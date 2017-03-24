@@ -13,16 +13,18 @@ public class MainMenu {
     {
         int swValue = getOption();
         GameManger manger = null;
-        swValue = getOption();
         //Display menu graphics
         while (swValue != 6)
         {
+            if (swValue == 1){
+                manger = new GameManger();
+                manger.readXmlFile("C:\\d\\basic_1.xml");
+            }
             swValue = getOption();
-
         }
     }
 
-    public int getOption()
+    private int getOption()
     {
         System.out.println("==========================");
         System.out.println("=======Main Menu==========");
