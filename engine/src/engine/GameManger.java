@@ -13,13 +13,18 @@ import org.w3c.dom.Node;
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
-
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathExpression;
+import javax.xml.xpath.XPathExpressionException;
+import javax.xml.xpath.XPathFactory;
 import javax.xml.validation.*;
 
 /**
  * Created by eran on 21/03/2017.
  */
 public class GameManger {
+    private Letter[] letterArr = new Letter[26];
     public class Board
     {
 
@@ -66,7 +71,8 @@ public class GameManger {
                 validator.validate(xmlFile);
                 System.out.println(xmlFile.getSystemId() + " is valid");
             } catch (SAXParseException e) {
-            TODO: System.out.println(xmlFile.getSystemId() + " is NOT valid reason:" + e);
+            TODO: // Need to add Excetion Handler
+            System.out.println(xmlFile.getSystemId() + " is NOT valid reason:" + e);
             } catch (SAXException e)
             {
                 System.out.println(xmlFile.getSystemId() + " is NOT valid reason:" + e);
@@ -75,32 +81,59 @@ public class GameManger {
 
             System.out.println("Root element :" + doc.getDocumentElement().getNodeName());
 
-            NodeList nList = doc.getElementsByTagName("DictionaryFileName");
+            NodeList nList = doc.getElementsByTagName("Structure");
+            XPathFactory xpathFactory = XPathFactory.newInstance();
+            XPath xpath = xpathFactory.newXPath();
+            fillListArr(doc,xpath);
 
+            //doc.getDocumentElement().getElementsByTagName("Structure").item(0).getChildNodes().item(3).getChildNodes()
             System.out.println("----------------------------");
 
-            for (int temp = 0; temp < nList.getLength(); temp++) {
-
-                Node nNode = nList.item(temp);
-
-                System.out.println("\nCurrent Element :" + nNode.getNodeName());
-
-                if (nNode.getNodeType() == Node.ELEMENT_NODE) {
-
-                    Element eElement = (Element) nNode;
-
-                    System.out.println("Staff id : " + eElement.getAttribute("id"));
-                    System.out.println("First Name : " + eElement.getElementsByTagName("firstname").item(0).getTextContent());
-                    System.out.println("Last Name : " + eElement.getElementsByTagName("lastname").item(0).getTextContent());
-                    System.out.println("Nick Name : " + eElement.getElementsByTagName("nickname").item(0).getTextContent());
-                    System.out.println("Salary : " + eElement.getElementsByTagName("salary").item(0).getTextContent());
-
-                }
-            }
+//            for (int temp = 0; temp < nList.getLength(); temp++) {
+//
+//                Node nNode = nList.item(temp);
+//
+//                System.out.println("\nCurrent Element :" + nNode.getNodeName());
+//
+//                if (nNode.getNodeType() == Node.ELEMENT_NODE) {
+//
+//                    Element eElement = (Element) nNode;
+//
+//                    System.out.println("Staff id : " + eElement.getAttribute("id"));
+//                    System.out.println("First Name : " + eElement.getElementsByTagName("firstname").item(0).getTextContent());
+//                    System.out.println("Last Name : " + eElement.getElementsByTagName("lastname").item(0).getTextContent());
+//                    System.out.println("Nick Name : " + eElement.getElementsByTagName("nickname").item(0).getTextContent());
+//                    System.out.println("Salary : " + eElement.getElementsByTagName("salary").item(0).getTextContent());
+//
+//                }
+//            }
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
+
+    public  void fillListArr(Document doc,XPath xpath) throws XPathExpressionException
+    {
+        XPathExpression expr = xpath.compile("sum(/GameDescriptor/Structure/Letters/Letter/Frequency)");
+        Number sumOfFreq =(Number)expr.evaluate(doc,XPathConstants.NUMBER); //calculate sum of frequences
+
+        expr = xpath.compile("/GameDescriptor/Structure/Letters/@target-deck-size");
+        Number deckSize =(Number)expr.evaluate(doc,XPathConstants.NUMBER); // get target-deck-size
+
+        expr = xpath.compile("/GameDescriptor/Structure/Letters/Letter");
+        NodeList nodes = (NodeList) expr.evaluate(doc, XPathConstants.NODESET);
+        for (int i = 0; i < nodes.getLength(); i++){
+            Element element = (Element) nodes.item(i);
+            char sign = element.getElementsByTagName("Sign").item(0).getTextContent().charAt(0);
+            int score = Integer.parseInt(element.getElementsByTagName("Score").item(0).getTextContent());
+            double frequency = Double.parseDouble(element.getElementsByTagName("Frequency").item(0).getTextContent());
+            int occurence = (int)Math.ceil((frequency/sumOfFreq.doubleValue())*deckSize.doubleValue());
+            letterArr[sign-'A'] = new Letter(sign,(byte)score,occurence);
+
+        }
+            //list.add(nodes.item(i).getNodeValue());
+    }
+
     public  void run()
     {
 
