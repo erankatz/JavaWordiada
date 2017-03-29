@@ -16,10 +16,20 @@ public class MainMenu {
         //Display menu graphics
         while (swValue != 6)
         {
-            if (swValue == 1){
-                manger = new GameManger();
-                manger.readXmlFile("C:\\d\\basic_1.xml");
+            switch (swValue){
+                case 1:
+                    manger = new GameManger();
+                    manger.readXmlFile("C:\\d\\basic_1.xml");
+                    break;
+                case 2:
+                    if (manger != null)
+                    {
+                        manger.run();
+                    }
+                    break;
+
             }
+
             swValue = getOption();
         }
     }
