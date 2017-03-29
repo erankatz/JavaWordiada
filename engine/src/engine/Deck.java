@@ -45,7 +45,13 @@ public class Deck {
         {
             Random rand = new Random();
             Letter letter;
-            int  n = rand.nextInt(currLetterArr.size() -1);
+            int n;
+            if (currLetterArr.size() !=0)
+                n = rand.nextInt(currLetterArr.size());
+            else {
+                System.out.printf("No Cards");
+                throw new NullPointerException();
+            }
             letter = currLetterArr.get(n);
             if (letter.getOccurence() == 1 )
             {
