@@ -6,10 +6,20 @@ package engine;
 public class Card {
     private char letter;
     private byte score;
+    private boolean revealed;
 
-    public Card(char letter,byte score)
+    protected Card(char letter,byte score)
     {
         this.letter = letter;
         this.score = score;
+        revealed = false;
+    }
+
+    public char getLetter()
+    {
+        if (revealed)
+            return letter;
+        else
+            return '?';
     }
 }

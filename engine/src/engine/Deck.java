@@ -11,6 +11,7 @@ import javax.xml.xpath.XPathExpressionException;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.Random;
 
 
@@ -19,9 +20,8 @@ import java.util.Random;
  */
 public class Deck {
     private HashSet<Letter> letterArr = new HashSet<Letter>();
-    private ArrayList<Letter> currLetterArr;
     private final int deckSize;
-    private int currDeckSize;
+    private LinkedList<Card> cards;
 
     public Deck(Document doc, XPath xpath) throws XPathExpressionException {
         XPathExpression expr =  xpath.compile("/GameDescriptor/Structure/Letters/@target-deck-size");
@@ -35,31 +35,38 @@ public class Deck {
 
     public void NewGame()
     {
-        currDeckSize = deckSize;
-        currLetterArr = new ArrayList<Letter>();
+        ArrayList<Letter> currLetterArr = new ArrayList<Letter>();
         for (Letter letter : letterArr)
         {
             currLetterArr.add(letter);
         }
+        cards = new LinkedList<>();
+        for (int i=0;i<deckSize;i++)
+        {
+            Random rand = new Random();
+            Letter letter;
+            int  n = rand.nextInt(currLetterArr.size() -1);
+            letter = currLetterArr.get(n);
+            if (letter.getOccurence() == 1 )
+            {
+                currLetterArr.remove(n);
+            }
+            letter.decOccurence();
+            cards.add(new Card(letter.getSign(),letter.getScore()));
+        }
     }
 
-    public Card GetTopCard()
+    public Card removeTopCard()
     {
-        if (currDeckSize == 0)
+        if (cards == null)
+        {
+            //TODO:Return NO init  Deck Exception
+        } else if (cards.size() == 0)
         {
             //TODO:Return Empty Deck Exception
         }
-        Random rand = new Random();
-        Letter letter;
-        int  n = rand.nextInt(currLetterArr.size() -1);
-        letter = currLetterArr.get(n);
-        if (letter.getOccurence() == 1 )
-        {
-            currLetterArr.remove(n);
-        }
-        letter.decOccurence();
-        currDeckSize--;
-        return new Card(letter.getSign(),letter.getScore());
+
+        return cards.removeLast();
     }
 
     private void readLeters(Document doc, XPath xpath) throws XPathExpressionException

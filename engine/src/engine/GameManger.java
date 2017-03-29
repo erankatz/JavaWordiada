@@ -6,6 +6,8 @@ import javax.xml.transform.stream.StreamSource;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.DocumentBuilder;
 import java.io.File;
+import java.util.ArrayList;
+
 import org.w3c.dom.Document;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
@@ -25,23 +27,26 @@ import javax.xml.validation.*;
  * Created by eran on 21/03/2017.
  */
 public class GameManger {
-    Deck deck;
+    private Deck deck;
+    private Board board= new Board(10);;
 
     private String dictionaryFileName;
-    private int boardSize;
     private int retriesNumber;
     private int cubeFacets;
     public void gameManager()
     {
         this.dictionaryFileName = "war-and-piece.txt";
-        this.boardSize = 7;
         this.retriesNumber = 2;
+    }
+
+    public Board getBoard()
+    {
+        return this.board;
     }
 
     public void readXmlFile(String fileName)
     {
         try {
-
             File fXmlFile = new File(fileName);
             DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
             DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
@@ -80,9 +85,15 @@ public class GameManger {
         }
     }
 
-    public  void run()
+    public void newGame()
     {
         deck.NewGame();
+        ArrayList<Card> initCards = new ArrayList<Card>();
+        for (int i =0; i< this.board.getBoardSize()*this.board.getBoardSize();i++)
+        {
+            initCards.add(this.deck.removeTopCard());
+        }
+        this.board.setInitCards(initCards);
     }
 
     public void playTurn()

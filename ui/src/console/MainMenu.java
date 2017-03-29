@@ -9,10 +9,13 @@ import com.sun.prism.shader.Solid_TextureYV12_AlphaTest_Loader;
 import engine.GameManger;
 
 public class MainMenu {
+    UIBoard board;
+
     public void run()
     {
         int swValue = getOption();
         GameManger manger = null;
+
         //Display menu graphics
         while (swValue != 6)
         {
@@ -20,11 +23,14 @@ public class MainMenu {
                 case 1:
                     manger = new GameManger();
                     manger.readXmlFile("C:\\d\\basic_1.xml");
+                    manger.newGame();
+                    board = new UIBoard(manger.getBoard());
+                    board.printGameBoard();
                     break;
                 case 2:
                     if (manger != null)
                     {
-                        manger.run();
+                        //manger.startGame();
                     }
                     break;
 
