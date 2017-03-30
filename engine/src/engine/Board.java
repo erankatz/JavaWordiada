@@ -8,10 +8,17 @@ import java.util.ArrayList;
 public class Board {
     private Card cards[][];
     private int boardSize;
+    private int numOfUnrevealedCard;
 
     protected Board(int boardSize)
     {
         this.boardSize = boardSize;
+        numOfUnrevealedCard =0;
+    }
+
+    protected int getNumOfUnrevealedCard()
+    {
+        return numOfUnrevealedCard;
     }
 
     public int getBoardSize(){

@@ -7,6 +7,7 @@ import java.lang.Math;
 /**
  * Created by eran on 29/03/2017.
  */
+
 public class UIBoard {
     private Board board;
     private int spaceAlign;

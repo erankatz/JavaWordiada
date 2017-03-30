@@ -28,11 +28,15 @@ import javax.xml.validation.*;
  */
 public class GameManger {
     private Deck deck;
+    private final int NUMOFPLAYERS = 2;
     private Board board= new Board(10);;
-
+    Player players[] = new Player[NUMOFPLAYERS];
     private String dictionaryFileName;
     private int retriesNumber;
-    private int cubeFacets;
+    private int cubeFacets = 6;
+    private boolean isGameStarted;
+    int currentPlayerTurn;
+
     public void gameManager()
     {
         this.dictionaryFileName = "war-and-piece.txt";
@@ -42,6 +46,27 @@ public class GameManger {
     public Board getBoard()
     {
         return this.board;
+    }
+
+    public int getNumofCardInDeck()
+    {
+        return deck.getDeckSize();
+    }
+
+    public  void startGame()
+    {
+        isGameStarted = true;
+        currentPlayerTurn = 1;
+    }
+
+    public Player[] getPlayers()
+    {
+        return players;
+    }
+
+    public int getCurrentPlayerTurn()
+    {
+        return currentPlayerTurn;
     }
 
     public void readXmlFile(String fileName)
@@ -94,6 +119,11 @@ public class GameManger {
             initCards.add(this.deck.removeTopCard());
         }
         this.board.setInitCards(initCards);
+        for (Player player : players)
+        {
+            player = new Player(deck,board,new Dice(cubeFacets));
+        }
+        isGameStarted = false;
     }
 
     public void playTurn()
@@ -104,5 +134,9 @@ public class GameManger {
     public void getStatistics()
     {
 
+    }
+
+    public boolean isGameStarted() {
+        return isGameStarted;
     }
 }

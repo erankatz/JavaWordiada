@@ -22,4 +22,18 @@ public class Card {
         else
             return '?';
     }
+
+    protected char getHiddenChar()
+    {
+        return letter;
+    }
+
+    public boolean isRevealed()
+    {
+        return revealed;
+    }
+
+    protected void reveal() {
+        revealed = true;
+    }
 }

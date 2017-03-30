@@ -15,24 +15,44 @@ public class MainMenu {
     {
         int swValue = getOption();
         GameManger manger = null;
-
+        int currentPlayerTurn;
+        UIPlayer player;
         //Display menu graphics
         while (swValue != 6)
         {
             switch (swValue){
                 case 1:
-                    manger = new GameManger();
-                    manger.readXmlFile("C:\\d\\basic_1.xml");
-                    manger.newGame();
-                    board = new UIBoard(manger.getBoard());
-                    board.printGameBoard();
-                    break;
-                case 2:
-                    if (manger != null)
+                    if (manger != null && manger.isGameStarted())
                     {
-                        //manger.startGame();
+                        System.out.println("The Game already started");
+                    } else {
+                        manger = new GameManger();
+                        manger.readXmlFile("C:\\d\\basic_1.xml");
+                        manger.newGame();
+                        board = new UIBoard(manger.getBoard());
+                        board.printGameBoard();
+                        player = new UIPlayer(manger.getPlayers(),manger);
+                        System.out.format("Number of cards in deck %d\n",manger.getNumofCardInDeck());
                     }
                     break;
+                case 2:
+                    if (manger != null && !manger.isGameStarted())
+                    {
+                        manger.startGame();
+                        currentPlayerTurn = 1;
+                        board.printGameBoard();
+                        System.out.format("Number of cards in deck %d\n",manger.getNumofCardInDeck());
+                    } else {
+                        System.out.println("The Game Not Loaded or already started");
+                    }
+                    break;
+                case 3:
+                    break;
+                case 4:
+                    break;
+                case 5:
+                    break;
+                case 6:
 
             }
 

@@ -33,6 +33,10 @@ public class Deck {
         }
     }
 
+    public int getDeckSize(){
+        return cards.size();
+    }
+
     public void NewGame()
     {
         ArrayList<Letter> currLetterArr = new ArrayList<Letter>();
@@ -104,7 +108,8 @@ public class Deck {
         }
     }
 
-    private class Letter implements Cloneable {
+
+    class Letter implements Cloneable {
         private final char sign;
         private final byte score;
         private int occurence;
@@ -133,7 +138,7 @@ public class Deck {
         }
 
         @Override
-        public Object clone()
+        protected Object clone()
         {
             return new Letter(sign,score,occurence);
         }
