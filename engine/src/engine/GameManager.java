@@ -21,15 +21,17 @@ import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 import javax.xml.validation.*;
-
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.regex.Pattern;
 
 /**
  * Created by eran on 21/03/2017.
  */
-public class GameManger {
+public class GameManager {
     private Deck deck;
     private final int NUMOFPLAYERS = 2;
-    private Board board= new Board(10);;
+    private Board board= new Board(10);
     Player players[] = new Player[NUMOFPLAYERS];
     private String dictionaryFileName;
     private int retriesNumber;
@@ -110,6 +112,21 @@ public class GameManger {
         }
     }
 
+    public void createDictionary() throws  java.io.IOException{
+        String bookStr = new String(Files.readAllBytes(Paths.get("C:\\d\\moby dick.txt")));
+        String str = "[\\\\!?,.#:;\\-_=\\+\\*\"'\\(\\)\\{\\}\\[\\]%$\\r]";
+        Pattern p = Pattern.compile(str);
+        bookStr = bookStr.replace("\n", " ").replaceAll(p.pattern(),"");
+        bookStr = bookStr.toUpperCase();
+        String strWords[] = bookStr.split(" ");
+        for(String w:strWords) {
+            w=w.trim();
+            if(w.length()>=2) {
+                System.out.println(w);
+            }
+        }
+
+    }
     public void newGame()
     {
         deck.NewGame();

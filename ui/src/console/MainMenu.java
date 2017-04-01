@@ -2,19 +2,16 @@ package console;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.nio.Buffer;
-import java.util.Scanner;
-import java.util.InputMismatchException;
-import com.sun.prism.shader.Solid_TextureYV12_AlphaTest_Loader;
-import engine.GameManger;
+
+import engine.GameManager;
 
 public class MainMenu {
     UIBoard board;
 
-    public void run()
+    public void run () throws  java.io.IOException
     {
         int swValue = getOption();
-        GameManger manger = null;
+        GameManager manager = null;
         int currentPlayerTurn;
         UIPlayer player;
         //Display menu graphics
@@ -22,26 +19,27 @@ public class MainMenu {
         {
             switch (swValue){
                 case 1:
-                    if (manger != null && manger.isGameStarted())
+                    if (manager != null && manager.isGameStarted())
                     {
                         System.out.println("The Game already started");
                     } else {
-                        manger = new GameManger();
-                        manger.readXmlFile("C:\\d\\basic_1.xml");
-                        manger.newGame();
-                        board = new UIBoard(manger.getBoard());
+                        manager = new GameManager();
+                        manager.readXmlFile("C:\\d\\basic_1.xml");
+                        manager.createDictionary();
+                        manager.newGame();
+                        board = new UIBoard(manager.getBoard());
                         board.printGameBoard();
-                        player = new UIPlayer(manger.getPlayers(),manger);
-                        System.out.format("Number of cards in deck %d\n",manger.getNumofCardInDeck());
+                        player = new UIPlayer(manager.getPlayers(),manager);
+                        System.out.format("Number of cards in deck %d\n",manager.getNumofCardInDeck());
                     }
                     break;
                 case 2:
-                    if (manger != null && !manger.isGameStarted())
+                    if (manager != null && !manager.isGameStarted())
                     {
-                        manger.startGame();
+                        manager.startGame();
                         currentPlayerTurn = 1;
                         board.printGameBoard();
-                        System.out.format("Number of cards in deck %d\n",manger.getNumofCardInDeck());
+                        System.out.format("Number of cards in deck %d\n",manager.getNumofCardInDeck());
                     } else {
                         System.out.println("The Game Not Loaded or already started");
                     }

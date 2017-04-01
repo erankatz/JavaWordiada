@@ -1,7 +1,7 @@
 package console;
 
 import engine.Board;
-import engine.GameManger;
+
 import java.lang.Math;
 
 /**

@@ -1,6 +1,6 @@
 package console;
 
-import engine.GameManger;
+import engine.GameManager;
 import engine.Player;
 
 /**
@@ -8,9 +8,9 @@ import engine.Player;
  */
 public class UIPlayer {
     Player player[];
-    GameManger manager;
+    GameManager manager;
 
-    public UIPlayer(Player player[], GameManger manager)
+    public UIPlayer(Player player[], GameManager manager)
     {
         this.player = player;
     }
