@@ -7,13 +7,13 @@ import engine.GameManager;
 
 public class MainMenu {
     UIBoard board;
+    UIPlayer player;
 
     public void run () throws  java.io.IOException
     {
         int swValue = getOption();
         GameManager manager = null;
         int currentPlayerTurn;
-        UIPlayer player;
         //Display menu graphics
         while (swValue != 6)
         {
@@ -29,7 +29,7 @@ public class MainMenu {
                         manager.newGame();
                         board = new UIBoard(manager.getBoard());
                         board.printGameBoard();
-                        player = new UIPlayer(manager.getPlayers(),manager);
+                        this.player = new UIPlayer(manager.getPlayers(),manager);
                         System.out.format("Number of cards in deck %d\n",manager.getNumofCardInDeck());
                     }
                     break;
@@ -37,7 +37,6 @@ public class MainMenu {
                     if (manager != null && !manager.isGameStarted())
                     {
                         manager.startGame();
-                        currentPlayerTurn = 1;
                         board.printGameBoard();
                         System.out.format("Number of cards in deck %d\n",manager.getNumofCardInDeck());
                     } else {
@@ -47,6 +46,7 @@ public class MainMenu {
                 case 3:
                     break;
                 case 4:
+                    this.player.playTurn();
                     break;
                 case 5:
                     break;

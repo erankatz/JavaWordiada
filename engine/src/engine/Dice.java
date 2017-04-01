@@ -23,7 +23,7 @@ public class Dice {
 
     protected Integer getResult()
     {
-        return getResult();
+        return result;
     }
 
     public int role()

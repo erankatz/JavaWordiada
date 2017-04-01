@@ -11,10 +11,12 @@ public class Player {
     private Deck deck;
     private Board board;
     private Dice cube;
+    private GameManager manager;
     private int leftCardNumToReveal;
 
-    public Player (Deck deck,Board board,Dice cube)
+    public Player (GameManager manager,Deck deck,Board board,Dice cube)
     {
+        this.manager = manager;
         this.deck = deck;
         this.cube = cube;
         this.board = board;
@@ -24,6 +26,10 @@ public class Player {
     {
         leftCardNumToReveal = cube.role();
         return leftCardNumToReveal;
+    }
+
+    public void endTurn() {
+        manager.endPlayerTurn();
     }
 
     public void revealCard(int row,int col)
@@ -43,7 +49,7 @@ public class Player {
 
             Card card = board.getBoardCard(row,col);
             if (!card.isRevealed()){
-                card.reveal();
+                card.reveal(); // changing flag to 'reveal'
                 leftCardNumToReveal--;
             } else {
                 //TODO: Card is already revealed Exception and undo function
@@ -53,6 +59,6 @@ public class Player {
 
     public boolean isLeftCardsToReveal()
     {
-        return board.getNumOfUnrevealedCard() == 0 || leftCardNumToReveal == 0;
+        return !(board.getNumOfUnrevealedCard() == 0 || leftCardNumToReveal == 0);
     }
 }

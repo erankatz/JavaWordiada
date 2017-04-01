@@ -26,7 +26,7 @@ public class UIBoard {
             System.out.format("%" + spaceAlign + "d",j+1);
             System.out.print(" ");
             for (int i = 0; i < board.getBoardSize(); i++) {
-                System.out.format("│%" + spaceAlign + "s",board.getBoardCard(i,j).getLetter());
+                System.out.format("│%" + spaceAlign + "s",board.getBoardCard(j+1,i+1).getLetter());
             }
             System.out.print('│');
             System.out.format("%" + spaceAlign + "d",j+1);

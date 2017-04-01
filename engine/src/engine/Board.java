@@ -13,7 +13,7 @@ public class Board {
     protected Board(int boardSize)
     {
         this.boardSize = boardSize;
-        numOfUnrevealedCard =0;
+        numOfUnrevealedCard =boardSize*boardSize;
     }
 
     protected int getNumOfUnrevealedCard()
@@ -27,16 +27,18 @@ public class Board {
 
     public Card getBoardCard(int row,int col)
     {
-        return cards[row][col];
+        return cards[row-1][col-1];
     }
 
     protected void setInitCards(ArrayList<Card> initCards){
         cards = new Card[boardSize][boardSize];
+        int z =0;
         for (int i=0;i<boardSize;i++)
         {
             for (int j=0;j<boardSize;j++)
             {
-                cards[i][j] = initCards.get((i+1)*(j+1) -1);
+                cards[i][j] = initCards.get(z);
+                z++;
             }
         }
     }

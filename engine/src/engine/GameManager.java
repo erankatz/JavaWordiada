@@ -23,6 +23,8 @@ import javax.xml.xpath.XPathFactory;
 import javax.xml.validation.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 /**
@@ -37,7 +39,8 @@ public class GameManager {
     private int retriesNumber;
     private int cubeFacets = 6;
     private boolean isGameStarted;
-    int currentPlayerTurn;
+    private int roundCounter;
+    Map<String, Integer> word2FrequencyDic;
 
     public void gameManager()
     {
@@ -58,7 +61,7 @@ public class GameManager {
     public  void startGame()
     {
         isGameStarted = true;
-        currentPlayerTurn = 1;
+        roundCounter = 0;
     }
 
     public Player[] getPlayers()
@@ -68,7 +71,7 @@ public class GameManager {
 
     public int getCurrentPlayerTurn()
     {
-        return currentPlayerTurn;
+        return roundCounter % NUMOFPLAYERS ;
     }
 
     public void readXmlFile(String fileName)
@@ -119,14 +122,27 @@ public class GameManager {
         bookStr = bookStr.replace("\n", " ").replaceAll(p.pattern(),"");
         bookStr = bookStr.toUpperCase();
         String strWords[] = bookStr.split(" ");
-        for(String w:strWords) {
-            w=w.trim();
-            if(w.length()>=2) {
-                System.out.println(w);
-            }
-        }
+        this.word2FrequencyDic = CreateMapAndCalcFrequency(strWords);
 
     }
+
+    private Map<String, Integer> CreateMapAndCalcFrequency(String[] names) {
+        //key=name value=number of appearances
+        Map<String, Integer> frequency = new HashMap<>();
+        for(String name : names) {
+            Integer currentCount = frequency.get(name);
+            if(currentCount == null) {
+                currentCount = 0; // auto-boxing
+            }
+            frequency.put(name, ++currentCount);
+        }
+        return frequency;
+    }
+
+    protected void endPlayerTurn(){
+        this.roundCounter++;
+    }
+
     public void newGame()
     {
         deck.NewGame();
@@ -136,17 +152,13 @@ public class GameManager {
             initCards.add(this.deck.removeTopCard());
         }
         this.board.setInitCards(initCards);
-        for (Player player : players)
+        for (int i =0;i<players.length; i++)
         {
-            player = new Player(deck,board,new Dice(cubeFacets));
+            players[i] = new Player(this,deck,board,new Dice(cubeFacets));
         }
         isGameStarted = false;
     }
 
-    public void playTurn()
-    {
-
-    }
 
     public void getStatistics()
     {
