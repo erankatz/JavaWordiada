@@ -37,11 +37,15 @@ public class UIPlayer {
     }
 
     private void chooseCards(Player currentPlayer) {
-        //(\d+,\d+[ ]+){1,}
+        Scanner s = new Scanner(System.in);
+        System.out.format("Build a word by choosing characters in the board according to the format:\n",currentPlayer.rollDice());
+        System.out.println("{row,column} {row,column} .....");
+        String UserInput = s.nextLine();
+        String strWords[] = UserInput.split("(\\d+,\\d+[ ]+){1,}");
+
 
     }
-    private void revealCards(Player currentPlayer)
-    {
+    private void revealCards(Player currentPlayer)  { //according to the dice
         System.out.format("Pick %d Cards in the board according to the format:\n",currentPlayer.rollDice());
         System.out.println("{row,column} {row,column} .....");
         System.out.println("Example: 2,3 5,2 1,3");
@@ -51,7 +55,7 @@ public class UIPlayer {
             //System.in.
             while (!sc.hasNext(Pattern.compile("\\d+,\\d+")))
             {
-                System.out.println("You Entered wrong, not according the requested format");
+                System.out.println("You entered wrong, not according the requested format");
                 sc.next();
             }
             String word = sc.next();
