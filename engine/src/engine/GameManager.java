@@ -15,6 +15,8 @@ import org.w3c.dom.Node;
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
+import sun.misc.JavaIOAccess;
+
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpression;
@@ -33,20 +35,20 @@ import java.util.regex.Pattern;
 public class GameManager {
     private Deck deck;
     private final int NUMOFPLAYERS = 2;
-    private Board board= new Board(10);
+    private Board board;
     Player players[] = new Player[NUMOFPLAYERS];
     private String dictionaryFileName;
     private int retriesNumber;
     private int cubeFacets = 6;
     private boolean isGameStarted;
     private int roundCounter;
-    Map<String, Integer> word2FrequencyDic;
 
     public void gameManager()
     {
         this.dictionaryFileName = "war-and-piece.txt";
         this.retriesNumber = 2;
     }
+
 
     public Board getBoard()
     {
@@ -62,6 +64,10 @@ public class GameManager {
     {
         isGameStarted = true;
         roundCounter = 0;
+    }
+
+    protected void wordRevealed(int freq){
+
     }
 
     public Player[] getPlayers()
@@ -115,14 +121,14 @@ public class GameManager {
         }
     }
 
-    public void createDictionary() throws  java.io.IOException{
+    public Map<String,Integer> createDictionary() throws  java.io.IOException{
         String bookStr = new String(Files.readAllBytes(Paths.get("C:\\d\\moby dick.txt")));
         String str = "[\\\\!?,.#:;\\-_=\\+\\*\"'\\(\\)\\{\\}\\[\\]%$\\r]";
         Pattern p = Pattern.compile(str);
         bookStr = bookStr.replace("\n", " ").replaceAll(p.pattern(),"");
         bookStr = bookStr.toUpperCase();
         String strWords[] = bookStr.split(" ");
-        this.word2FrequencyDic = CreateMapAndCalcFrequency(strWords);
+        return CreateMapAndCalcFrequency(strWords);
 
     }
 
@@ -143,15 +149,18 @@ public class GameManager {
         this.roundCounter++;
     }
 
-    public void newGame()
+    public void newGame() throws java.io.IOException
     {
         deck.NewGame();
         ArrayList<Card> initCards = new ArrayList<Card>();
+        this.board= new Board(10,this,deck);
         for (int i =0; i< this.board.getBoardSize()*this.board.getBoardSize();i++)
         {
             initCards.add(this.deck.removeTopCard());
         }
         this.board.setInitCards(initCards);
+        board.setDictionary(createDictionary());
+
         for (int i =0;i<players.length; i++)
         {
             players[i] = new Player(this,deck,board,new Dice(cubeFacets));

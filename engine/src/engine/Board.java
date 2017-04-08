@@ -1,6 +1,8 @@
 package engine;
 
 import java.util.ArrayList;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Created by eran on 29/03/2017.
@@ -9,11 +11,47 @@ public class Board {
     private Card cards[][];
     private int boardSize;
     private int numOfUnrevealedCard;
+    private GameManager manager;
+    private Map<String, Integer> word2FrequencyDic;
+    private Deck deck;
 
-    protected Board(int boardSize)
+    protected Board(int boardSize,GameManager manager,Deck deck)
     {
         this.boardSize = boardSize;
-        numOfUnrevealedCard =boardSize*boardSize;
+        this.numOfUnrevealedCard =boardSize*boardSize;
+        this.manager = manager;
+        this.deck = deck;
+    }
+
+    protected void setDictionary(Map<String ,Integer> dictionary)
+    {
+        this.word2FrequencyDic =dictionary;
+    }
+
+    public void revealWord(Set<Map.Entry<Integer,Integer>> pairs) {
+        String str = buildWord(pairs);
+        if (word2FrequencyDic.containsKey(str))
+        {
+            manager.wordRevealed(word2FrequencyDic.get(str));
+            replaceCards(pairs);
+        }
+    }
+
+    private void replaceCards(Set<Map.Entry<Integer,Integer>> pairs) {
+        pairs.stream()
+                .map(entry->getBoardCard(entry.getKey(),entry.getValue()))
+                .forEach(card->  card = deck.removeTopCard());
+    }
+
+    private String buildWord(Set<Map.Entry<Integer,Integer>> pairs){
+        String str = new String("");
+        for (Map.Entry<Integer,Integer> pair : pairs)
+        {
+            Card card = getBoardCard(pair.getKey(),pair.getValue());
+            card.reveal();
+            str += card.getLetter();
+        }
+        return  str.toUpperCase();
     }
 
     protected int getNumOfUnrevealedCard()
@@ -27,11 +65,15 @@ public class Board {
 
     public Card getBoardCard(int row,int col)
     {
-        return cards[row-1][col-1];
+        return this.cards[row-1][col-1];
+    }
+
+    private void setBoardCard(int row,int col,Card card){
+        this.cards[row-1][col-1] = card;
     }
 
     protected void setInitCards(ArrayList<Card> initCards){
-        cards = new Card[boardSize][boardSize];
+        this.cards = new Card[boardSize][boardSize];
         int z =0;
         for (int i=0;i<boardSize;i++)
         {

@@ -3,6 +3,7 @@ package engine;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Created by eran on 30/03/2017.
@@ -55,6 +56,10 @@ public class Player {
                 //TODO: Card is already revealed Exception and undo function
             }
         this.cube.endTurn();
+    }
+
+    public void revealWord(Set<Map.Entry<Integer,Integer>> pairs) {
+        board.revealWord(pairs);
     }
 
     public boolean isLeftCardsToReveal()

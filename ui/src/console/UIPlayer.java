@@ -2,8 +2,12 @@ package console;
 
 import engine.GameManager;
 import engine.Player;
+import org.omg.CORBA.DynAnyPackage.Invalid;
+import org.omg.CORBA.DynAnyPackage.InvalidValue;
 
-import java.util.Scanner;
+import javax.swing.text.html.parser.Entity;
+import java.util.*;
+import java.util.concurrent.ExecutionException;
 import java.util.regex.Pattern;
 
 /**
@@ -23,7 +27,7 @@ public class UIPlayer {
 
     public void printCurrentPlayerTurn()
     {
-        System.out.format("Player Turn: %d\n",manager.getCurrentPlayerTurn());
+        System.out.format("Player Turn: %d\n",manager.getCurrentPlayerTurn() + 1);
     }
 
     public void playTurn()
@@ -37,14 +41,48 @@ public class UIPlayer {
     }
 
     private void chooseCards(Player currentPlayer) {
-        Scanner s = new Scanner(System.in);
-        System.out.format("Build a word by choosing characters in the board according to the format:\n",currentPlayer.rollDice());
+        System.out.format("Build a word by choosing characters in the board according to the format:\n");
         System.out.println("{row,column} {row,column} .....");
-        String UserInput = s.nextLine();
-        String strWords[] = UserInput.split("(\\d+,\\d+[ ]+){1,}");
+        System.out.println("Example: 2,1 1,1 1,2");
+        Scanner sc = new Scanner(System.in);
+        Boolean done = false;
+        while (!done)
+        {
+            String line = sc.nextLine();
+            if (!line.matches("(\\d+,\\d+)|(\\d+,\\d+)[ ]{1,}(\\d+,\\d+)")){
+                do
+                {
+                    System.out.println("You entered wrong, not according the requested format");
+                    line = sc.nextLine();
+                } while (!line.matches("(\\d+,\\d+)|(\\d+,\\d+)[ ]{1,}(\\d+,\\d+)"));
+            }
 
+            try {
+                Set<Map.Entry<Integer,Integer>> pairs = MapStringCradsPairsToSet(line);
+                done = true;
+                currentPlayer.revealWord(pairs);
+            } catch (Exception ex) {
 
+            }
+        }
     }
+
+    private Set<Map.Entry<Integer,Integer>> MapStringCradsPairsToSet(String sPairs)
+    {
+        Set<Map.Entry<Integer,Integer>> pairs = new HashSet<>();
+        String[] stingPairs =sPairs.split(" ") ;
+        for (String pair : stingPairs){
+            Integer num1 = Integer.parseInt(pair.split(",")[0]);
+            Integer num2 = Integer.parseInt(pair.split(",")[1]);
+            Map.Entry<Integer,Integer> entry = new AbstractMap.SimpleEntry<Integer, Integer>(num1, num2);
+            if (pairs.add(entry) == false )
+            {
+                //TODO:Throw Exception
+            }
+        }
+        return pairs;
+    }
+
     private void revealCards(Player currentPlayer)  { //according to the dice
         System.out.format("Pick %d Cards in the board according to the format:\n",currentPlayer.rollDice());
         System.out.println("{row,column} {row,column} .....");
@@ -53,7 +91,7 @@ public class UIPlayer {
         while (currentPlayer.isLeftCardsToReveal()) //reveal cards according to dice
         {
             //System.in.
-            while (!sc.hasNext(Pattern.compile("\\d+,\\d+")))
+            while (!sc.hasNext(Pattern.compile("\\d+,\\d+\\s{0,}")))
             {
                 System.out.println("You entered wrong, not according the requested format");
                 sc.next();
