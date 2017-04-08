@@ -49,12 +49,13 @@ public class UIPlayer {
         while (!done)
         {
             String line = sc.nextLine();
-            if (!line.matches("(\\d+,\\d+)|(\\d+,\\d+)[ ]{1,}(\\d+,\\d+)")){
+            line = line.replaceAll("(^ )", "").replaceAll("( $)", "");
+            if (!line.matches("(\\d+,\\d+)|(\\d+,\\d+[ ]+)+(\\d+,\\d+)")){
                 do
                 {
                     System.out.println("You entered wrong, not according the requested format");
                     line = sc.nextLine();
-                } while (!line.matches("(\\d+,\\d+)|(\\d+,\\d+)[ ]{1,}(\\d+,\\d+)"));
+                } while (!line.matches("(\\d+,\\d+)|(\\d+,\\d+[ ]+)+(\\d+,\\d+)"));
             }
 
             try {

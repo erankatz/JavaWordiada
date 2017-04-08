@@ -39,8 +39,7 @@ public class Board {
 
     private void replaceCards(Set<Map.Entry<Integer,Integer>> pairs) {
         pairs.stream()
-                .map(entry->getBoardCard(entry.getKey(),entry.getValue()))
-                .forEach(card->  card = deck.removeTopCard());
+                .forEach(entry-> setBoardCard(entry.getKey(),entry.getValue(),deck.removeTopCard()));
     }
 
     private String buildWord(Set<Map.Entry<Integer,Integer>> pairs){

@@ -6,6 +6,11 @@ import javax.xml.transform.stream.StreamSource;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.DocumentBuilder;
 import java.io.File;
+import java.sql.Time;
+import java.text.SimpleDateFormat;
+import java.time.Duration;
+import java.time.LocalTime;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 
 import org.w3c.dom.Document;
@@ -25,8 +30,10 @@ import javax.xml.xpath.XPathFactory;
 import javax.xml.validation.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
 /**
@@ -42,6 +49,7 @@ public class GameManager {
     private int cubeFacets = 6;
     private boolean isGameStarted;
     private int roundCounter;
+    private LocalTime gameStartedTime;
 
     public void gameManager()
     {
@@ -49,6 +57,21 @@ public class GameManager {
         this.retriesNumber = 2;
     }
 
+    public int getNumOfTurnsElapsed()
+    {
+        return this.roundCounter;
+    }
+
+    public int gutNumberofTurns()
+    {
+        return roundCounter;
+    }
+
+
+    public Duration getTimeElapsed()
+    {
+        return Duration.between(this.gameStartedTime,LocalTime.now());
+    }
 
     public Board getBoard()
     {
@@ -64,6 +87,7 @@ public class GameManager {
     {
         isGameStarted = true;
         roundCounter = 0;
+        this.gameStartedTime = LocalTime.now();
     }
 
     protected void wordRevealed(int freq){

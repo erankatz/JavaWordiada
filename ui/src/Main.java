@@ -1,4 +1,3 @@
-package com.company;
 import console.MainMenu;
 
 public class Main {

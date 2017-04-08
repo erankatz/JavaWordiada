@@ -46,18 +46,34 @@ public class MainMenu {
                 case 3:
                     break;
                 case 4:
-                    this.player.playTurn();
+                    if (manager != null && manager.isGameStarted())
+                    {
+                        this.player.playTurn();
+                    }else {
+                        System.out.println("The Game not started");
+                    }
                     break;
                 case 5:
+                    if (manager != null && manager.isGameStarted()) {
+                        printStatistics(manager);
+                    }else {
+                        System.out.println("The Game not started");
+                    }
                     break;
                 case 6:
-
+                    break;
             }
 
             swValue = getOption();
         }
     }
 
+    private void printStatistics(GameManager manager)
+    {
+        System.out.format("Number of Turns Elapsed: %d \n", manager.getNumOfTurnsElapsed());
+        System.out.format("Time elapes:\t %d:%d \n",manager.getTimeElapsed().getSeconds() /60 ,manager.getTimeElapsed().getSeconds() % 60);
+        System.out.format("Number of cards in the deck %d \n",manager.getNumofCardInDeck());
+    }
     private int getOption()
     {
         System.out.println("==========================");
