@@ -3,16 +3,16 @@ package engine;
 import com.sun.xml.internal.ws.api.message.ExceptionHasMessage;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.Entity;
 import org.w3c.dom.NodeList;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathExpressionException;
 import java.lang.reflect.Array;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.Random;
+import java.util.*;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
 
 /**
@@ -22,8 +22,9 @@ public class Deck {
     private HashSet<Letter> letterArr = new HashSet<Letter>();
     private final int deckSize;
     private LinkedList<Card> cards;
+    private Map<Character,Long> initCharFrequency;
 
-    public Deck(Document doc, XPath xpath) throws XPathExpressionException {
+    protected Deck(Document doc, XPath xpath) throws XPathExpressionException {
         XPathExpression expr =  xpath.compile("/GameDescriptor/Structure/Letters/@target-deck-size");
         Number deckSize = (Number) expr.evaluate(doc, XPathConstants.NUMBER); // get target-deck-size
         this.deckSize = deckSize.intValue();
@@ -32,6 +33,18 @@ public class Deck {
             //TODO: Too few letter
         }
     }
+
+    public Map<Character,Long> getCharFrequency()
+    {
+        return cards.stream()
+                .collect(Collectors.groupingBy(e -> e.getHiddenChar(),Collectors.counting()));
+    }
+
+    public Map<Character,Long> getInitCharFrequency()
+    {
+        return this.initCharFrequency;
+    }
+
 
     public int getDeckSize(){
         return cards.size();
@@ -64,6 +77,7 @@ public class Deck {
             letter.decOccurence();
             cards.add(new Card(letter.getSign(),letter.getScore()));
         }
+        this.initCharFrequency = getCharFrequency();
     }
 
     public Card removeTopCard()
@@ -113,17 +127,20 @@ public class Deck {
         private final char sign;
         private final byte score;
         private int occurence;
+        private int initOccurence;
 
-
-        public Letter(char _sign, byte _score, int _occurence) {
+        protected Letter(char _sign, byte _score, int _occurence) {
             this.sign = _sign;
             this.score = _score;
             this.occurence = _occurence;
+            this.initOccurence = _occurence;
         }
 
         public int getOccurence() {
             return occurence;
         }
+
+        public int getInitOccurence() {return initOccurence;}
 
         public byte getScore() {
             return score;
@@ -133,7 +150,7 @@ public class Deck {
             return sign;
         }
 
-        public void decOccurence() {
+        protected void decOccurence() {
             occurence--;
         }
 

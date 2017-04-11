@@ -1,5 +1,6 @@
 package engine;
 
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.Set;
@@ -12,7 +13,7 @@ public class Board {
     private int boardSize;
     private int numOfUnrevealedCard;
     private GameManager manager;
-    private Map<String, Integer> word2FrequencyDic;
+    private Map<String, Long> word2FrequencyDic;
     private Deck deck;
 
     protected Board(int boardSize,GameManager manager,Deck deck)
@@ -23,18 +24,20 @@ public class Board {
         this.deck = deck;
     }
 
-    protected void setDictionary(Map<String ,Integer> dictionary)
+    protected void setDictionary(Map<String ,Long> dictionary)
     {
         this.word2FrequencyDic =dictionary;
     }
 
-    public void revealWord(Set<Map.Entry<Integer,Integer>> pairs) {
+    public boolean revealWord(Set<Map.Entry<Integer,Integer>> pairs) {
         String str = buildWord(pairs);
         if (word2FrequencyDic.containsKey(str))
         {
-            manager.wordRevealed(word2FrequencyDic.get(str));
             replaceCards(pairs);
+            manager.wordRevealed( new AbstractMap.SimpleEntry<String, Long>(str,word2FrequencyDic.get(str)));
+            return true;
         }
+        return false;
     }
 
     private void replaceCards(Set<Map.Entry<Integer,Integer>> pairs) {

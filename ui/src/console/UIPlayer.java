@@ -9,6 +9,7 @@ import javax.swing.text.html.parser.Entity;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * Created by eran on 30/03/2017.
@@ -82,6 +83,25 @@ public class UIPlayer {
             }
         }
         return pairs;
+    }
+
+    public void printPlayerstatistics(){
+        int i=1;
+        for (Player playerPtr : player){
+            Map<String,Long> composedWords = playerPtr.getComposedWords();
+            long score = playerPtr.getScore();
+            if (composedWords == null){
+                System.out.format("The Player %d composed %d words, scored %d \n",
+                        i,0,score);
+            }else {
+                long totalWords = manager.getTotalWordsInDict();
+                System.out.format("The Player %d composed %d words, scored %d \n",
+                        i, composedWords.size(),score);
+                composedWords.entrySet()
+                        .forEach(e1->System.out.format("%s: %d / %d\n",e1.getKey(),e1.getValue(),totalWords));
+            }
+            i++;
+        }
     }
 
     private void revealCards(Player currentPlayer)  { //according to the dice

@@ -1,9 +1,7 @@
 package engine;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import javax.swing.text.html.parser.Entity;
+import java.util.*;
 
 /**
  * Created by eran on 30/03/2017.
@@ -14,6 +12,8 @@ public class Player {
     private Dice cube;
     private GameManager manager;
     private int leftCardNumToReveal;
+    private long score;
+    private Map<String,Long> composedWords = new HashMap<>();
 
     public Player (GameManager manager,Deck deck,Board board,Dice cube)
     {
@@ -60,6 +60,22 @@ public class Player {
 
     public void revealWord(Set<Map.Entry<Integer,Integer>> pairs) {
         board.revealWord(pairs);
+    }
+
+    protected void increaseScore(long value){
+        score+=value;
+    }
+
+    protected void addComposedWord(Map.Entry<String,Long> word){
+        this.composedWords.put(word.getKey(),word.getValue());
+    }
+
+    public long getScore() {
+        return score;
+    }
+
+    public Map<String,Long> getComposedWords(){
+        return composedWords;
     }
 
     public boolean isLeftCardsToReveal()

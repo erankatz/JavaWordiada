@@ -13,11 +13,8 @@ import java.time.LocalTime;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 
+import org.w3c.dom.*;
 import org.w3c.dom.Document;
-import org.w3c.dom.Document;
-import org.w3c.dom.NodeList;
-import org.w3c.dom.Node;
-import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 import sun.misc.JavaIOAccess;
@@ -50,6 +47,7 @@ public class GameManager {
     private boolean isGameStarted;
     private int roundCounter;
     private LocalTime gameStartedTime;
+    private long totalWordsInDict;
 
     public void gameManager()
     {
@@ -90,7 +88,9 @@ public class GameManager {
         this.gameStartedTime = LocalTime.now();
     }
 
-    protected void wordRevealed(int freq){
+    protected void wordRevealed(Map.Entry<String ,Long> word2Frequency){
+        players[getCurrentPlayerTurn()].increaseScore(1);
+        players[getCurrentPlayerTurn()].addComposedWord(word2Frequency);
 
     }
 
@@ -145,7 +145,7 @@ public class GameManager {
         }
     }
 
-    public Map<String,Integer> createDictionary() throws  java.io.IOException{
+    public Map<String,Long> createDictionary() throws  java.io.IOException{
         String bookStr = new String(Files.readAllBytes(Paths.get("C:\\d\\moby dick.txt")));
         String str = "[\\\\!?,.#:;\\-_=\\+\\*\"'\\(\\)\\{\\}\\[\\]%$\\r]";
         Pattern p = Pattern.compile(str);
@@ -156,17 +156,22 @@ public class GameManager {
 
     }
 
-    private Map<String, Integer> CreateMapAndCalcFrequency(String[] names) {
+    private Map<String, Long> CreateMapAndCalcFrequency(String[] names) {
         //key=name value=number of appearances
-        Map<String, Integer> frequency = new HashMap<>();
+        Map<String, Long> frequency = new HashMap<>();
+        this.totalWordsInDict = names.length;
         for(String name : names) {
-            Integer currentCount = frequency.get(name);
+            Long currentCount = frequency.get(name);
             if(currentCount == null) {
-                currentCount = 0; // auto-boxing
+                currentCount = new Long(0); // auto-boxing
             }
             frequency.put(name, ++currentCount);
         }
         return frequency;
+    }
+
+    public long getTotalWordsInDict(){
+        return totalWordsInDict;
     }
 
     protected void endPlayerTurn(){
@@ -192,11 +197,16 @@ public class GameManager {
         isGameStarted = false;
     }
 
-
-    public void getStatistics()
+    public Map<Character,Long> getCharFrequency()
     {
-
+        return deck.getCharFrequency();
     }
+
+    public Map<Character,Long> getInitCharFrequency()
+    {
+        return deck.getInitCharFrequency();
+    }
+
 
     public boolean isGameStarted() {
         return isGameStarted;

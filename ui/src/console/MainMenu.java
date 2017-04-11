@@ -2,12 +2,18 @@ package console;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.time.LocalTime;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Map;
 
 import engine.GameManager;
+import sun.rmi.runtime.Log;
 
 public class MainMenu {
-    UIBoard board;
-    UIPlayer player;
+    private UIBoard board;
+    private UIPlayer player;
+    private Map<Character,Long> currCharFreq;
 
     public void run () throws  java.io.IOException
     {
@@ -73,6 +79,24 @@ public class MainMenu {
         System.out.format("Number of Turns Elapsed: %d \n", manager.getNumOfTurnsElapsed());
         System.out.format("Time elapes:\t %d:%d \n",manager.getTimeElapsed().getSeconds() /60 ,manager.getTimeElapsed().getSeconds() % 60);
         System.out.format("Number of cards in the deck %d \n",manager.getNumofCardInDeck());
+        this.currCharFreq = manager.getCharFrequency();
+        manager.getInitCharFrequency()
+                .entrySet()
+                .stream()
+                .sorted(Map.Entry.comparingByKey())
+                .forEach(e1->printCharFrequency(e1.getKey(),e1.getValue()));
+        this.player.printPlayerstatistics();
+
+    }
+
+    private void printCharFrequency(char ch,long initFreq)
+    {
+        Long currCharFrequency;
+        if ((currCharFrequency = currCharFreq.get(ch)) == null){
+            System.out.format("%c - %d/%d\n",ch,0,initFreq);
+        } else {
+            System.out.format("%c - %d/%d\n",ch,currCharFrequency,initFreq);
+        }
     }
     private int getOption()
     {
