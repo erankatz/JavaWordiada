@@ -1,7 +1,19 @@
 package console;
 
+import com.sun.org.apache.bcel.internal.generic.DUP;
+import engine.Deck;
 import engine.GameManager;
 import engine.Player;
+import engine.exception.board.CardNotReveledException;
+import engine.exception.board.WrongCardPositionException;
+import engine.exception.card.CardAlreadyRevealedException;
+import engine.exception.card.CardException;
+import engine.exception.card.DuplicateCardException;
+import engine.exception.card.NoCardsLeftToRevealException;
+import engine.exception.deck.DeckException;
+import engine.exception.deck.DeckNotInitializedException;
+import engine.exception.deck.EmptyDeckException;
+import engine.exception.dice.DiceException;
 import org.omg.CORBA.DynAnyPackage.Invalid;
 import org.omg.CORBA.DynAnyPackage.InvalidValue;
 
@@ -61,15 +73,27 @@ public class UIPlayer {
 
             try {
                 Set<Map.Entry<Integer,Integer>> pairs = MapStringCradsPairsToSet(line);
-                done = true;
                 currentPlayer.revealWord(pairs);
-            } catch (Exception ex) {
+                done = true;
+            } catch (EmptyDeckException ex) {
+                done = true;
+                //TODO:End the Game
+            } catch (DuplicateCardException ex) {
+                System.out.format("The card in location\n Row: %d\n Col: %d\n Chosen twice\n",
+                        ex.getRow(),ex.getCol());
+            } catch (DeckException ex) {
 
+            } catch (WrongCardPositionException ex){
+                System.out.format("The card in location\n Row: %d\n Col: %d\n not matches the board sizes\n",
+                        ex.getRow(),ex.getCol());
+            } catch (CardNotReveledException ex) {
+                System.out.format("You chosen the card \n Row: %d\n Col: %d\n This card is not reveled\n You must compose a word from reveled cards\n",
+                        ex.getRow(),ex.getCol());
             }
         }
     }
 
-    private Set<Map.Entry<Integer,Integer>> MapStringCradsPairsToSet(String sPairs)
+    private Set<Map.Entry<Integer,Integer>> MapStringCradsPairsToSet(String sPairs) throws DuplicateCardException
     {
         Set<Map.Entry<Integer,Integer>> pairs = new HashSet<>();
         String[] stingPairs =sPairs.split(" ") ;
@@ -79,7 +103,7 @@ public class UIPlayer {
             Map.Entry<Integer,Integer> entry = new AbstractMap.SimpleEntry<Integer, Integer>(num1, num2);
             if (pairs.add(entry) == false )
             {
-                //TODO:Throw Exception
+                throw new DuplicateCardException(num1,num2);
             }
         }
         return pairs;
@@ -122,9 +146,14 @@ public class UIPlayer {
             int col = Integer.parseInt(word.split(",")[1]);
             try{
                 currentPlayer.revealCard(row,col);
-            }catch (Exception ex)
-            {
-                System.out.println(ex.getMessage());
+            } catch (WrongCardPositionException ex){
+                System.out.format("The card in location\n Row: %d\n Col: %d\n not matches the board sizes\n",
+                        ex.getRow(),ex.getCol());
+            } catch (CardAlreadyRevealedException ex) {
+                System.out.format("You chosen the card \n Row: %d\n Col: %d\n This card is already reveled\n You must revel a non reveled cards\n",
+                        ex.getRow(),ex.getCol());
+            } catch (Exception ex){
+
             }
             System.out.format("You entered row : %d , col : %d\n",row,col);
         }

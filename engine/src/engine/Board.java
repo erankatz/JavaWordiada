@@ -1,9 +1,16 @@
 package engine;
 
+import engine.exception.board.CardNotReveledException;
+import engine.exception.board.WrongCardPositionException;
+import engine.exception.card.CardAlreadyRevealedException;
+import engine.exception.card.CardException;
+import engine.exception.deck.DeckException;
+
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 
 /**
  * Created by eran on 29/03/2017.
@@ -29,7 +36,7 @@ public class Board {
         this.word2FrequencyDic =dictionary;
     }
 
-    public boolean revealWord(Set<Map.Entry<Integer,Integer>> pairs) {
+    public boolean revealWord(Set<Map.Entry<Integer,Integer>> pairs) throws DeckException,WrongCardPositionException,CardNotReveledException {
         String str = buildWord(pairs);
         if (word2FrequencyDic.containsKey(str))
         {
@@ -40,17 +47,26 @@ public class Board {
         return false;
     }
 
-    private void replaceCards(Set<Map.Entry<Integer,Integer>> pairs) {
-        pairs.stream()
-                .forEach(entry-> setBoardCard(entry.getKey(),entry.getValue(),deck.removeTopCard()));
+    private void replaceCards(Set<Map.Entry<Integer,Integer>> pairs) throws DeckException {
+        for (Map.Entry<Integer,Integer> pair : pairs){
+            try {
+                setBoardCard(pair.getKey(),pair.getValue(),deck.removeTopCard());
+            } catch (DeckException ex){
+                throw ex;
+            }
+        }
+        //pairs.stream()
+        //        .forEach(entry-> setBoardCard(entry.getKey(),entry.getValue(),deck.removeTopCard()));
     }
 
-    private String buildWord(Set<Map.Entry<Integer,Integer>> pairs){
+    private String buildWord(Set<Map.Entry<Integer,Integer>> pairs) throws WrongCardPositionException,CardNotReveledException{
         String str = new String("");
         for (Map.Entry<Integer,Integer> pair : pairs)
         {
             Card card = getBoardCard(pair.getKey(),pair.getValue());
-            card.reveal();
+            if (!card.isRevealed()) {
+                throw new CardNotReveledException(pair.getKey(),pair.getValue());
+            }
             str += card.getLetter();
         }
         return  str.toUpperCase();
@@ -65,8 +81,11 @@ public class Board {
         return boardSize;
     }
 
-    public Card getBoardCard(int row,int col)
+    public Card getBoardCard(int row,int col) throws WrongCardPositionException
     {
+        if (row > boardSize || col > boardSize){
+            throw new WrongCardPositionException(row,col);
+        }
         return this.cards[row-1][col-1];
     }
 

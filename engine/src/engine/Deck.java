@@ -1,17 +1,20 @@
 package engine;
 
-import com.sun.xml.internal.ws.api.message.ExceptionHasMessage;
+import engine.exception.deck.DeckException;
+import engine.exception.deck.DeckNotInitializedException;
+import engine.exception.deck.EmptyDeckException;
+import engine.exception.letter.AlphabetExeption;
+import engine.exception.letter.DuplicateLetterException;
+import engine.exception.letter.LetterException;
+import engine.exception.letter.TooFewLettersException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.w3c.dom.Entity;
 import org.w3c.dom.NodeList;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathExpressionException;
-import java.lang.reflect.Array;
 import java.util.*;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 
@@ -24,13 +27,13 @@ public class Deck {
     private LinkedList<Card> cards;
     private Map<Character,Long> initCharFrequency;
 
-    protected Deck(Document doc, XPath xpath) throws XPathExpressionException {
+    protected Deck(Document doc, XPath xpath) throws XPathExpressionException, LetterException {
         XPathExpression expr =  xpath.compile("/GameDescriptor/Structure/Letters/@target-deck-size");
         Number deckSize = (Number) expr.evaluate(doc, XPathConstants.NUMBER); // get target-deck-size
         this.deckSize = deckSize.intValue();
         readLeters(doc,xpath);
         if (letterArr.size() != Alphabet.numOfLetters) {
-            //TODO: Too few letter
+            throw new TooFewLettersException(letterArr.size());
         }
     }
 
@@ -80,20 +83,20 @@ public class Deck {
         this.initCharFrequency = getCharFrequency();
     }
 
-    public Card removeTopCard()
+    public Card removeTopCard() throws DeckException
     {
         if (cards == null)
         {
-            //TODO:Return NO init  Deck Exception
+            throw new DeckNotInitializedException();
         } else if (cards.size() == 0)
         {
-            //TODO:Return Empty Deck Exception
+            throw new EmptyDeckException();
         }
 
         return cards.removeLast();
     }
 
-    private void readLeters(Document doc, XPath xpath) throws XPathExpressionException
+    private void readLeters(Document doc, XPath xpath) throws XPathExpressionException,LetterException
     {
         XPathExpression expr = xpath.compile("sum(/GameDescriptor/Structure/Letters/Letter/Frequency)");
         Number sumOfFreq = (Number) expr.evaluate(doc, XPathConstants.NUMBER); //calculate sum of frequences
@@ -101,7 +104,7 @@ public class Deck {
         expr = xpath.compile("/GameDescriptor/Structure/Letters/Letter");
         NodeList nodes = (NodeList) expr.evaluate(doc, XPathConstants.NODESET);
         if (nodes.getLength() != Alphabet.numOfLetters ) {
-            //TODO:Write Exception about too few letters
+            throw new TooFewLettersException(nodes.getLength());
         }
 
         for (int i = 0; i < nodes.getLength(); i++) {
@@ -113,11 +116,10 @@ public class Deck {
             int occurence = (int) Math.ceil((frequency / sumOfFreq.doubleValue()) * deckSize);
             if (Alphabet.IsInAlphabet(sign)) {
                 if (letterArr.add(new Letter(sign, (byte) score, occurence)) == false) {
-                    //TODO:Write Exception class when duplicate letter exist
+                    throw new DuplicateLetterException(sign);
                 }
             } else {
-                //TODO:Write Exception known letter
-
+                throw new AlphabetExeption(sign);
             }
         }
     }

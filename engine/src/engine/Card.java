@@ -1,5 +1,7 @@
 package engine;
 
+import engine.exception.card.CardAlreadyRevealedException;
+
 /**
  * Created by eran on 29/03/2017.
  */

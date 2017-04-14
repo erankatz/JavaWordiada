@@ -6,13 +6,17 @@ import javax.xml.transform.stream.StreamSource;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.DocumentBuilder;
 import java.io.File;
+import java.io.InputStream;
+import java.net.URL;
 import java.sql.Time;
 import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.time.LocalTime;
 import java.time.ZonedDateTime;
-import java.util.ArrayList;
+import java.util.*;
 
+import engine.exception.deck.DeckException;
+import engine.exception.dice.DiceException;
 import org.w3c.dom.*;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
@@ -27,11 +31,9 @@ import javax.xml.xpath.XPathFactory;
 import javax.xml.validation.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * Created by eran on 21/03/2017.
@@ -41,19 +43,17 @@ public class GameManager {
     private final int NUMOFPLAYERS = 2;
     private Board board;
     Player players[] = new Player[NUMOFPLAYERS];
-    private String dictionaryFileName;
+    private String dictionaryFilePath;
     private int retriesNumber;
-    private int cubeFacets = 6;
+    private int cubeFacets;
+    private int boardSize;
     private boolean isGameStarted;
     private int roundCounter;
     private LocalTime gameStartedTime;
     private long totalWordsInDict;
+    private boolean gameOver;
+    private int winnerPlayer;
 
-    public void gameManager()
-    {
-        this.dictionaryFileName = "war-and-piece.txt";
-        this.retriesNumber = 2;
-    }
 
     public int getNumOfTurnsElapsed()
     {
@@ -118,7 +118,8 @@ public class GameManager {
 
             //-----------------------------------------
             Source xmlFile = new StreamSource(fXmlFile);
-            File schemaFile = new File("C:\\d\\Wordiada.xsd");
+            URL schemaFile = GameManager.class.getResource("/resources/Wordiada.xsd");
+            //File schemaFile = new File("C:\\d\\Wordiada.xsd");
             // or File schemaFile = new File("/location/to/xsd") etc.
             SchemaFactory schemaFactory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
             Schema schema = schemaFactory.newSchema(schemaFile);
@@ -127,7 +128,6 @@ public class GameManager {
                 validator.validate(xmlFile);
                 System.out.println(xmlFile.getSystemId() + " is valid");
             } catch (SAXParseException e) {
-            //TODO:  Need to add Excetion Handler
             System.out.println(xmlFile.getSystemId() + " is NOT valid reason:" + e);
             } catch (SAXException e)
             {
@@ -138,7 +138,26 @@ public class GameManager {
 
             XPathFactory xpathFactory = XPathFactory.newInstance();
             XPath xpath = xpathFactory.newXPath();
+            XPathExpression expr;
+
+            //Create deck
             deck = new Deck(doc,xpath);
+
+            //GetDictionaryFileNameFromFile
+            expr =  xpath.compile("/GameDescriptor/Structure/DictionaryFileName/text()");
+            dictionaryFilePath =  fXmlFile.getParent() + "\\dictionary\\"+  (String)expr.evaluate(doc, XPathConstants.STRING);
+
+            //GetNumberOfCubeFacetsFromFile
+            expr =  xpath.compile("/GameDescriptor/Structure/CubeFacets/text()");
+            cubeFacets = ((Number) expr.evaluate(doc, XPathConstants.NUMBER)).intValue();
+
+            //GetBoardSizeFromFile
+            expr =  xpath.compile("/GameDescriptor/Structure/BoardSize/text()");
+            boardSize = ((Number) expr.evaluate(doc, XPathConstants.NUMBER)).intValue();
+
+            //GetRetriesNumberFromFile
+            expr =  xpath.compile("/GameDescriptor/Structure/RetriesNumber/text()");
+            retriesNumber = ((Number) expr.evaluate(doc, XPathConstants.NUMBER)).intValue();
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -146,7 +165,7 @@ public class GameManager {
     }
 
     public Map<String,Long> createDictionary() throws  java.io.IOException{
-        String bookStr = new String(Files.readAllBytes(Paths.get("C:\\d\\moby dick.txt")));
+        String bookStr = new String(Files.readAllBytes(Paths.get(dictionaryFilePath)));
         String str = "[\\\\!?,.#:;\\-_=\\+\\*\"'\\(\\)\\{\\}\\[\\]%$\\r]";
         Pattern p = Pattern.compile(str);
         bookStr = bookStr.replace("\n", " ").replaceAll(p.pattern(),"");
@@ -156,18 +175,32 @@ public class GameManager {
 
     }
 
-    private Map<String, Long> CreateMapAndCalcFrequency(String[] names) {
+    private Map<String, Long> CreateMapAndCalcFrequency(String[] words) {
         //key=name value=number of appearances
         Map<String, Long> frequency = new HashMap<>();
-        this.totalWordsInDict = names.length;
-        for(String name : names) {
-            Long currentCount = frequency.get(name);
+        List<String> filteredWords = Arrays.stream(words).filter(str->str.length()>1).collect(Collectors.toList());
+        this.totalWordsInDict = filteredWords.size();
+        for(String word : filteredWords) {
+            Long currentCount = frequency.get(word); //check if word already exists
             if(currentCount == null) {
                 currentCount = new Long(0); // auto-boxing
             }
-            frequency.put(name, ++currentCount);
+            frequency.put(word, ++currentCount);
         }
         return frequency;
+    }
+
+    public void playerQuit(){
+        isGameStarted = false;
+        endPlayerTurn();
+        gameOver = true;
+    }
+
+    public boolean isGameOver(){
+        return gameOver;
+    }
+    public int getWinnerPlayer(){
+        return getCurrentPlayerTurn();
     }
 
     public long getTotalWordsInDict(){
@@ -178,11 +211,11 @@ public class GameManager {
         this.roundCounter++;
     }
 
-    public void newGame() throws java.io.IOException
+    public void newGame() throws java.io.IOException,DiceException,DeckException
     {
         deck.NewGame();
         ArrayList<Card> initCards = new ArrayList<Card>();
-        this.board= new Board(10,this,deck);
+        this.board= new Board(boardSize,this,deck);
         for (int i =0; i< this.board.getBoardSize()*this.board.getBoardSize();i++)
         {
             initCards.add(this.deck.removeTopCard());
@@ -206,7 +239,6 @@ public class GameManager {
     {
         return deck.getInitCharFrequency();
     }
-
 
     public boolean isGameStarted() {
         return isGameStarted;

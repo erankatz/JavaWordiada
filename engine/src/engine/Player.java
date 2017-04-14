@@ -1,5 +1,15 @@
 package engine;
 
+import engine.exception.board.CardNotReveledException;
+import engine.exception.board.WrongCardPositionException;
+import engine.exception.card.AllCardsRevealedException;
+import engine.exception.card.CardAlreadyRevealedException;
+import engine.exception.card.CardException;
+import engine.exception.card.NoCardsLeftToRevealException;
+import engine.exception.deck.DeckException;
+import engine.exception.dice.DiceException;
+import engine.exception.dice.DiceNotRolledException;
+
 import javax.swing.text.html.parser.Entity;
 import java.util.*;
 
@@ -30,22 +40,22 @@ public class Player {
     }
 
     public void endTurn() {
-        manager.endPlayerTurn();
+        manager.endPlayerTurn();cube.endTurn();
     }
 
-    public void revealCard(int row,int col)
+    public void revealCard(int row,int col) throws DiceException,CardException,WrongCardPositionException
     {
         if (cube.getResult() == null)
         {
-            //TODO: Return Error Cube not rolled
+            throw new DiceNotRolledException();
         }
         if (leftCardNumToReveal == 0)
         {
-            //TODO: return Error No cards Left to reveal
+            throw new NoCardsLeftToRevealException();
         }
         if (board.getNumOfUnrevealedCard() == 0)
         {
-            //TODO: Exception All cards already reveled
+            throw new AllCardsRevealedException();
         }
 
             Card card = board.getBoardCard(row,col);
@@ -53,12 +63,11 @@ public class Player {
                 card.reveal(); // changing flag to 'reveal'
                 leftCardNumToReveal--;
             } else {
-                //TODO: Card is already revealed Exception and undo function
+                throw new CardAlreadyRevealedException(row,col);
             }
-        this.cube.endTurn();
     }
 
-    public void revealWord(Set<Map.Entry<Integer,Integer>> pairs) {
+    public void revealWord(Set<Map.Entry<Integer,Integer>> pairs) throws DeckException,WrongCardPositionException,CardNotReveledException {
         board.revealWord(pairs);
     }
 

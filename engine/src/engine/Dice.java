@@ -1,4 +1,7 @@
 package engine;
+import engine.exception.dice.DiceException;
+import engine.exception.dice.WrongNumberOfDiceFacetExecption;
+
 import java.security.PublicKey;
 import java.util.Random;
 
@@ -11,13 +14,13 @@ public class Dice {
     private final int numOfFacets;
     private Integer result;
 
-    public Dice(int numOfFacets)
+    public Dice(int numOfFacets) throws DiceException
     {
         if (numOfFacets >= minFacets && numOfFacets <= maxFacets)
             this.numOfFacets = numOfFacets;
         else {
             this.numOfFacets = 0;
-            //TODO:Throw too many cube Facets or too low cube facets
+            throw new WrongNumberOfDiceFacetExecption(numOfFacets);
         }
     }
 
@@ -28,8 +31,9 @@ public class Dice {
 
     public int role()
     {
+        //TODO:What happened with 1 facet
         Random rand = new Random();
-        this.result = rand.nextInt(numOfFacets) + 1;
+        this.result = rand.nextInt(numOfFacets-1) + 2;
         return result.intValue();
     }
 

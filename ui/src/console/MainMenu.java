@@ -8,6 +8,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 import engine.GameManager;
+import engine.exception.deck.DeckException;
+import engine.exception.dice.DiceException;
+import engine.exception.dice.WrongNumberOfDiceFacetExecption;
 import sun.rmi.runtime.Log;
 
 public class MainMenu {
@@ -15,13 +18,13 @@ public class MainMenu {
     private UIPlayer player;
     private Map<Character,Long> currCharFreq;
 
-    public void run () throws  java.io.IOException
+    public void run ()
     {
         int swValue = getOption();
         GameManager manager = null;
         int currentPlayerTurn;
         //Display menu graphics
-        while (swValue != 6)
+        while (swValue != 7)
         {
             switch (swValue){
                 case 1:
@@ -29,20 +32,46 @@ public class MainMenu {
                     {
                         System.out.println("The Game already started");
                     } else {
-                        manager = new GameManager();
-                        manager.readXmlFile("C:\\d\\basic_1.xml");
-                        manager.createDictionary();
-                        manager.newGame();
-                        board = new UIBoard(manager.getBoard());
-                        board.printGameBoard();
-                        this.player = new UIPlayer(manager.getPlayers(),manager);
-                        System.out.format("Number of cards in deck %d\n",manager.getNumofCardInDeck());
+                        try{
+                            manager = new GameManager();
+                            manager.readXmlFile("C:\\d\\basic_1.xml");
+                            manager.createDictionary();
+                            manager.newGame();
+                            board = new UIBoard(manager.getBoard());
+                            board.printGameBoard();
+                            System.out.format("Number of cards in deck %d\n",manager.getNumofCardInDeck());
+                        } catch (WrongNumberOfDiceFacetExecption ex){
+                            System.out.format("Wrong number of Facets (%d)",ex.getNumOfFacet());
+                        } catch (DiceException ex){
+                            System.out.println(ex.getMessage());
+                        } catch (java.io.IOException ex) {
+                            System.out.println(ex.getMessage());
+                        } catch (DeckException ex) {
+                            System.out.println(ex.getMessage());
+                        }
                     }
                     break;
                 case 2:
                     if (manager != null && !manager.isGameStarted())
                     {
+                        if (manager.isGameOver())
+                        {
+                            try {
+                                manager.createDictionary();
+                                manager.newGame();
+                                board = new UIBoard(manager.getBoard());
+                            } catch (WrongNumberOfDiceFacetExecption ex){
+                                System.out.format("Wrong number of Facets (%d)",ex.getNumOfFacet());
+                            } catch (DiceException ex){
+                                System.out.println(ex.getMessage());
+                            } catch (IOException ex){
+                                System.out.println(ex.getMessage());
+                            } catch (DeckException ex) {
+                                System.out.println(ex.getMessage());
+                            }
+                        }
                         manager.startGame();
+                        this.player = new UIPlayer(manager.getPlayers(),manager);
                         board.printGameBoard();
                         System.out.format("Number of cards in deck %d\n",manager.getNumofCardInDeck());
                     } else {
@@ -50,6 +79,11 @@ public class MainMenu {
                     }
                     break;
                 case 3:
+                    if (manager != null && manager.isGameStarted()){
+                        printGameStatus(manager);
+                    } else {
+                        System.out.println("The Game not started");
+                    }
                     break;
                 case 4:
                     if (manager != null && manager.isGameStarted())
@@ -67,6 +101,17 @@ public class MainMenu {
                     }
                     break;
                 case 6:
+                    if (manager != null && manager.isGameStarted()) {
+                        manager.playerQuit();
+                        System.out.format("Player %d is the winner\n", manager.getWinnerPlayer()+1);
+                        board.printGameBoard();
+                        printStatistics(manager);
+                    } else{
+                        System.out.println("The Game not started");
+                    }
+                    break;
+                case 7:
+                    System.out.println("Exit");
                     break;
             }
 
@@ -74,6 +119,12 @@ public class MainMenu {
         }
     }
 
+    private void printGameStatus(GameManager manager)
+    {
+        board.printGameBoard();
+        System.out.format("Number of cards in the deck %d \n",manager.getNumofCardInDeck());
+        System.out.format("Player %d Turn\n",manager.getCurrentPlayerTurn() +1);
+    }
     private void printStatistics(GameManager manager)
     {
         System.out.format("Number of Turns Elapsed: %d \n", manager.getNumOfTurnsElapsed());
@@ -108,7 +159,8 @@ public class MainMenu {
         System.out.println("3. Show Game Status");
         System.out.println("4. Play Turn");
         System.out.println("5. Get Statistics");
-        System.out.println("6. Exit");
+        System.out.println("6. Quit Game");
+        System.out.println("7. Exit");
         System.out.println("==========================");
         System.out.println("==========================");
         boolean check;
@@ -129,7 +181,7 @@ public class MainMenu {
             {
                 System.exit(0);
             }
-            if (!(i > 0) && (i < 7))
+            if (!(i > 0) && (i <= 7))
             {
                 System.out.println("Input error - enter number between 1 to 6");
                 check = false;
