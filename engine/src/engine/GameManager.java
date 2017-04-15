@@ -15,6 +15,7 @@ import java.time.LocalTime;
 import java.time.ZonedDateTime;
 import java.util.*;
 
+import com.sun.org.apache.xpath.internal.operations.Bool;
 import engine.exception.deck.DeckException;
 import engine.exception.dice.DiceException;
 import org.w3c.dom.*;
@@ -53,6 +54,7 @@ public class GameManager {
     private long totalWordsInDict;
     private boolean gameOver;
     private int winnerPlayer;
+    private boolean isGoldFishMode;
 
 
     public int getNumOfTurnsElapsed()
@@ -60,6 +62,7 @@ public class GameManager {
         return this.roundCounter;
     }
 
+    public int getRetriesNumber(){ return retriesNumber;}
     public int gutNumberofTurns()
     {
         return roundCounter;
@@ -86,11 +89,14 @@ public class GameManager {
         isGameStarted = true;
         roundCounter = 0;
         this.gameStartedTime = LocalTime.now();
+        if (players[getCurrentPlayerTurn()] instanceof ComputerPlayer){
+            ((ComputerPlayer)players[getCurrentPlayerTurn()]).playTurn();
+        }
     }
 
-    protected void wordRevealed(Map.Entry<String ,Long> word2Frequency){
+    protected void wordRevealed(String word, long frequency){
         players[getCurrentPlayerTurn()].increaseScore(1);
-        players[getCurrentPlayerTurn()].addComposedWord(word2Frequency);
+        players[getCurrentPlayerTurn()].addComposedWord(word,frequency);
 
     }
 
@@ -159,6 +165,10 @@ public class GameManager {
             expr =  xpath.compile("/GameDescriptor/Structure/RetriesNumber/text()");
             retriesNumber = ((Number) expr.evaluate(doc, XPathConstants.NUMBER)).intValue();
 
+            //CheckIfGoldFishMode
+            expr =  xpath.compile("/GameDescriptor/GameType/@gold-fish-mode");
+            isGoldFishMode = Boolean.parseBoolean((String) expr.evaluate(doc, XPathConstants.STRING));
+
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -208,10 +218,17 @@ public class GameManager {
     }
 
     protected void endPlayerTurn(){
+
         this.roundCounter++;
+        if (isGoldFishMode){
+            board.ChangeAllCardsToUnreveal();
+        }
+        if (players[getCurrentPlayerTurn()] instanceof ComputerPlayer){
+            ((ComputerPlayer)players[getCurrentPlayerTurn()]).playTurn();
+        }
     }
 
-    public void newGame() throws java.io.IOException,DiceException,DeckException
+    public void newGame(List<Boolean> booleanList) throws java.io.IOException,DiceException,DeckException
     {
         deck.NewGame();
         ArrayList<Card> initCards = new ArrayList<Card>();
@@ -225,8 +242,13 @@ public class GameManager {
 
         for (int i =0;i<players.length; i++)
         {
-            players[i] = new Player(this,deck,board,new Dice(cubeFacets));
+            if (booleanList.get(i))
+                players[i] = new ComputerPlayer(this,deck,board,new Dice(cubeFacets));
+            else{
+                players[i] = new Player(this,deck,board,new Dice(cubeFacets));
+            }
         }
+
         isGameStarted = false;
     }
 

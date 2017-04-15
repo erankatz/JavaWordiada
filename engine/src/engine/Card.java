@@ -38,4 +38,8 @@ public class Card {
     protected void reveal() {
         revealed = true;
     }
+
+    protected void unReveal(){
+        revealed =false;
+    }
 }

@@ -3,9 +3,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.time.LocalTime;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 import engine.GameManager;
 import engine.exception.deck.DeckException;
@@ -36,7 +34,7 @@ public class MainMenu {
                             manager = new GameManager();
                             manager.readXmlFile("C:\\d\\basic_1.xml");
                             manager.createDictionary();
-                            manager.newGame();
+                            manager.newGame(getComputeBooleanrArray());
                             board = new UIBoard(manager.getBoard());
                             board.printGameBoard();
                             System.out.format("Number of cards in deck %d\n",manager.getNumofCardInDeck());
@@ -58,7 +56,7 @@ public class MainMenu {
                         {
                             try {
                                 manager.createDictionary();
-                                manager.newGame();
+                                manager.newGame(getComputeBooleanrArray());
                                 board = new UIBoard(manager.getBoard());
                             } catch (WrongNumberOfDiceFacetExecption ex){
                                 System.out.format("Wrong number of Facets (%d)",ex.getNumOfFacet());
@@ -70,6 +68,7 @@ public class MainMenu {
                                 System.out.println(ex.getMessage());
                             }
                         }
+
                         manager.startGame();
                         this.player = new UIPlayer(manager.getPlayers(),manager);
                         board.printGameBoard();
@@ -119,6 +118,24 @@ public class MainMenu {
         }
     }
 
+    private List<Boolean> getComputeBooleanrArray()  {
+        List<Boolean> isComputerPlayerList = new ArrayList<>();
+        Scanner sc = new Scanner(System.in);
+        for (int i=0;i<2;i++){
+            System.out.println("Is Player " + (i +1) + " is Computer Player ?\n Type Y/N");
+            String userInput;
+            do{
+                userInput = sc.nextLine();
+            } while (!(userInput.equals("Y") || userInput.equals("N")));
+
+            if (userInput.equals("Y")){
+                isComputerPlayerList.add(true);
+            }else{
+                isComputerPlayerList.add(false);
+            }
+        }
+        return isComputerPlayerList;
+    }
     private void printGameStatus(GameManager manager)
     {
         board.printGameBoard();
@@ -136,7 +153,7 @@ public class MainMenu {
                 .stream()
                 .sorted(Map.Entry.comparingByKey())
                 .forEach(e1->printCharFrequency(e1.getKey(),e1.getValue()));
-        this.player.printPlayerstatistics();
+        this.player.printPlayerStatistics();
 
     }
 

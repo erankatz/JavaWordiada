@@ -1,9 +1,11 @@
 package console;
 
 import com.sun.org.apache.bcel.internal.generic.DUP;
+import com.sun.org.apache.xerces.internal.util.SynchronizedSymbolTable;
 import engine.Deck;
 import engine.GameManager;
 import engine.Player;
+import engine.exception.board.BoardException;
 import engine.exception.board.CardNotReveledException;
 import engine.exception.board.WrongCardPositionException;
 import engine.exception.card.CardAlreadyRevealedException;
@@ -17,6 +19,7 @@ import engine.exception.dice.DiceException;
 import org.omg.CORBA.DynAnyPackage.Invalid;
 import org.omg.CORBA.DynAnyPackage.InvalidValue;
 
+import javax.swing.plaf.synth.SynthOptionPaneUI;
 import javax.swing.text.html.parser.Entity;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
@@ -49,7 +52,10 @@ public class UIPlayer {
         Player currentPlayer = player[manager.getCurrentPlayerTurn()];
         revealCards(currentPlayer);
         this.board.printGameBoard();
-        chooseCards(currentPlayer);
+        while (currentPlayer.revealWordPending()){
+            chooseCards(currentPlayer);
+        }
+
         currentPlayer.endTurn();
     }
 
@@ -57,6 +63,7 @@ public class UIPlayer {
         System.out.format("Build a word by choosing characters in the board according to the format:\n");
         System.out.println("{row,column} {row,column} .....");
         System.out.println("Example: 2,1 1,1 1,2");
+        System.out.println("Retries left: " + currentPlayer.getRetriesNumber());
         Scanner sc = new Scanner(System.in);
         Boolean done = false;
         while (!done)
@@ -72,8 +79,12 @@ public class UIPlayer {
             }
 
             try {
-                Set<Map.Entry<Integer,Integer>> pairs = MapStringCradsPairsToSet(line);
-                currentPlayer.revealWord(pairs);
+                List<Map.Entry<Integer,Integer>> pairs = MapStringCradsPairsToList(line);
+                if(currentPlayer.revealWord(pairs)){
+                    System.out.println("You are right! you built a valid word!");
+                } else {
+                    System.out.println("You are wrong :( ");
+                }
                 done = true;
             } catch (EmptyDeckException ex) {
                 done = true;
@@ -89,13 +100,15 @@ public class UIPlayer {
             } catch (CardNotReveledException ex) {
                 System.out.format("You chosen the card \n Row: %d\n Col: %d\n This card is not reveled\n You must compose a word from reveled cards\n",
                         ex.getRow(),ex.getCol());
+            } catch (BoardException ex){
+                System.out.println(ex.getMessage());
             }
         }
     }
 
-    private Set<Map.Entry<Integer,Integer>> MapStringCradsPairsToSet(String sPairs) throws DuplicateCardException
+    private List<Map.Entry<Integer,Integer>> MapStringCradsPairsToList(String sPairs) throws DuplicateCardException
     {
-        Set<Map.Entry<Integer,Integer>> pairs = new HashSet<>();
+        List<Map.Entry<Integer,Integer>> pairs = new LinkedList<>();
         String[] stingPairs =sPairs.split(" ") ;
         for (String pair : stingPairs){
             Integer num1 = Integer.parseInt(pair.split(",")[0]);
@@ -109,7 +122,7 @@ public class UIPlayer {
         return pairs;
     }
 
-    public void printPlayerstatistics(){
+    public void printPlayerStatistics(){
         int i=1;
         for (Player playerPtr : player){
             Map<String,Long> composedWords = playerPtr.getComposedWords();
@@ -150,7 +163,7 @@ public class UIPlayer {
                 System.out.format("The card in location\n Row: %d\n Col: %d\n not matches the board sizes\n",
                         ex.getRow(),ex.getCol());
             } catch (CardAlreadyRevealedException ex) {
-                System.out.format("You chosen the card \n Row: %d\n Col: %d\n This card is already reveled\n You must revel a non reveled cards\n",
+                System.out.format("You chosen the card \n Row: %d\n Col: %d\n This card is already reveled\n You must choose a non reveled cards\n",
                         ex.getRow(),ex.getCol());
             } catch (Exception ex){
 

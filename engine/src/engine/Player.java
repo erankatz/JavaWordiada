@@ -1,5 +1,6 @@
 package engine;
 
+import engine.exception.board.BoardException;
 import engine.exception.board.CardNotReveledException;
 import engine.exception.board.WrongCardPositionException;
 import engine.exception.card.AllCardsRevealedException;
@@ -18,12 +19,13 @@ import java.util.*;
  */
 public class Player {
     private Deck deck;
-    private Board board;
+    protected Board board;
     private Dice cube;
     private GameManager manager;
     private int leftCardNumToReveal;
     private long score;
     private Map<String,Long> composedWords = new HashMap<>();
+    private int retriesNumber;
 
     public Player (GameManager manager,Deck deck,Board board,Dice cube)
     {
@@ -32,6 +34,7 @@ public class Player {
         this.cube = cube;
         this.board = board;
         leftCardNumToReveal = 0;
+
     }
     public int rollDice()
     {
@@ -40,7 +43,9 @@ public class Player {
     }
 
     public void endTurn() {
-        manager.endPlayerTurn();cube.endTurn();
+        manager.endPlayerTurn();
+        cube.endTurn();
+
     }
 
     public void revealCard(int row,int col) throws DiceException,CardException,WrongCardPositionException
@@ -67,16 +72,30 @@ public class Player {
             }
     }
 
-    public void revealWord(Set<Map.Entry<Integer,Integer>> pairs) throws DeckException,WrongCardPositionException,CardNotReveledException {
-        board.revealWord(pairs);
+    public boolean revealWordPending(){
+        if (this.retriesNumber >0 && !manager.isGameOver()){
+            return true;
+        }else {
+            return false;
+        }
+    }
+
+    public boolean revealWord(List<Map.Entry<Integer,Integer>> pairs) throws DeckException,WrongCardPositionException,CardNotReveledException,BoardException {
+        boolean ret = board.revealWord(pairs);
+        if (ret == true){
+            retriesNumber=0;
+        } else{
+            retriesNumber--;
+        }
+        return ret;
     }
 
     protected void increaseScore(long value){
         score+=value;
     }
 
-    protected void addComposedWord(Map.Entry<String,Long> word){
-        this.composedWords.put(word.getKey(),word.getValue());
+    protected void addComposedWord(String word, long frequency){
+        this.composedWords.put(word,frequency);
     }
 
     public long getScore() {
@@ -87,8 +106,15 @@ public class Player {
         return composedWords;
     }
 
-    public boolean isLeftCardsToReveal()
-    {
-        return !(board.getNumOfUnrevealedCard() == 0 || leftCardNumToReveal == 0);
+    public boolean isLeftCardsToReveal() {
+        boolean ret = !(board.getNumOfUnrevealedCard() == 0 || leftCardNumToReveal == 0);
+        if (ret == false)
+            this.retriesNumber = manager.getRetriesNumber();
+        return ret;
     }
+
+    public int getRetriesNumber(){
+        return retriesNumber;
+    }
+
 }

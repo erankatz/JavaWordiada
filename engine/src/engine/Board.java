@@ -1,16 +1,18 @@
 package engine;
 
+import engine.exception.board.BoardException;
 import engine.exception.board.CardNotReveledException;
+import engine.exception.board.DuplicateCardPositionException;
 import engine.exception.board.WrongCardPositionException;
 import engine.exception.card.CardAlreadyRevealedException;
 import engine.exception.card.CardException;
 import engine.exception.deck.DeckException;
 
-import java.util.AbstractMap;
-import java.util.ArrayList;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
+import java.util.concurrent.Callable;
 import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 /**
  * Created by eran on 29/03/2017.
@@ -36,18 +38,18 @@ public class Board {
         this.word2FrequencyDic =dictionary;
     }
 
-    public boolean revealWord(Set<Map.Entry<Integer,Integer>> pairs) throws DeckException,WrongCardPositionException,CardNotReveledException {
+    public boolean revealWord(List<Map.Entry<Integer,Integer>> pairs) throws DeckException,WrongCardPositionException,CardNotReveledException,BoardException {
         String str = buildWord(pairs);
         if (word2FrequencyDic.containsKey(str))
         {
             replaceCards(pairs);
-            manager.wordRevealed( new AbstractMap.SimpleEntry<String, Long>(str,word2FrequencyDic.get(str)));
+            manager.wordRevealed(str,word2FrequencyDic.get(str)); //After word is revealed and validation
             return true;
         }
         return false;
     }
 
-    private void replaceCards(Set<Map.Entry<Integer,Integer>> pairs) throws DeckException {
+    private void replaceCards(List<Map.Entry<Integer,Integer>> pairs) throws DeckException {
         for (Map.Entry<Integer,Integer> pair : pairs){
             try {
                 setBoardCard(pair.getKey(),pair.getValue(),deck.removeTopCard());
@@ -59,8 +61,16 @@ public class Board {
         //        .forEach(entry-> setBoardCard(entry.getKey(),entry.getValue(),deck.removeTopCard()));
     }
 
-    private String buildWord(Set<Map.Entry<Integer,Integer>> pairs) throws WrongCardPositionException,CardNotReveledException{
+    private String buildWord(List<Map.Entry<Integer,Integer>> pairs) throws BoardException,WrongCardPositionException,CardNotReveledException{
         String str = new String("");
+
+        //check for duplicate positions
+        Set<Map.Entry<Integer,Integer>> entries = pairs.stream().collect(Collectors.toSet());
+        if (entries.size() != pairs.size()){
+            throw new DuplicateCardPositionException();
+        }
+
+        //build word
         for (Map.Entry<Integer,Integer> pair : pairs)
         {
             Card card = getBoardCard(pair.getKey(),pair.getValue());
@@ -69,7 +79,27 @@ public class Board {
             }
             str += card.getLetter();
         }
+
         return  str.toUpperCase();
+    }
+
+    protected void ChangeAllCardsToUnreveal(){
+        Arrays.stream(cards).forEach(cardrows-> Arrays.stream(cardrows).forEach(card->card.unReveal()));
+    }
+
+    public List<Map.Entry<Integer,Integer>> AllCardsPositionsFilter(Predicate<Card> filter) {
+        List<Map.Entry<Integer,Integer>> pairs = new ArrayList<>();
+        for (int i=0;i<boardSize;i++)
+        {
+            for (int j=0;j<boardSize;j++)
+            {
+                Card card = cards[i][j];
+                if (filter.test(card)) {
+                    pairs.add(new AbstractMap.SimpleEntry<Integer, Integer>(i+1,j+1));
+                }
+            }
+        }
+        return pairs;
     }
 
     protected int getNumOfUnrevealedCard()
