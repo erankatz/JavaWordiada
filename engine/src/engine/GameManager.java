@@ -218,7 +218,10 @@ public class GameManager implements Serializable{
     }
 
     protected void endPlayerTurn(){
-
+        if (deck.getDeckSize() == 0 && board.getNumOfUnrevealedCard() ==0){
+            gameOver =true;
+            //TODO:Assign a winner
+        }
         this.roundCounter++;
         if (isGoldFishMode){
             board.ChangeAllCardsToUnreveal();

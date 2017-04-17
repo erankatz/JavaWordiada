@@ -1,6 +1,7 @@
 package console;
 
 import engine.Board;
+import engine.Card;
 import engine.exception.board.WrongCardPositionException;
 
 import java.lang.Math;
@@ -28,7 +29,14 @@ public class UIBoard {
             System.out.print(" ");
             for (int i = 0; i < board.getBoardSize(); i++) {
                 try {
-                    System.out.format("│%" + spaceAlign + "s", board.getBoardCard(j + 1, i + 1).getLetter());
+                    char ch;
+                    Card card = board.getBoardCard(j + 1, i + 1);
+                    if (card == null){
+                        ch =  ' ';
+                    } else{
+                        ch=card.getLetter();
+                    }
+                    System.out.format("│%" + spaceAlign + "s",ch);
                 }catch(WrongCardPositionException ex){
                     System.out.format("Error in printing the board %d,%d\n",ex.getRow(),ex.getCol());
                     System.exit(1);
@@ -59,7 +67,7 @@ public class UIBoard {
     }
 
     public void printNumberOLegalWords(){
-        System.out.println("Number of legal words in dictionary is: "+board.getNumberOLegalWords());
+        System.out.println("Number of legal words in dictionary is: "+board.getNumberOLegalWords(card->card.isRevealed()));
     }
     private  void printBorderLine(char ch)
     {

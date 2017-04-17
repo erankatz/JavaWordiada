@@ -3,6 +3,7 @@ package engine.wordSearch;
 import engine.Card;
 
 import java.util.*;
+import java.util.function.Predicate;
 
 /**
  * Created by eran on 17/04/2017.
@@ -10,6 +11,7 @@ import java.util.*;
 public class WordSearch {
     List<String> result;
     Trie trie;
+    Predicate<Card> filter;
 
     public WordSearch(Set<String> words){
         trie = new Trie();
@@ -18,8 +20,9 @@ public class WordSearch {
         }
     }
 
-    public List<String > findWords(Card[][] board) {
+    public List<String > findWords(Card[][] board, Predicate<Card> filter) {
         result = new LinkedList<>();
+        this.filter = filter;
         int m = board.length;
         int n = board[0].length;
 
@@ -43,6 +46,9 @@ public class WordSearch {
 
         if (visited[i][j])
             return;
+        if (this.filter.test(board[i][j]) == false){
+            return;
+        }
 
         str = str + board[i][j].getHiddenChar();
 

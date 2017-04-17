@@ -41,8 +41,8 @@ public class Board implements java.io.Serializable{
         wordSearcher = new WordSearch(dictionary.keySet());
     }
 
-    public int getNumberOLegalWords(){
-        return wordSearcher.findWords(cards).size();
+    public int getNumberOLegalWords(Predicate<Card> filter){
+        return wordSearcher.findWords(cards,filter).size();
     }
 
     public boolean revealWord(List<Map.Entry<Integer,Integer>> pairs) throws DeckException,WrongCardPositionException,CardNotReveledException,BoardException {
@@ -59,7 +59,11 @@ public class Board implements java.io.Serializable{
     private void replaceCards(List<Map.Entry<Integer,Integer>> pairs) throws DeckException {
         for (Map.Entry<Integer,Integer> pair : pairs){
             try {
-                setBoardCard(pair.getKey(),pair.getValue(),deck.removeTopCard());
+                if (deck.getDeckSize() ==0){
+                    setBoardCard(pair.getKey(),pair.getValue(),null);
+                } else{
+                    setBoardCard(pair.getKey(),pair.getValue(),deck.removeTopCard());
+                }
             } catch (DeckException ex){
                 throw ex;
             }
