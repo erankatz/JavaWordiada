@@ -58,6 +58,9 @@ public class UIBoard {
         }
     }
 
+    public void printNumberOLegalWords(){
+        System.out.println("Number of legal words in dictionary is: "+board.getNumberOLegalWords());
+    }
     private  void printBorderLine(char ch)
     {
         String ch2 = new Character(ch).toString();

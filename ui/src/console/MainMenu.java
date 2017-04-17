@@ -23,7 +23,7 @@ public class MainMenu {
         GameManager manager = null;
         int currentPlayerTurn;
         //Display menu graphics
-        while (swValue != 7)
+        while (swValue != 9)
         {
             switch (swValue){
                 case 1:
@@ -81,6 +81,7 @@ public class MainMenu {
                 case 3:
                     if (manager != null && manager.isGameStarted()){
                         printGameStatus(manager);
+                        board.printNumberOLegalWords();
                     } else {
                         System.out.println("The Game not started");
                     }

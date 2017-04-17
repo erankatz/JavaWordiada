@@ -25,7 +25,7 @@ public class Card implements java.io.Serializable {
             return '?';
     }
 
-    protected char getHiddenChar()
+    public char getHiddenChar()
     {
         return letter;
     }

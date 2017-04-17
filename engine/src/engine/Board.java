@@ -7,6 +7,7 @@ import engine.exception.board.WrongCardPositionException;
 import engine.exception.card.CardAlreadyRevealedException;
 import engine.exception.card.CardException;
 import engine.exception.deck.DeckException;
+import engine.wordSearch.WordSearch;
 
 import java.util.*;
 import java.util.concurrent.Callable;
@@ -24,6 +25,7 @@ public class Board implements java.io.Serializable{
     private GameManager manager;
     private Map<String, Long> word2FrequencyDic;
     private Deck deck;
+    private WordSearch wordSearcher;
 
     protected Board(int boardSize,GameManager manager,Deck deck)
     {
@@ -36,6 +38,11 @@ public class Board implements java.io.Serializable{
     protected void setDictionary(Map<String ,Long> dictionary)
     {
         this.word2FrequencyDic =dictionary;
+        wordSearcher = new WordSearch(dictionary.keySet());
+    }
+
+    public int getNumberOLegalWords(){
+        return wordSearcher.findWords(cards).size();
     }
 
     public boolean revealWord(List<Map.Entry<Integer,Integer>> pairs) throws DeckException,WrongCardPositionException,CardNotReveledException,BoardException {

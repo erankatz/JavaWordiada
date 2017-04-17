@@ -17,6 +17,7 @@ import java.util.*;
 import com.sun.org.apache.xpath.internal.operations.Bool;
 import engine.exception.deck.DeckException;
 import engine.exception.dice.DiceException;
+import engine.wordSearch.WordSearch;
 import org.w3c.dom.*;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
