@@ -5,8 +5,7 @@ import javax.xml.transform.Source;
 import javax.xml.transform.stream.StreamSource;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.DocumentBuilder;
-import java.io.File;
-import java.io.InputStream;
+import java.io.*;
 import java.net.URL;
 import java.sql.Time;
 import java.text.SimpleDateFormat;
@@ -39,7 +38,7 @@ import java.util.stream.Collectors;
 /**
  * Created by eran on 21/03/2017.
  */
-public class GameManager {
+public class GameManager implements Serializable{
     private Deck deck;
     private final int NUMOFPLAYERS = 2;
     private Board board;
@@ -264,5 +263,25 @@ public class GameManager {
 
     public boolean isGameStarted() {
         return isGameStarted;
+    }
+
+    public void saveGameToFile(String fullFileName) throws IOException
+    {
+        FileOutputStream fileOut =
+                new FileOutputStream(fullFileName);
+        ObjectOutputStream out = new ObjectOutputStream(fileOut);
+        out.writeObject(this);
+        out.close();
+        fileOut.close();
+        System.out.printf("Serialized data is saved in /tmp/employee.ser");
+    }
+
+    public static GameManager loadGameFromFile(String fullFileName) throws IOException,ClassNotFoundException{
+        FileInputStream fileIn = new FileInputStream(fullFileName);
+        ObjectInputStream in = new ObjectInputStream(fileIn);
+        GameManager e = (GameManager) in.readObject();
+        in.close();
+        fileIn.close();
+        return  e;
     }
 }

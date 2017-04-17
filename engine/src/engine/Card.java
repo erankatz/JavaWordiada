@@ -5,7 +5,7 @@ import engine.exception.card.CardAlreadyRevealedException;
 /**
  * Created by eran on 29/03/2017.
  */
-public class Card {
+public class Card implements java.io.Serializable {
     private char letter;
     private byte score;
     private boolean revealed;

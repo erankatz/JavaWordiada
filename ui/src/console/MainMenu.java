@@ -18,6 +18,7 @@ public class MainMenu {
 
     public void run ()
     {
+
         int swValue = getOption();
         GameManager manager = null;
         int currentPlayerTurn;
@@ -110,6 +111,22 @@ public class MainMenu {
                     }
                     break;
                 case 7:
+                    try {
+                        manager = GameManager.loadGameFromFile("c:\\d\\save.ser");
+                        this.board = new UIBoard(manager.getBoard());
+                        this.player = new UIPlayer(manager.getPlayers(),manager);
+                    }catch (Exception ex){
+                        ex.printStackTrace();
+                    }
+                    break;
+                case 8:
+                    try {
+                        manager.saveGameToFile("c:\\d\\save.ser");
+                    } catch (Exception ex){
+                        ex.printStackTrace();
+                    }
+                    break;
+                case 9:
                     System.out.println("Exit");
                     break;
             }
@@ -177,7 +194,9 @@ public class MainMenu {
         System.out.println("4. Play Turn");
         System.out.println("5. Get Statistics");
         System.out.println("6. Quit Game");
-        System.out.println("7. Exit");
+        System.out.println("7. Load Game From File");
+        System.out.println("8. Save Game To File");
+        System.out.println("9. Exit");
         System.out.println("==========================");
         System.out.println("==========================");
         boolean check;
@@ -198,7 +217,7 @@ public class MainMenu {
             {
                 System.exit(0);
             }
-            if (!(i > 0) && (i <= 7))
+            if (!(i > 0) && (i <= 9))
             {
                 System.out.println("Input error - enter number between 1 to 6");
                 check = false;

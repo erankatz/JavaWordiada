@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
 /**
  * Created by eran on 29/03/2017.
  */
-public class Deck {
+public class Deck implements java.io.Serializable{
     private HashSet<Letter> letterArr = new HashSet<Letter>();
     private final int deckSize;
     private LinkedList<Card> cards;
@@ -125,7 +125,7 @@ public class Deck {
     }
 
 
-    class Letter implements Cloneable {
+    class Letter implements Cloneable, java.io.Serializable {
         private final char sign;
         private final byte score;
         private int occurence;

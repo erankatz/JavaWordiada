@@ -17,7 +17,7 @@ import java.util.*;
 /**
  * Created by eran on 30/03/2017.
  */
-public class Player {
+public class Player implements java.io.Serializable{
     private Deck deck;
     protected Board board;
     private Dice cube;

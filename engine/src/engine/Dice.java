@@ -8,7 +8,7 @@ import java.util.Random;
 /**
  * Created by eran on 30/03/2017.
  */
-public class Dice {
+public class Dice implements java.io.Serializable{
     private final int minFacets = 6;
     private final int maxFacets = 12;
     private final int numOfFacets;
@@ -31,7 +31,6 @@ public class Dice {
 
     public int role()
     {
-        //TODO:What happened with 1 facet
         Random rand = new Random();
         this.result = rand.nextInt(numOfFacets-1) + 2;
         return result.intValue();

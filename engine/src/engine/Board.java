@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 /**
  * Created by eran on 29/03/2017.
  */
-public class Board {
+public class Board implements java.io.Serializable{
     private Card cards[][];
     private int boardSize;
     private int numOfUnrevealedCard;

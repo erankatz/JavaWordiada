@@ -8,7 +8,7 @@ import java.util.Random;
 /**
  * Created by eran on 15/04/2017.
  */
-public class ComputerPlayer extends Player {
+public class ComputerPlayer extends Player implements java.io.Serializable {
 
     public ComputerPlayer (GameManager manager,Deck deck,Board board,Dice cube){
         super(manager,deck,board,cube);
