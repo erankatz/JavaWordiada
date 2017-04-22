@@ -78,9 +78,8 @@ public class MainMenu {
                     }
                     break;
                 case 3:
-                    if (manager != null && manager.isGameStarted() && manager.isGameOver()){
+                    if (manager != null && manager.isGameStarted() && !manager.isGameOver()){
                         printGameStatus(manager);
-                        board.printNumberOLegalWords();
                     } else if (manager == null){
                         System.out.println("The Game not started");
                     } else if (manager.isGameOver() == true){

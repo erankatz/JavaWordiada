@@ -15,22 +15,24 @@ public class ComputerPlayer extends Player implements java.io.Serializable {
     }
 
     public void playTurn(){
-        rollDice();
-        List<Map.Entry<Integer,Integer>> pairs = board.AllCardsPositionsFilter(card->!card.isRevealed());
+        List<Map.Entry<Integer,Integer>> pairs;
         Random rand = new Random();
-
-        while (isLeftCardsToReveal()){
-            //TODO:Handle end of the game
-            Map.Entry<Integer,Integer> pair = pairs.get(rand.nextInt(pairs.size()));
-            pairs.remove(pair);
-            try {
-                revealCard(pair.getKey(), pair.getValue());
-            }catch (Exception ex){
-                System.out.println("Error occurred");
-                System.exit(1);
+        if (board.getNumOfUnrevealedCard() != 0) {
+        rollDice();
+        pairs = board.AllCardsPositionsFilter(card->card != null && !card.isRevealed());
+            while (isLeftCardsToReveal() && pairs.size() !=0) {
+                Map.Entry<Integer, Integer> pair = pairs.get(rand.nextInt(pairs.size()));
+                pairs.remove(pair);
+                try {
+                    revealCard(pair.getKey(), pair.getValue());
+                } catch (Exception ex) {
+                    System.out.println("Error occurred");
+                    System.exit(1);
+                }
             }
         }
-        pairs = board.AllCardsPositionsFilter(card->card.isRevealed());
+
+        pairs = board.AllCardsPositionsFilter(card->card!=null && card.isRevealed());
         int wordSize = rand.nextInt(pairs.size());
         List<Map.Entry<Integer,Integer>> wordPairs = new ArrayList<>();
         for (int i=0;i<wordSize;i++){
@@ -45,6 +47,7 @@ public class ComputerPlayer extends Player implements java.io.Serializable {
             System.exit(1);
         }
 
-        endTurn();
+        if (!manager.isComputerMode())
+            endTurn();
     }
 }

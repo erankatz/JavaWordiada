@@ -101,9 +101,9 @@ public class Board implements java.io.Serializable{
         return pairs;
     }
 
-    public int getNumOfUnrevealedCard()
+    public long getNumOfUnrevealedCard()
     {
-        return numOfUnrevealedCard;
+        return Arrays.stream(cards).flatMap(x->Arrays.stream(x)).filter(card->card != null && !card.isRevealed()).count();
     }
 
     public int getBoardSize(){

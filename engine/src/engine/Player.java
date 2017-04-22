@@ -18,7 +18,7 @@ public class Player implements java.io.Serializable{
     private Deck deck;
     protected Board board;
     private Dice cube;
-    private GameManager manager;
+    protected GameManager manager;
     private int leftCardNumToReveal;
     private long score;
     private Map<String,Long> composedWords = new HashMap<>();

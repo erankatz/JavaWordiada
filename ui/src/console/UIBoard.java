@@ -52,7 +52,7 @@ public class UIBoard {
         System.out.println("");
     }
 
-    public int getNumOfUnrevealedCard(){
+    public long getNumOfUnrevealedCard(){
         return board.getNumOfUnrevealedCard();
     }
     private void printStartLineSpace()
@@ -70,7 +70,7 @@ public class UIBoard {
     }
 
     public void printNumberOLegalWords(){
-        System.out.println("Number of legal words in dictionary is: "+board.getNumberOfLegalWords(card->card.isRevealed()));
+        System.out.println("Number of legal words in dictionary is: "+board.getNumberOfLegalWords(card->card != null && card.isRevealed()));
     }
     private  void printBorderLine(char ch)
     {

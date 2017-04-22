@@ -84,9 +84,18 @@ public class GameManager implements Serializable{
         isGameStarted = true;
         roundCounter = 0;
         this.gameStartedTime = LocalTime.now();
-        if (players[getCurrentPlayerTurn()] instanceof ComputerPlayer){
+        if (isComputerMode()){
+            while (!gameOver){
+                ((ComputerPlayer)players[getCurrentPlayerTurn()]).playTurn();
+                endPlayerTurn();
+            }
+        } else if (players[getCurrentPlayerTurn()] instanceof ComputerPlayer){
             ((ComputerPlayer)players[getCurrentPlayerTurn()]).playTurn();
         }
+    }
+
+    public boolean isComputerMode(){
+        return players[0] instanceof ComputerPlayer && players[1] instanceof ComputerPlayer;
     }
 
     protected void wordRevealed(String word, long frequency){
@@ -238,7 +247,8 @@ public class GameManager implements Serializable{
         if (isGoldFishMode){
             board.ChangeAllCardsToUnreveal();
         }
-        if (players[getCurrentPlayerTurn()] instanceof ComputerPlayer){
+
+        if (!isComputerMode() && players[getCurrentPlayerTurn()] instanceof ComputerPlayer){
             ((ComputerPlayer)players[getCurrentPlayerTurn()]).playTurn();
         }
     }
