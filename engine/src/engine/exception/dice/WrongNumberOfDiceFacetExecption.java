@@ -10,6 +10,11 @@ public class WrongNumberOfDiceFacetExecption extends DiceException{
         this.numOfFacet = numOfFacet;
     }
 
+    @Override
+    public String getMessage(){
+        return "Wrong number of Facets (" + numOfFacet + ")";
+    }
+
     public int getNumOfFacet(){
         return numOfFacet;
     }

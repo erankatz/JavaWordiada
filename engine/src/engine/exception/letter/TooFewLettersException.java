@@ -14,4 +14,11 @@ public class TooFewLettersException extends LetterException {
     public int getnumberOfLettersDefined(){
         return numberOfLettersDefined;
     }
+
+
+
+
+
+
+    // TODO:is the XML cotains all the A-Z???
 }

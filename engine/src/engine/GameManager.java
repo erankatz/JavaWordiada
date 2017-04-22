@@ -7,22 +7,18 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.DocumentBuilder;
 import java.io.*;
 import java.net.URL;
-import java.sql.Time;
-import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.time.LocalTime;
-import java.time.ZonedDateTime;
 import java.util.*;
 
-import com.sun.org.apache.xpath.internal.operations.Bool;
-import engine.exception.deck.DeckException;
+import engine.exception.board.BoardSizeOutOfRangeException;
+import engine.exception.board.NotEnoughCardsToFillBoardException;
 import engine.exception.dice.DiceException;
-import engine.wordSearch.WordSearch;
-import org.w3c.dom.*;
+import engine.exception.file.FileException;
+import engine.exception.letter.LetterException;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
-import sun.misc.JavaIOAccess;
 
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
@@ -32,7 +28,6 @@ import javax.xml.xpath.XPathFactory;
 import javax.xml.validation.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -110,14 +105,18 @@ public class GameManager implements Serializable{
         return roundCounter % NUMOFPLAYERS ;
     }
 
-    public void readXmlFile(String fileName)
+    public void readXmlFile(String fileName) throws java.io.IOException,LetterException,XPathExpressionException,BoardSizeOutOfRangeException,NotEnoughCardsToFillBoardException
     {
+        Document doc;
+        File fXmlFile;
         try {
-            File fXmlFile = new File(fileName);
+            fXmlFile = new File(fileName);
             DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
             DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
-            Document doc = dBuilder.parse(fXmlFile);
-
+            doc = dBuilder.parse(fXmlFile);
+        }catch (Exception ex){
+            throw new FileException(fileName, ex);
+        }
             //optional, but recommended
             //read this - http://stackoverflow.com/questions/13786607/normalization-in-dom-parsing-with-java-how-does-it-work
             doc.getDocumentElement().normalize();
@@ -127,10 +126,10 @@ public class GameManager implements Serializable{
             URL schemaFile = GameManager.class.getResource("/resources/Wordiada.xsd");
             //File schemaFile = new File("C:\\d\\Wordiada.xsd");
             // or File schemaFile = new File("/location/to/xsd") etc.
-            SchemaFactory schemaFactory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
-            Schema schema = schemaFactory.newSchema(schemaFile);
-            Validator validator = schema.newValidator();
             try {
+                SchemaFactory schemaFactory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
+                Schema schema = schemaFactory.newSchema(schemaFile);
+                Validator validator = schema.newValidator();
                 validator.validate(xmlFile);
                 System.out.println(xmlFile.getSystemId() + " is valid");
             } catch (SAXParseException e) {
@@ -138,6 +137,8 @@ public class GameManager implements Serializable{
             } catch (SAXException e)
             {
                 System.out.println(xmlFile.getSystemId() + " is NOT valid reason:" + e);
+            } catch (IOException ex){
+                throw new FileException(fileName,ex);
             }
             //-------------------------------------------
 
@@ -161,6 +162,12 @@ public class GameManager implements Serializable{
             expr =  xpath.compile("/GameDescriptor/Structure/BoardSize/text()");
             boardSize = ((Number) expr.evaluate(doc, XPathConstants.NUMBER)).intValue();
 
+            if(boardSize <5 || boardSize> 50)
+                throw new BoardSizeOutOfRangeException(boardSize);
+
+            if( (boardSize * boardSize) > deck.getDeckSize())
+                throw new NotEnoughCardsToFillBoardException();
+
             //GetRetriesNumberFromFile
             expr =  xpath.compile("/GameDescriptor/Structure/RetriesNumber/text()");
             retriesNumber = ((Number) expr.evaluate(doc, XPathConstants.NUMBER)).intValue();
@@ -168,14 +175,15 @@ public class GameManager implements Serializable{
             //CheckIfGoldFishMode
             expr =  xpath.compile("/GameDescriptor/GameType/@gold-fish-mode");
             isGoldFishMode = Boolean.parseBoolean((String) expr.evaluate(doc, XPathConstants.STRING));
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
     }
 
     public Map<String,Long> createDictionary() throws  java.io.IOException{
-        String bookStr = new String(Files.readAllBytes(Paths.get(dictionaryFilePath)));
+        String bookStr;
+        try{
+            bookStr = new String(Files.readAllBytes(Paths.get(dictionaryFilePath)));
+        } catch (IOException ex){
+            throw new FileException(Paths.get(dictionaryFilePath).toString(),ex);
+        }
         String str = "[\\\\!?,.#:;\\-_=\\+\\*\"'\\(\\)\\{\\}\\[\\]%$\\r]";
         Pattern p = Pattern.compile(str);
         bookStr = bookStr.replace("\n", " ").replaceAll(p.pattern(),"");
@@ -220,7 +228,11 @@ public class GameManager implements Serializable{
     protected void endPlayerTurn(){
         if (deck.getDeckSize() == 0 && board.getNumOfUnrevealedCard() ==0){
             gameOver =true;
-            //TODO:Assign a winner
+            if (players[0].getScore() > players[1].getScore()){
+                winnerPlayer =0;
+            } else{
+                winnerPlayer =1;
+            }
         }
         this.roundCounter++;
         if (isGoldFishMode){
@@ -231,7 +243,7 @@ public class GameManager implements Serializable{
         }
     }
 
-    public void newGame(List<Boolean> booleanList) throws java.io.IOException,DiceException,DeckException
+    public void newGame(List<Boolean> booleanList) throws java.io.IOException,DiceException
     {
         deck.NewGame();
         ArrayList<Card> initCards = new ArrayList<Card>();

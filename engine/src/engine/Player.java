@@ -3,15 +3,12 @@ package engine;
 import engine.exception.board.BoardException;
 import engine.exception.board.CardNotReveledException;
 import engine.exception.board.WrongCardPositionException;
-import engine.exception.card.AllCardsRevealedException;
 import engine.exception.card.CardAlreadyRevealedException;
 import engine.exception.card.CardException;
 import engine.exception.card.NoCardsLeftToRevealException;
-import engine.exception.deck.DeckException;
 import engine.exception.dice.DiceException;
 import engine.exception.dice.DiceNotRolledException;
 
-import javax.swing.text.html.parser.Entity;
 import java.util.*;
 
 /**
@@ -58,10 +55,6 @@ public class Player implements java.io.Serializable{
         {
             throw new NoCardsLeftToRevealException();
         }
-        if (board.getNumOfUnrevealedCard() == 0)
-        {
-            throw new AllCardsRevealedException();
-        }
 
             Card card = board.getBoardCard(row,col);
             if (!card.isRevealed()){
@@ -80,7 +73,7 @@ public class Player implements java.io.Serializable{
         }
     }
 
-    public boolean revealWord(List<Map.Entry<Integer,Integer>> pairs) throws DeckException,WrongCardPositionException,CardNotReveledException,BoardException {
+    public boolean revealWord(List<Map.Entry<Integer,Integer>> pairs) throws WrongCardPositionException,CardNotReveledException,BoardException {
         boolean ret = board.revealWord(pairs);
         if (ret == true){
             retriesNumber=0;

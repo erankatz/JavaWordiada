@@ -8,7 +8,7 @@ public class Alphabet {
     static public boolean IsInAlphabet(char letter)
     {
         letter = Character.toUpperCase(letter);
-        if (letter - 'A' <= numOfLetters && letter - 'A' >= 0)
+        if ("!?,.:;-_=+*\"\\'(){}[]%$".indexOf(letter) == -1)
         {
             return true;
         }

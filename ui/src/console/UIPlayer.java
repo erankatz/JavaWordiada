@@ -1,30 +1,15 @@
 package console;
 
-import com.sun.org.apache.bcel.internal.generic.DUP;
-import com.sun.org.apache.xerces.internal.util.SynchronizedSymbolTable;
-import engine.Deck;
 import engine.GameManager;
 import engine.Player;
 import engine.exception.board.BoardException;
 import engine.exception.board.CardNotReveledException;
+import engine.exception.board.DuplicateCardPositionException;
 import engine.exception.board.WrongCardPositionException;
 import engine.exception.card.CardAlreadyRevealedException;
-import engine.exception.card.CardException;
-import engine.exception.card.DuplicateCardException;
-import engine.exception.card.NoCardsLeftToRevealException;
-import engine.exception.deck.DeckException;
-import engine.exception.deck.DeckNotInitializedException;
-import engine.exception.deck.EmptyDeckException;
-import engine.exception.dice.DiceException;
-import org.omg.CORBA.DynAnyPackage.Invalid;
-import org.omg.CORBA.DynAnyPackage.InvalidValue;
 
-import javax.swing.plaf.synth.SynthOptionPaneUI;
-import javax.swing.text.html.parser.Entity;
 import java.util.*;
-import java.util.concurrent.ExecutionException;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 /**
  * Created by eran on 30/03/2017.
@@ -50,7 +35,8 @@ public class UIPlayer {
     {
         printCurrentPlayerTurn();
         Player currentPlayer = player[manager.getCurrentPlayerTurn()];
-        revealCards(currentPlayer);
+        if (board.getNumOfUnrevealedCard() != 0)
+            revealCards(currentPlayer);
         this.board.printGameBoard();
         while (currentPlayer.revealWordPending()){
             chooseCards(currentPlayer);
@@ -86,14 +72,10 @@ public class UIPlayer {
                     System.out.println("You are wrong :( ");
                 }
                 done = true;
-            } catch (EmptyDeckException ex) {
-                done = true;
-                //TODO:End the Game
-            } catch (DuplicateCardException ex) {
+
+            } catch (DuplicateCardPositionException ex) {
                 System.out.format("The card in location\n Row: %d\n Col: %d\n Chosen twice\n",
                         ex.getRow(),ex.getCol());
-            } catch (DeckException ex) {
-
             } catch (WrongCardPositionException ex){
                 System.out.format("The card in location\n Row: %d\n Col: %d\n not matches the board sizes\n",
                         ex.getRow(),ex.getCol());
@@ -106,7 +88,7 @@ public class UIPlayer {
         }
     }
 
-    private List<Map.Entry<Integer,Integer>> MapStringCradsPairsToList(String sPairs) throws DuplicateCardException
+    private List<Map.Entry<Integer,Integer>> MapStringCradsPairsToList(String sPairs) throws DuplicateCardPositionException
     {
         List<Map.Entry<Integer,Integer>> pairs = new LinkedList<>();
         String[] stingPairs =sPairs.split(" ") ;
@@ -116,7 +98,7 @@ public class UIPlayer {
             Map.Entry<Integer,Integer> entry = new AbstractMap.SimpleEntry<Integer, Integer>(num1, num2);
             if (pairs.add(entry) == false )
             {
-                throw new DuplicateCardException(num1,num2);
+                throw new DuplicateCardPositionException(num1,num2);
             }
         }
         return pairs;
@@ -142,9 +124,15 @@ public class UIPlayer {
     }
 
     private void revealCards(Player currentPlayer)  { //according to the dice
-        System.out.format("Pick %d Cards in the board according to the format:\n",currentPlayer.rollDice());
+        int result = currentPlayer.rollDice();
+        if (result > board.getNumOfUnrevealedCard()){
+            System.out.format("Pick %d Cards in the board according to the format:\n",result);
+        } else {
+            System.out.format("Pick %d Cards in the board according to the format:\n",currentPlayer.rollDice());
+        }
         System.out.println("{row,column} {row,column} .....");
         System.out.println("Example: 2,3 5,2 1,3");
+
         Scanner sc = new Scanner(System.in);
         while (currentPlayer.isLeftCardsToReveal()) //reveal cards according to dice
         {

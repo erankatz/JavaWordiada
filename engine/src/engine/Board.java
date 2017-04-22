@@ -4,14 +4,9 @@ import engine.exception.board.BoardException;
 import engine.exception.board.CardNotReveledException;
 import engine.exception.board.DuplicateCardPositionException;
 import engine.exception.board.WrongCardPositionException;
-import engine.exception.card.CardAlreadyRevealedException;
-import engine.exception.card.CardException;
-import engine.exception.deck.DeckException;
 import engine.wordSearch.WordSearch;
 
 import java.util.*;
-import java.util.concurrent.Callable;
-import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -41,11 +36,11 @@ public class Board implements java.io.Serializable{
         wordSearcher = new WordSearch(dictionary.keySet());
     }
 
-    public int getNumberOLegalWords(Predicate<Card> filter){
+    public int getNumberOfLegalWords(Predicate<Card> filter){
         return wordSearcher.findWords(cards,filter).size();
     }
 
-    public boolean revealWord(List<Map.Entry<Integer,Integer>> pairs) throws DeckException,WrongCardPositionException,CardNotReveledException,BoardException {
+    public boolean revealWord(List<Map.Entry<Integer,Integer>> pairs) throws WrongCardPositionException,CardNotReveledException,BoardException {
         String str = buildWord(pairs);
         if (word2FrequencyDic.containsKey(str))
         {
@@ -56,29 +51,22 @@ public class Board implements java.io.Serializable{
         return false;
     }
 
-    private void replaceCards(List<Map.Entry<Integer,Integer>> pairs) throws DeckException {
-        for (Map.Entry<Integer,Integer> pair : pairs){
-            try {
-                if (deck.getDeckSize() ==0){
-                    setBoardCard(pair.getKey(),pair.getValue(),null);
-                } else{
-                    setBoardCard(pair.getKey(),pair.getValue(),deck.removeTopCard());
-                }
-            } catch (DeckException ex){
-                throw ex;
-            }
-        }
-        //pairs.stream()
-        //        .forEach(entry-> setBoardCard(entry.getKey(),entry.getValue(),deck.removeTopCard()));
+    private void replaceCards(List<Map.Entry<Integer,Integer>> pairs)  {
+
+        pairs.stream()
+                .forEach(entry-> setBoardCard(entry.getKey(),entry.getValue(),deck.removeTopCard()));
     }
 
     private String buildWord(List<Map.Entry<Integer,Integer>> pairs) throws BoardException,WrongCardPositionException,CardNotReveledException{
         String str = new String("");
 
         //check for duplicate positions
-        Set<Map.Entry<Integer,Integer>> entries = pairs.stream().collect(Collectors.toSet());
-        if (entries.size() != pairs.size()){
-            throw new DuplicateCardPositionException();
+        List<Map.Entry<Map.Entry<Integer,Integer>,Long>> entries = pairs.stream()
+                .collect(Collectors.groupingBy(e -> e, Collectors.counting()))
+                .entrySet().stream().filter(e-> e.getValue() > 1).collect(Collectors.toList());
+        if (entries.size() >0){
+            Map.Entry<Integer,Integer> entry = entries.get(0).getKey();
+            throw new DuplicateCardPositionException(entry.getKey(),entry.getValue());
         }
 
         //build word
@@ -113,7 +101,7 @@ public class Board implements java.io.Serializable{
         return pairs;
     }
 
-    protected int getNumOfUnrevealedCard()
+    public int getNumOfUnrevealedCard()
     {
         return numOfUnrevealedCard;
     }

@@ -2,14 +2,14 @@ package console;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.time.LocalTime;
 import java.util.*;
 
 import engine.GameManager;
-import engine.exception.deck.DeckException;
+import engine.exception.EngineException;
 import engine.exception.dice.DiceException;
 import engine.exception.dice.WrongNumberOfDiceFacetExecption;
-import sun.rmi.runtime.Log;
+
+import javax.xml.xpath.XPathExpressionException;
 
 public class MainMenu {
     private UIBoard board;
@@ -23,7 +23,7 @@ public class MainMenu {
         GameManager manager = null;
         int currentPlayerTurn;
         //Display menu graphics
-        while (swValue != 9)
+        while (swValue != 10)
         {
             switch (swValue){
                 case 1:
@@ -39,14 +39,15 @@ public class MainMenu {
                             board = new UIBoard(manager.getBoard());
                             board.printGameBoard();
                             System.out.format("Number of cards in deck %d\n",manager.getNumofCardInDeck());
-                        } catch (WrongNumberOfDiceFacetExecption ex){
-                            System.out.format("Wrong number of Facets (%d)",ex.getNumOfFacet());
-                        } catch (DiceException ex){
-                            System.out.println(ex.getMessage());
                         } catch (java.io.IOException ex) {
                             System.out.println(ex.getMessage());
-                        } catch (DeckException ex) {
+                            manager = null;
+                        } catch (EngineException ex){
                             System.out.println(ex.getMessage());
+                            manager = null;
+                        } catch (XPathExpressionException ex){
+                            System.out.println("File is corrupted");
+                            manager = null;
                         }
                     }
                     break;
@@ -65,8 +66,6 @@ public class MainMenu {
                                 System.out.println(ex.getMessage());
                             } catch (IOException ex){
                                 System.out.println(ex.getMessage());
-                            } catch (DeckException ex) {
-                                System.out.println(ex.getMessage());
                             }
                         }
 
@@ -79,11 +78,13 @@ public class MainMenu {
                     }
                     break;
                 case 3:
-                    if (manager != null && manager.isGameStarted()){
+                    if (manager != null && manager.isGameStarted() && manager.isGameOver()){
                         printGameStatus(manager);
                         board.printNumberOLegalWords();
-                    } else {
+                    } else if (manager == null){
                         System.out.println("The Game not started");
+                    } else if (manager.isGameOver() == true){
+                        System.out.println("The Game is over!");
                     }
                     break;
                 case 4:
@@ -92,6 +93,11 @@ public class MainMenu {
                         this.player.playTurn();
                     }else {
                         System.out.println("The Game not started");
+                    }
+                    if (manager.isGameOver()){
+                        System.out.format("Player %d is the winner\n", manager.getWinnerPlayer()+1);
+                        board.printGameBoard();
+                        printStatistics(manager);
                     }
                     break;
                 case 5:
@@ -128,6 +134,9 @@ public class MainMenu {
                     }
                     break;
                 case 9:
+                    board.printNumberOLegalWords();
+                    break;
+                case 10:
                     System.out.println("Exit");
                     break;
             }
@@ -197,7 +206,8 @@ public class MainMenu {
         System.out.println("6. Quit Game");
         System.out.println("7. Load Game From File");
         System.out.println("8. Save Game To File");
-        System.out.println("9. Exit");
+        System.out.println("9. Check How many Legal Words Can be Built From Revealed Cards");
+        System.out.println("10. Exit");
         System.out.println("==========================");
         System.out.println("==========================");
         boolean check;
@@ -218,7 +228,7 @@ public class MainMenu {
             {
                 System.exit(0);
             }
-            if (!(i > 0) && (i <= 9))
+            if (!(i > 0) && (i <= 10))
             {
                 System.out.println("Input error - enter number between 1 to 6");
                 check = false;

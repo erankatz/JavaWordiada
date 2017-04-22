@@ -22,6 +22,6 @@ public class CardNotReveledException extends BoardException {
 
     @Override
     public String getMessage(){
-        return "";
+        return "You chose an unrevealed card(s)!/nPlease choose only revealed card(s)";
     }
 }

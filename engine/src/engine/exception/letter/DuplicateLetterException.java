@@ -12,4 +12,9 @@ public class DuplicateLetterException extends LetterException {
     public char getLetter(){
         return letter;
     }
+
+    @Override
+    public String getMessage(){
+        return "The given xml file contains the letter " + letter + " more than one time";
+    }
 }

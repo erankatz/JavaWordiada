@@ -13,4 +13,9 @@ public class AlphabetExeption extends LetterException {
     {
         return ch;
     }
+
+    @Override
+    public String getMessage(){
+        return String.format("Illegal character %c was given in the XML file",ch);
+    }
 }

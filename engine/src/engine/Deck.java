@@ -1,8 +1,5 @@
 package engine;
 
-import engine.exception.deck.DeckException;
-import engine.exception.deck.DeckNotInitializedException;
-import engine.exception.deck.EmptyDeckException;
 import engine.exception.letter.AlphabetExeption;
 import engine.exception.letter.DuplicateLetterException;
 import engine.exception.letter.LetterException;
@@ -50,7 +47,10 @@ public class Deck implements java.io.Serializable{
 
 
     public int getDeckSize(){
-        return cards.size();
+        if (cards == null)
+            return deckSize;
+        else
+            return cards.size();
     }
 
     public void NewGame()
@@ -83,14 +83,12 @@ public class Deck implements java.io.Serializable{
         this.initCharFrequency = getCharFrequency();
     }
 
-    public Card removeTopCard() throws DeckException
+    public Card removeTopCard()
     {
-        if (cards == null)
+
+        if (cards.size() == 0)
         {
-            throw new DeckNotInitializedException();
-        } else if (cards.size() == 0)
-        {
-            throw new EmptyDeckException();
+            return null;
         }
 
         return cards.removeLast();
@@ -154,6 +152,20 @@ public class Deck implements java.io.Serializable{
 
         protected void decOccurence() {
             occurence--;
+        }
+
+        @Override
+        public boolean equals(Object o){
+            if(o == null)   return false;
+            if(!(o instanceof Letter) ) return false;
+
+            Letter other = (Letter) o;
+            return this.sign == other.sign;
+        }
+
+        @Override
+        public int hashCode(){
+            return sign;
         }
 
         @Override

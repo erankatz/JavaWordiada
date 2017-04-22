@@ -21,4 +21,9 @@ public class WrongCardPositionException extends BoardException{
     public int getCol() {
         return col;
     }
+
+    @Override
+    public String getMessage(){
+        return String.format("You chose illegal card position: {%d,%d}",row,col);
+    }
 }
