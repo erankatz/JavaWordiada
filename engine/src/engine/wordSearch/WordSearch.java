@@ -30,7 +30,9 @@ public class WordSearch {
 
         for (int i = 0; i < m; i++) {
             for (int j = 0; j < n; j++) {
-                dfs(board, visited, "", i, j, trie);
+                if (this.filter.test(board[i][j])){
+                    dfs(board, visited, "", i, j, trie);
+                }
             }
         }
         return result;
@@ -46,9 +48,7 @@ public class WordSearch {
 
         if (visited[i][j])
             return;
-        if (this.filter.test(board[i][j]) == false){
-            return;
-        }
+
 
         str = str + board[i][j].getHiddenChar();
 
