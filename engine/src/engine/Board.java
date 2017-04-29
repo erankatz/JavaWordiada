@@ -37,7 +37,12 @@ public class Board implements java.io.Serializable{
     }
 
     public int getNumberOfLegalWords(Predicate<Card> filter){
-        return wordSearcher.findWords(cards,filter).size();
+        return getLegalWords(filter).size();
+    }
+
+    public List<String> getLegalWords(Predicate<Card> filter){
+        List<Card> filteredCards = Arrays.stream(cards).flatMap(Arrays::stream).filter(card->card!=null).filter(filter).collect(Collectors.toList());
+        return wordSearcher.findWords(filteredCards);
     }
 
     public boolean revealWord(List<Map.Entry<Integer,Integer>> pairs) throws WrongCardPositionException,CardNotReveledException,BoardException {
@@ -56,6 +61,7 @@ public class Board implements java.io.Serializable{
         pairs.stream()
                 .forEach(entry-> setBoardCard(entry.getKey(),entry.getValue(),deck.removeTopCard()));
     }
+
 
     private String buildWord(List<Map.Entry<Integer,Integer>> pairs) throws BoardException,WrongCardPositionException,CardNotReveledException{
         String str = new String("");
@@ -82,8 +88,8 @@ public class Board implements java.io.Serializable{
         return  str.toUpperCase();
     }
 
-    protected void ChangeAllCardsToUnreveal(){
-        Arrays.stream(cards).forEach(cardrows-> Arrays.stream(cardrows).forEach(card->card.unReveal()));
+    protected void ChangeAllCardsToUnrevealed(){
+        Arrays.stream(cards).forEach(cardRows-> Arrays.stream(cardRows).filter(card->card!=null).forEach(card->card.unReveal()));
     }
 
     public List<Map.Entry<Integer,Integer>> AllCardsPositionsFilter(Predicate<Card> filter) {

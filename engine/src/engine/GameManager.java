@@ -15,6 +15,7 @@ import engine.exception.board.BoardSizeOutOfRangeException;
 import engine.exception.board.NotEnoughCardsToFillBoardException;
 import engine.exception.dice.DiceException;
 import engine.exception.file.FileException;
+import engine.exception.file.FileExtensionException;
 import engine.exception.letter.LetterException;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
@@ -57,11 +58,11 @@ public class GameManager implements Serializable{
         return this.roundCounter;
     }
 
-    public int getRetriesNumber(){ return retriesNumber;}
-    public int gutNumberofTurns()
+    //public int getRetriesNumber(){ return retriesNumber;}
+    /*public int getNumberOfTurns()
     {
         return roundCounter;
-    }
+    }*/
 
 
     public Duration getTimeElapsed()
@@ -74,7 +75,7 @@ public class GameManager implements Serializable{
         return this.board;
     }
 
-    public int getNumofCardInDeck()
+    public int getNumOfCardInDeck()
     {
         return deck.getDeckSize();
     }
@@ -114,8 +115,11 @@ public class GameManager implements Serializable{
         return roundCounter % NUMOFPLAYERS ;
     }
 
-    public void readXmlFile(String fileName) throws java.io.IOException,LetterException,XPathExpressionException,BoardSizeOutOfRangeException,NotEnoughCardsToFillBoardException
+    public void readXmlFile(String fileName) throws java.io.IOException,LetterException,XPathExpressionException,BoardSizeOutOfRangeException,NotEnoughCardsToFillBoardException,FileExtensionException
     {
+        if (!fileName.toLowerCase().endsWith(".xml")){
+            throw new FileExtensionException (fileName);
+        }
         Document doc;
         File fXmlFile;
         try {
@@ -126,21 +130,18 @@ public class GameManager implements Serializable{
         }catch (Exception ex){
             throw new FileException(fileName, ex);
         }
-            //optional, but recommended
-            //read this - http://stackoverflow.com/questions/13786607/normalization-in-dom-parsing-with-java-how-does-it-work
+
             doc.getDocumentElement().normalize();
 
             //-----------------------------------------
             Source xmlFile = new StreamSource(fXmlFile);
             URL schemaFile = GameManager.class.getResource("/resources/Wordiada.xsd");
-            //File schemaFile = new File("C:\\d\\Wordiada.xsd");
-            // or File schemaFile = new File("/location/to/xsd") etc.
+
             try {
                 SchemaFactory schemaFactory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
                 Schema schema = schemaFactory.newSchema(schemaFile);
                 Validator validator = schema.newValidator();
                 validator.validate(xmlFile);
-                System.out.println(xmlFile.getSystemId() + " is valid");
             } catch (SAXParseException e) {
             System.out.println(xmlFile.getSystemId() + " is NOT valid reason:" + e);
             } catch (SAXException e)
@@ -197,17 +198,16 @@ public class GameManager implements Serializable{
         Pattern p = Pattern.compile(str);
         bookStr = bookStr.replace("\n", " ").replaceAll(p.pattern(),"");
         bookStr = bookStr.toUpperCase();
-        String strWords[] = bookStr.split(" ");
+        List<String> strWords = Arrays.stream(bookStr.split(" ")).filter(word->word.length()>1).collect(Collectors.toList());
         return CreateMapAndCalcFrequency(strWords);
 
     }
 
-    private Map<String, Long> CreateMapAndCalcFrequency(String[] words) {
+    private Map<String, Long> CreateMapAndCalcFrequency(List<String> words) {
         //key=name value=number of appearances
         Map<String, Long> frequency = new HashMap<>();
-        List<String> filteredWords = Arrays.stream(words).filter(str->str.length()>1).collect(Collectors.toList());
-        this.totalWordsInDict = filteredWords.size();
-        for(String word : filteredWords) {
+        this.totalWordsInDict = words.size();
+        for(String word : words) {
             Long currentCount = frequency.get(word); //check if word already exists
             if(currentCount == null) {
                 currentCount = new Long(0); // auto-boxing
@@ -227,7 +227,7 @@ public class GameManager implements Serializable{
         return gameOver;
     }
     public int getWinnerPlayer(){
-        return getCurrentPlayerTurn();
+        return winnerPlayer;
     }
 
     public long getTotalWordsInDict(){
@@ -235,18 +235,23 @@ public class GameManager implements Serializable{
     }
 
     protected void endPlayerTurn(){
-        if (deck.getDeckSize() == 0 && board.getNumOfUnrevealedCard() ==0){
+        if ((deck.getDeckSize() == 0 && board.getNumOfUnrevealedCard() ==0) ||
+                (this.isGoldFishMode && board.getNumberOfLegalWords(card->true) ==0)){
             gameOver =true;
+            isGameStarted =false;
             if (players[0].getScore() > players[1].getScore()){
                 winnerPlayer =0;
-            } else{
+            } else if (players[0].getScore() == players[1].getScore()){
+                winnerPlayer =-1;
+            } else {
                 winnerPlayer =1;
             }
         }
         this.roundCounter++;
         if (isGoldFishMode){
-            board.ChangeAllCardsToUnreveal();
+            board.ChangeAllCardsToUnrevealed();
         }
+        players[getCurrentPlayerTurn()].setRetriesNumber(retriesNumber);
 
         if (!isComputerMode() && players[getCurrentPlayerTurn()] instanceof ComputerPlayer){
             ((ComputerPlayer)players[getCurrentPlayerTurn()]).playTurn();
@@ -272,14 +277,15 @@ public class GameManager implements Serializable{
             else{
                 players[i] = new Player(this,deck,board,new Dice(cubeFacets));
             }
+            players[i].setRetriesNumber(retriesNumber);
         }
-
+        gameOver =false;
         isGameStarted = false;
     }
 
     public Map<Character,Long> getCharFrequency()
     {
-        return deck.getCharFrequency();
+        return deck.CreateMapStructureCharToLong();
     }
 
     public Map<Character,Long> getInitCharFrequency()
@@ -293,21 +299,33 @@ public class GameManager implements Serializable{
 
     public void saveGameToFile(String fullFileName) throws IOException
     {
-        FileOutputStream fileOut =
-                new FileOutputStream(fullFileName);
-        ObjectOutputStream out = new ObjectOutputStream(fileOut);
-        out.writeObject(this);
-        out.close();
-        fileOut.close();
-        System.out.printf("Serialized data is saved in /tmp/employee.ser");
+        try {
+            FileOutputStream fileOut =
+                    new FileOutputStream(fullFileName);
+            ObjectOutputStream out = new ObjectOutputStream(fileOut);
+            out.writeObject(this);
+            out.close();
+            fileOut.close();
+        } catch (IOException ex){
+            throw new IOException(ex);
+        }
+
     }
 
-    public static GameManager loadGameFromFile(String fullFileName) throws IOException,ClassNotFoundException{
-        FileInputStream fileIn = new FileInputStream(fullFileName);
-        ObjectInputStream in = new ObjectInputStream(fileIn);
-        GameManager e = (GameManager) in.readObject();
-        in.close();
-        fileIn.close();
-        return  e;
+    public static GameManager loadGameFromFile(String fullFileName) throws IOException{
+        GameManager e =null;
+        try{
+            FileInputStream fileIn = new FileInputStream(fullFileName);
+            ObjectInputStream in = new ObjectInputStream(fileIn);
+            e = (GameManager) in.readObject();
+            in.close();
+            fileIn.close();
+        } catch (IOException ex) {
+            throw new IOException(ex);
+        } catch (ClassNotFoundException ex){
+            throw new IOException(ex);
+        }
+
+        return e;
     }
 }

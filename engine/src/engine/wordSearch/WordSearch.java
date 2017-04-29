@@ -2,13 +2,14 @@ package engine.wordSearch;
 
 import engine.Card;
 
+import java.io.Serializable;
 import java.util.*;
 import java.util.function.Predicate;
 
 /**
  * Created by eran on 17/04/2017.
  */
-public class WordSearch {
+public class WordSearch implements Serializable{
     List<String> result;
     Trie trie;
     Predicate<Card> filter;
@@ -20,50 +21,43 @@ public class WordSearch {
         }
     }
 
-    public List<String > findWords(Card[][] board, Predicate<Card> filter) {
+    public List<String > findWords(List<Card> board) {
         result = new LinkedList<>();
         this.filter = filter;
-        int m = board.length;
-        int n = board[0].length;
+        int m = board.size();
 
-        boolean[][] visited = new boolean[m][n];
+        boolean[] visited = new boolean[m];
 
         for (int i = 0; i < m; i++) {
-            for (int j = 0; j < n; j++) {
-                if (this.filter.test(board[i][j])){
-                    dfs(board, visited, "", i, j, trie);
-                }
-            }
+                dfs(board, visited, "", i, trie);
         }
         return result;
     }
 
-    public void dfs(Card[][] board, boolean[][] visited, String str, int i, int j, Trie trie) {
-        int m = board.length;
-        int n = board[0].length;
+    public void dfs(List<Card> board, boolean[] visited, String str, int i,  Trie trie) {
+        int m = board.size();
 
-        if (i < 0 || j < 0 || i >= m || j >= n) {
+        if (i < 0 || i < 0 || i >= m) {
             return;
         }
 
-        if (visited[i][j])
+        if (visited[i])
             return;
 
 
-        str = str + board[i][j].getHiddenChar();
+        str = str + board.get(i).getHiddenChar();
 
         if (!trie.startsWith(str))
             return;
 
         if (trie.search(str)) {
-            result.add(str);
+            if (str.length() >1)
+                result.add(str);
         }
 
-        visited[i][j] = true;
-        dfs(board, visited, str, i - 1, j, trie);
-        dfs(board, visited, str, i + 1, j, trie);
-        dfs(board, visited, str, i, j - 1, trie);
-        dfs(board, visited, str, i, j + 1, trie);
-        visited[i][j] = false;
+        visited[i] = true;
+        dfs(board, visited, str, i - 1, trie);
+        dfs(board, visited, str, i + 1, trie);
+        visited[i] = false;
     }
 }

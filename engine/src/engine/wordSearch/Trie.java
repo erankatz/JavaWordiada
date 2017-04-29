@@ -1,12 +1,13 @@
 package engine.wordSearch;
 
+import java.io.Serializable;
 import java.util.*;
 
 /**
  * Created by eran on 17/04/2017.
  */
-public class Trie{
-    class TrieNode{
+public class Trie implements Serializable{
+    class TrieNode implements Serializable{
         public Map<Character,TrieNode> children = new HashMap();
         public String item = "";
     }

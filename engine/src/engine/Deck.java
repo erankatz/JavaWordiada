@@ -19,8 +19,8 @@ import java.util.stream.Collectors;
  * Created by eran on 29/03/2017.
  */
 public class Deck implements java.io.Serializable{
-    private HashSet<Letter> letterArr = new HashSet<Letter>();
-    private final int deckSize;
+    private HashSet<Letter> letterArr;
+    private int deckSize;
     private LinkedList<Card> cards;
     private Map<Character,Long> initCharFrequency;
 
@@ -29,13 +29,12 @@ public class Deck implements java.io.Serializable{
         Number deckSize = (Number) expr.evaluate(doc, XPathConstants.NUMBER); // get target-deck-size
         this.deckSize = deckSize.intValue();
         readLeters(doc,xpath);
-        if (letterArr.size() != Alphabet.numOfLetters) {
-            throw new TooFewLettersException(letterArr.size());
-        }
+        this.deckSize =0;
+        letterArr.stream().forEach(letter->this.deckSize+=letter.getOccurence());
     }
 
-    public Map<Character,Long> getCharFrequency()
-    {
+    public Map<Character,Long> CreateMapStructureCharToLong()
+    {// The function creates Map structure : Character -> Long
         return cards.stream()
                 .collect(Collectors.groupingBy(e -> e.getHiddenChar(),Collectors.counting()));
     }
@@ -55,23 +54,18 @@ public class Deck implements java.io.Serializable{
 
     public void NewGame()
     {
-        ArrayList<Letter> currLetterArr = new ArrayList<Letter>();
+        ArrayList<Letter> currLetterArr = new ArrayList<Letter>(); //ArrayList of Letters with data from XML
         for (Letter letter : letterArr)
         {
-            currLetterArr.add(letter);
+            currLetterArr.add((Letter) letter.clone());
         }
         cards = new LinkedList<>();
-        for (int i=0;i<deckSize;i++)
+        while (currLetterArr.size() !=0)
         {
             Random rand = new Random();
             Letter letter;
-            int n;
-            if (currLetterArr.size() !=0)
-                n = rand.nextInt(currLetterArr.size());
-            else {
-                System.out.printf("No Cards");
-                throw new NullPointerException();
-            }
+            int n = rand.nextInt(currLetterArr.size());
+
             letter = currLetterArr.get(n);
             if (letter.getOccurence() == 1 )
             {
@@ -80,7 +74,7 @@ public class Deck implements java.io.Serializable{
             letter.decOccurence();
             cards.add(new Card(letter.getSign(),letter.getScore()));
         }
-        this.initCharFrequency = getCharFrequency();
+        this.initCharFrequency = CreateMapStructureCharToLong();
     }
 
     public Card removeTopCard()
@@ -95,16 +89,14 @@ public class Deck implements java.io.Serializable{
     }
 
     private void readLeters(Document doc, XPath xpath) throws XPathExpressionException,LetterException
-    {
+    {//Getting NodeList form the XML and then extracting the data
         XPathExpression expr = xpath.compile("sum(/GameDescriptor/Structure/Letters/Letter/Frequency)");
         Number sumOfFreq = (Number) expr.evaluate(doc, XPathConstants.NUMBER); //calculate sum of frequences
 
         expr = xpath.compile("/GameDescriptor/Structure/Letters/Letter");
         NodeList nodes = (NodeList) expr.evaluate(doc, XPathConstants.NODESET);
-        if (nodes.getLength() != Alphabet.numOfLetters ) {
-            throw new TooFewLettersException(nodes.getLength());
-        }
 
+        letterArr = new HashSet<Letter>();
         for (int i = 0; i < nodes.getLength(); i++) {
             Element element = (Element) nodes.item(i);
             char sign = element.getElementsByTagName("Sign").item(0).getTextContent().charAt(0);

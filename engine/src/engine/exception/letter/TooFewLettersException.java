@@ -20,5 +20,4 @@ public class TooFewLettersException extends LetterException {
 
 
 
-    // TODO:is the XML cotains all the A-Z???
 }

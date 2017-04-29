@@ -1,6 +1,6 @@
 package engine;
 import engine.exception.dice.DiceException;
-import engine.exception.dice.WrongNumberOfDiceFacetExecption;
+import engine.exception.dice.WrongNumberOfDiceFacetException;
 
 import java.security.PublicKey;
 import java.util.Random;
@@ -20,7 +20,7 @@ public class Dice implements java.io.Serializable{
             this.numOfFacets = numOfFacets;
         else {
             this.numOfFacets = 0;
-            throw new WrongNumberOfDiceFacetExecption(numOfFacets);
+            throw new WrongNumberOfDiceFacetException(numOfFacets);
         }
     }
 

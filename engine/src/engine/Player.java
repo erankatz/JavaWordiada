@@ -100,14 +100,14 @@ public class Player implements java.io.Serializable{
     }
 
     public boolean isLeftCardsToReveal() {
-        boolean ret = !(board.getNumOfUnrevealedCard() == 0 || leftCardNumToReveal == 0);
-        if (ret == false)
-            this.retriesNumber = manager.getRetriesNumber();
-        return ret;
+        return !(board.getNumOfUnrevealedCard() == 0 || leftCardNumToReveal == 0);
     }
 
     public int getRetriesNumber(){
         return retriesNumber;
     }
 
+    public void setRetriesNumber(int retriesNumber) {
+        this.retriesNumber = retriesNumber;
+    }
 }

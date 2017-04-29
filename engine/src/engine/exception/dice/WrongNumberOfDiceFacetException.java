@@ -3,10 +3,10 @@ package engine.exception.dice;
 /**
  * Created by eran on 11/04/2017.
  */
-public class WrongNumberOfDiceFacetExecption extends DiceException{
+public class WrongNumberOfDiceFacetException extends DiceException{
     private int numOfFacet;
 
-    public WrongNumberOfDiceFacetExecption(int numOfFacet) {
+    public WrongNumberOfDiceFacetException(int numOfFacet) {
         this.numOfFacet = numOfFacet;
     }
 

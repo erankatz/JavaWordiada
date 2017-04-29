@@ -9,12 +9,14 @@ public class Card implements java.io.Serializable {
     private char letter;
     private byte score;
     private boolean revealed;
+    private boolean isEverRevealed; //For computer player in gold fish mode
 
     protected Card(char letter,byte score)
     {
         this.letter = letter;
         this.score = score;
         revealed = false;
+        isEverRevealed = false;
     }
 
     public char getLetter()
@@ -30,13 +32,13 @@ public class Card implements java.io.Serializable {
         return letter;
     }
 
-    public boolean isRevealed()
-    {
+    public boolean isRevealed() {
         return revealed;
     }
 
     protected void reveal() {
         revealed = true;
+        isEverRevealed =true;
     }
 
     protected void unReveal(){
