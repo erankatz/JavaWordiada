@@ -21,7 +21,7 @@ public class FileException extends java.io.IOException {
     @Override
     public String getMessage(){
         if (exception instanceof NoSuchFileException || exception instanceof FileNotFoundException)
-            return ("File " + fileName + " Not exists");
+            return ("File " + fileName + " Does Not Exists");
         else if (exception instanceof FileLockInterruptionException) {
             return "File " + fileName + " is locked by another process";
         } else if (exception instanceof EOFException){

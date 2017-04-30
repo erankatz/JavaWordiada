@@ -74,7 +74,7 @@ public class MainMenu {
                         manager.startGame();
                         this.player = new UIPlayer(manager.getPlayers(),manager);
                         board.printGameBoard();
-                        System.out.format("Number of cards in deck %d\n",manager.getNumOfCardInDeck());
+                        System.out.format("Number of cards in deck: %d\n",manager.getNumOfCardInDeck());
                         if (manager.isGameOver()){
                             printGameOver(manager);
                         }
