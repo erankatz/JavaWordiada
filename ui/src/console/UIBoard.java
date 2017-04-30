@@ -22,7 +22,7 @@ public class UIBoard {
         spaceAlign = new Double(Math.log10(board.getBoardSize())+ 1).intValue();
         printColumnLabels();
         System.out.println("");
-        printBorderLine('_');
+        printBorderLine('-');
         System.out.println("");
         for (int j = 0; j < board.getBoardSize(); j++) {
             System.out.format("%" + spaceAlign + "d",j+1);
@@ -46,7 +46,7 @@ public class UIBoard {
             System.out.format("%" + spaceAlign + "d",j+1);
             System.out.println("");
         }
-        printBorderLine('¯');
+        printBorderLine('-');
         System.out.println("");
         printColumnLabels();
         System.out.println("");

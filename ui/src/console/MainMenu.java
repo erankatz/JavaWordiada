@@ -1,13 +1,15 @@
 package console;
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.security.CodeSource;
 import java.util.*;
 
 import engine.GameManager;
 import engine.exception.EngineException;
 import engine.exception.dice.DiceException;
-import engine.exception.dice.WrongNumberOfDiceFacetExecption;
+import engine.exception.dice.WrongNumberOfDiceFacetException;
 
 import javax.xml.xpath.XPathExpressionException;
 
@@ -33,12 +35,12 @@ public class MainMenu {
                     } else {
                         try{
                             manager = new GameManager();
-                            manager.readXmlFile("C:\\d\\basic_1.xml");
+                            manager.readXmlFile(getFileName());
                             manager.createDictionary();
                             manager.newGame(getComputeBooleanrArray());
                             board = new UIBoard(manager.getBoard());
                             board.printGameBoard();
-                            System.out.format("Number of cards in deck %d\n",manager.getNumofCardInDeck());
+                            System.out.format("Number of cards in deck %d\n",manager.getNumOfCardInDeck());
                         } catch (java.io.IOException ex) {
                             System.out.println(ex.getMessage());
                             manager = null;
@@ -60,7 +62,7 @@ public class MainMenu {
                                 manager.createDictionary();
                                 manager.newGame(getComputeBooleanrArray());
                                 board = new UIBoard(manager.getBoard());
-                            } catch (WrongNumberOfDiceFacetExecption ex){
+                            } catch (WrongNumberOfDiceFacetException ex){
                                 System.out.format("Wrong number of Facets (%d)",ex.getNumOfFacet());
                             } catch (DiceException ex){
                                 System.out.println(ex.getMessage());
@@ -72,7 +74,10 @@ public class MainMenu {
                         manager.startGame();
                         this.player = new UIPlayer(manager.getPlayers(),manager);
                         board.printGameBoard();
-                        System.out.format("Number of cards in deck %d\n",manager.getNumofCardInDeck());
+                        System.out.format("Number of cards in deck %d\n",manager.getNumOfCardInDeck());
+                        if (manager.isGameOver()){
+                            printGameOver(manager);
+                        }
                     } else {
                         System.out.println("The Game Not Loaded or already started");
                     }
@@ -94,9 +99,7 @@ public class MainMenu {
                         System.out.println("The Game not started");
                     }
                     if (manager.isGameOver()){
-                        System.out.format("Player %d is the winner\n", manager.getWinnerPlayer()+1);
-                        board.printGameBoard();
-                        printStatistics(manager);
+                        printGameOver(manager);
                     }
                     break;
                 case 5:
@@ -118,18 +121,20 @@ public class MainMenu {
                     break;
                 case 7:
                     try {
-                        manager = GameManager.loadGameFromFile("c:\\d\\save.ser");
+                        manager = GameManager.loadGameFromFile(getJarFolder() + "\\" + "save.ser");
                         this.board = new UIBoard(manager.getBoard());
                         this.player = new UIPlayer(manager.getPlayers(),manager);
-                    }catch (Exception ex){
-                        ex.printStackTrace();
+                        System.out.printf("Game loaded successfully\n");
+                    }catch (IOException ex){
+                        ex.getMessage();
                     }
                     break;
                 case 8:
                     try {
-                        manager.saveGameToFile("c:\\d\\save.ser");
-                    } catch (Exception ex){
-                        ex.printStackTrace();
+                        manager.saveGameToFile(getJarFolder() + "\\" + "save.ser");
+                        System.out.printf("Game saved successfully\n");
+                    } catch (IOException ex){
+                        ex.getMessage();
                     }
                     break;
                 case 9:
@@ -142,6 +147,36 @@ public class MainMenu {
 
             swValue = getOption();
         }
+    }
+    private String getJarFolder(){
+        String jarDir =null;
+        CodeSource codeSource = MainMenu.class.getProtectionDomain().getCodeSource();
+        try{
+            File jarFile = new File(codeSource.getLocation().toURI().getPath());
+            jarDir = jarFile.getParentFile().getPath();
+        } catch (Exception ex){
+            ex.printStackTrace();
+            System.exit(1);
+        }
+        return jarDir;
+    }
+
+    private void printGameOver(GameManager manager){
+        if (manager.isGameOver()){
+            if (manager.getWinnerPlayer() < 0){
+                System.out.format("It's a Tie\n");
+            } else{
+                System.out.format("Player %d is the winner\n", manager.getWinnerPlayer()+1);
+            }
+            board.printGameBoard();
+            printStatistics(manager);
+        }
+    }
+
+    private String getFileName(){
+        Scanner sc = new Scanner(System.in);
+        System.out.println("Please provide full path to the XML file");
+        return sc.nextLine();
     }
 
     private List<Boolean> getComputeBooleanrArray()  {
@@ -165,14 +200,14 @@ public class MainMenu {
     private void printGameStatus(GameManager manager)
     {
         board.printGameBoard();
-        System.out.format("Number of cards in the deck %d \n",manager.getNumofCardInDeck());
+        System.out.format("Number of cards in the deck %d \n",manager.getNumOfCardInDeck());
         System.out.format("Player %d Turn\n",manager.getCurrentPlayerTurn() +1);
     }
     private void printStatistics(GameManager manager)
     {
         System.out.format("Number of Turns Elapsed: %d \n", manager.getNumOfTurnsElapsed());
-        System.out.format("Time elapes:\t %d:%d \n",manager.getTimeElapsed().getSeconds() /60 ,manager.getTimeElapsed().getSeconds() % 60);
-        System.out.format("Number of cards in the deck %d \n",manager.getNumofCardInDeck());
+        System.out.format("Time Elapsed:\t %d:%d \n",manager.getTimeElapsed().getSeconds() /60 ,manager.getTimeElapsed().getSeconds() % 60);
+        System.out.format("Number of cards in the deck %d \n",manager.getNumOfCardInDeck());
         this.currCharFreq = manager.getCharFrequency();
         manager.getInitCharFrequency()
                 .entrySet()
@@ -197,15 +232,15 @@ public class MainMenu {
         System.out.println("==========================");
         System.out.println("=======Main Menu==========");
         System.out.println("==========================");
-        System.out.println("1. Read File");
-        System.out.println("2. Start Game");
-        System.out.println("3. Show Game Status");
-        System.out.println("4. Play Turn");
-        System.out.println("5. Get Statistics");
-        System.out.println("6. Quit Game");
-        System.out.println("7. Load Game From File");
-        System.out.println("8. Save Game To File");
-        System.out.println("9. Check How many Legal Words Can be Built From Revealed Cards");
+        System.out.println("1.  Read File");
+        System.out.println("2.  Start Game");
+        System.out.println("3.  Show Game Status");
+        System.out.println("4.  Play Turn");
+        System.out.println("5.  Show Statistics");
+        System.out.println("6.  Quit Game");
+        System.out.println("7.  Load Game From File");
+        System.out.println("8.  Save Game To File");
+        System.out.println("9.  Check How many Legal Words Can be Built From Revealed Cards");
         System.out.println("10. Exit");
         System.out.println("==========================");
         System.out.println("==========================");

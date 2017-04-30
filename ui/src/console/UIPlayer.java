@@ -110,11 +110,11 @@ public class UIPlayer {
             Map<String,Long> composedWords = playerPtr.getComposedWords();
             long score = playerPtr.getScore();
             if (composedWords == null){
-                System.out.format("The Player %d composed %d words, scored %d \n",
+                System.out.format("Player %d composed %d words, scored %d \n",
                         i,0,score);
             }else {
                 long totalWords = manager.getTotalWordsInDict();
-                System.out.format("The Player %d composed %d words, scored %d \n",
+                System.out.format("Player %d composed %d words, scored %d \n",
                         i, composedWords.size(),score);
                 composedWords.entrySet()
                         .forEach(e1->System.out.format("%s: %d / %d\n",e1.getKey(),e1.getValue(),totalWords));
@@ -126,9 +126,9 @@ public class UIPlayer {
     private void revealCards(Player currentPlayer)  { //according to the dice
         int result = currentPlayer.rollDice();
         if (result > board.getNumOfUnrevealedCard()){
-            System.out.format("Pick %d Cards in the board according to the format:\n",result);
+            System.out.format("Pick %d Cards in the board according to the format:\n",board.getNumOfUnrevealedCard());
         } else {
-            System.out.format("Pick %d Cards in the board according to the format:\n",currentPlayer.rollDice());
+            System.out.format("Pick %d Cards in the board according to the format:\n",result);
         }
         System.out.println("{row,column} {row,column} .....");
         System.out.println("Example: 2,3 5,2 1,3");
