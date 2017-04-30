@@ -1,6 +1,7 @@
 package engine.exception.file;
 
 import java.io.EOFException;
+import java.io.FileNotFoundException;
 import java.nio.channels.FileLockInterruptionException;
 
 /**
@@ -18,14 +19,14 @@ public class FileException extends java.io.IOException {
 
     @Override
     public String getMessage(){
-        if (exception instanceof NoSuchFieldException)
+        if (exception instanceof NoSuchFieldException || exception instanceof FileNotFoundException)
             return ("File " + fileName + " Not exists");
-        else if (exception instanceof FileLockInterruptionException)
-            return "File " + fileName +" is locked by another process";
-        else if (exception instanceof EOFException){
+        else if (exception instanceof FileLockInterruptionException) {
+            return "File " + fileName + " is locked by another process";
+        } else if (exception instanceof EOFException){
             return "File " + fileName +" is corrupted";
-        } else {
-            return "File Error:" + fileName;
         }
+            return "File Error:" + fileName;
     }
 }
+

@@ -17,6 +17,6 @@ public class FileExtensionException extends EngineException {
     @Override
     public String getMessage(){
 
-            return "The extension of the given XML File is not valid: \n";
+            return "The extension of the given XML File is not valid";
     }
 }
