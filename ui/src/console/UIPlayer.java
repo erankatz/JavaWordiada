@@ -2,6 +2,7 @@ package console;
 
 import engine.GameManager;
 import engine.Player;
+import engine.exception.EngineException;
 import engine.exception.board.BoardException;
 import engine.exception.board.CardNotReveledException;
 import engine.exception.board.DuplicateCardPositionException;
@@ -65,7 +66,7 @@ public class UIPlayer {
             }
 
             try {
-                List<Map.Entry<Integer,Integer>> pairs = MapStringCradsPairsToList(line);
+                List<Map.Entry<Integer,Integer>> pairs = MapStringCardsPairsToList(line);
                 if(currentPlayer.revealWord(pairs)){
                     System.out.println("You are right! you built a valid word!");
                 } else {
@@ -73,22 +74,13 @@ public class UIPlayer {
                 }
                 done = true;
 
-            } catch (DuplicateCardPositionException ex) {
-                System.out.format("The card in location\n Row: %d\n Col: %d\n Chosen twice\n",
-                        ex.getRow(),ex.getCol());
-            } catch (WrongCardPositionException ex){
-                System.out.format("The card in location\n Row: %d\n Col: %d\n not matches the board sizes\n",
-                        ex.getRow(),ex.getCol());
-            } catch (CardNotReveledException ex) {
-                System.out.format("You chosen the card \n Row: %d\n Col: %d\n This card is not reveled\n You must compose a word from reveled cards\n",
-                        ex.getRow(),ex.getCol());
-            } catch (BoardException ex){
+            } catch (EngineException ex){
                 System.out.println(ex.getMessage());
             }
         }
     }
 
-    private List<Map.Entry<Integer,Integer>> MapStringCradsPairsToList(String sPairs) throws DuplicateCardPositionException
+    private List<Map.Entry<Integer,Integer>> MapStringCardsPairsToList(String sPairs) throws DuplicateCardPositionException
     {
         List<Map.Entry<Integer,Integer>> pairs = new LinkedList<>();
         String[] stingPairs =sPairs.split(" ") ;
@@ -147,14 +139,8 @@ public class UIPlayer {
             int col = Integer.parseInt(word.split(",")[1]);
             try{
                 currentPlayer.revealCard(row,col);
-            } catch (WrongCardPositionException ex){
-                System.out.format("The card in location\n Row: %d\n Col: %d\n not matches the board sizes\n",
-                        ex.getRow(),ex.getCol());
-            } catch (CardAlreadyRevealedException ex) {
-                System.out.format("You chosen the card \n Row: %d\n Col: %d\n This card is already reveled\n You must choose a non reveled cards\n",
-                        ex.getRow(),ex.getCol());
-            } catch (Exception ex){
-
+            } catch (EngineException ex){
+                System.out.println(ex.getMessage());
             }
             System.out.format("You entered row : %d , col : %d\n",row,col);
         }

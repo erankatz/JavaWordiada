@@ -37,10 +37,10 @@ public class MainMenu {
                             manager = new GameManager();
                             manager.readXmlFile(getFileName());
                             manager.createDictionary();
-                            manager.newGame(getComputeBooleanrArray());
+                            manager.newGame(getComputerBooleanrArray());
                             board = new UIBoard(manager.getBoard());
                             board.printGameBoard();
-                            System.out.format("Number of cards in deck %d\n",manager.getNumOfCardInDeck());
+                            System.out.format("Number of cards in deck: %d\n",manager.getNumOfCardInDeck());
                         } catch (java.io.IOException ex) {
                             System.out.println(ex.getMessage());
                             manager = null;
@@ -60,7 +60,7 @@ public class MainMenu {
                         {
                             try {
                                 manager.createDictionary();
-                                manager.newGame(getComputeBooleanrArray());
+                                manager.newGame(getComputerBooleanrArray());
                                 board = new UIBoard(manager.getBoard());
                             } catch (WrongNumberOfDiceFacetException ex){
                                 System.out.format("Wrong number of Facets (%d)",ex.getNumOfFacet());
@@ -179,7 +179,7 @@ public class MainMenu {
         return sc.nextLine();
     }
 
-    private List<Boolean> getComputeBooleanrArray()  {
+    private List<Boolean> getComputerBooleanrArray()  {
         List<Boolean> isComputerPlayerList = new ArrayList<>();
         Scanner sc = new Scanner(System.in);
         for (int i=0;i<2;i++){
@@ -200,20 +200,20 @@ public class MainMenu {
     private void printGameStatus(GameManager manager)
     {
         board.printGameBoard();
-        System.out.format("Number of cards in the deck %d \n",manager.getNumOfCardInDeck());
+        System.out.format("Number of cards in the deck: %d \n",manager.getNumOfCardInDeck());
         System.out.format("Player %d Turn\n",manager.getCurrentPlayerTurn() +1);
     }
     private void printStatistics(GameManager manager)
     {
         System.out.format("Number of Turns Elapsed: %d \n", manager.getNumOfTurnsElapsed());
         System.out.format("Time Elapsed:\t %d:%d \n",manager.getTimeElapsed().getSeconds() /60 ,manager.getTimeElapsed().getSeconds() % 60);
-        System.out.format("Number of cards in the deck %d \n",manager.getNumOfCardInDeck());
+        System.out.format("Number of cards in the deck: %d \n",manager.getNumOfCardInDeck());
         this.currCharFreq = manager.getCharFrequency();
         manager.getInitCharFrequency()
                 .entrySet()
                 .stream()
                 .sorted(Map.Entry.comparingByKey())
-                .forEach(e1->printCharFrequency(e1.getKey(),e1.getValue()));
+                .forEach(e1->printCharFrequency(e1.getKey(),manager.getNumOfCardInDeck()));
         this.player.printPlayerStatistics();
 
     }
