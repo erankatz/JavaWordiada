@@ -41,7 +41,7 @@ public class Board implements java.io.Serializable{
     }
 
     public List<String> getLegalWords(Predicate<Card> filter){
-        List<Card> filteredCards = Arrays.stream(cards).flatMap(Arrays::stream).filter(card->card!=null).filter(filter).collect(Collectors.toList());
+        List<Card> filteredCards = Arrays.stream(cards).flatMap(Arrays::stream).filter(card->card != null).filter(filter).collect(Collectors.toList());
         return wordSearcher.findWords(filteredCards);
     }
 

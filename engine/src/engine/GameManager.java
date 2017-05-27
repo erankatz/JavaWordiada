@@ -11,6 +11,7 @@ import java.time.Duration;
 import java.time.LocalTime;
 import java.util.*;
 
+import engine.exception.EngineException;
 import engine.exception.board.BoardSizeOutOfRangeException;
 import engine.exception.board.NotEnoughCardsToFillBoardException;
 import engine.exception.dice.DiceException;
@@ -115,20 +116,29 @@ public class GameManager implements Serializable{
         return roundCounter % NUMOFPLAYERS ;
     }
 
-    public void readXmlFile(String fileName) throws java.io.IOException,LetterException,XPathExpressionException,BoardSizeOutOfRangeException,NotEnoughCardsToFillBoardException,FileExtensionException
+    public void readXmlFle (String filePath) throws java.io.IOException,LetterException,XPathExpressionException,BoardSizeOutOfRangeException,NotEnoughCardsToFillBoardException,FileExtensionException
     {
-        if (!fileName.toLowerCase().endsWith(".xml")){
-            throw new FileExtensionException (fileName);
+        try{
+            File file = new File(filePath);
+            readXmlFile(file);
+        }catch (Exception ex){
+            throw new FileException(filePath, ex);
+        }
+    }
+    public void readXmlFile(File file) throws java.io.IOException,LetterException,XPathExpressionException,BoardSizeOutOfRangeException,NotEnoughCardsToFillBoardException,FileExtensionException
+    {
+        if (!file.getName().toLowerCase().endsWith(".xml")){
+            throw new FileExtensionException (file.getAbsolutePath());
         }
         Document doc;
         File fXmlFile;
         try {
-            fXmlFile = new File(fileName);
+            fXmlFile = file;
             DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
             DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
             doc = dBuilder.parse(fXmlFile);
         }catch (Exception ex){
-            throw new FileException(fileName, ex);
+            throw new FileException(file.getAbsolutePath(), ex);
         }
 
             doc.getDocumentElement().normalize();
@@ -148,7 +158,7 @@ public class GameManager implements Serializable{
             {
                 System.out.println(xmlFile.getSystemId() + " is NOT valid reason:" + e);
             } catch (IOException ex){
-                throw new FileException(fileName,ex);
+                throw new FileException(file.getAbsolutePath(),ex);
             }
             //-------------------------------------------
 
