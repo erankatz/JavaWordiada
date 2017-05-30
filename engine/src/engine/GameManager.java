@@ -18,6 +18,7 @@ import engine.exception.dice.DiceException;
 import engine.exception.file.FileException;
 import engine.exception.file.FileExtensionException;
 import engine.exception.letter.LetterException;
+import engine.listener.*;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
@@ -37,6 +38,12 @@ import java.util.stream.Collectors;
  * Created by eran on 21/03/2017.
  */
 public class GameManager implements Serializable{
+    private List<CardRemovedListener> cardRemovedListeners = new ArrayList<>();
+    private List<CardSelectedListener> cardSelectedListeners = new ArrayList<>();
+    private List<DisableAllCardsListener> disableAllCardsListeners = new ArrayList<>();
+    private List<EnableAllCardsListener> enableAllCardsListeners = new ArrayList<>();
+    private List<CardChangedListener> cardChangedListeners = new ArrayList<>();
+
     private Deck deck;
     private final int NUMOFPLAYERS = 2;
     private Board board;
@@ -116,7 +123,7 @@ public class GameManager implements Serializable{
         return roundCounter % NUMOFPLAYERS ;
     }
 
-    public void readXmlFle (String filePath) throws java.io.IOException,LetterException,XPathExpressionException,BoardSizeOutOfRangeException,NotEnoughCardsToFillBoardException,FileExtensionException
+    public void readXmlFile (String filePath) throws java.io.IOException,LetterException,XPathExpressionException,BoardSizeOutOfRangeException,NotEnoughCardsToFillBoardException,FileExtensionException
     {
         try{
             File file = new File(filePath);
@@ -245,6 +252,7 @@ public class GameManager implements Serializable{
     }
 
     protected void endPlayerTurn(){
+        notifyDisableAllCardsListeners();
         if ((deck.getDeckSize() == 0 && board.getNumOfUnrevealedCard() ==0) ||
                 (this.isGoldFishMode && board.getNumberOfLegalWords(card->true) ==0)){
             gameOver =true;
@@ -270,7 +278,9 @@ public class GameManager implements Serializable{
 
     public void newGame(List<Boolean> booleanList) throws java.io.IOException,DiceException
     {
+        notifyDisableAllCardsListeners();
         deck.NewGame();
+        //deck.addMangerCardsListener(this);
         ArrayList<Card> initCards = new ArrayList<Card>();
         this.board= new Board(boardSize,this,deck);
         for (int i =0; i< this.board.getBoardSize()*this.board.getBoardSize();i++)
@@ -279,13 +289,15 @@ public class GameManager implements Serializable{
         }
         this.board.setInitCards(initCards);
         board.setDictionary(createDictionary());
-
+        board.addMangerCardsListener(this);
         for (int i =0;i<players.length; i++)
         {
             if (booleanList.get(i))
                 players[i] = new ComputerPlayer(this,deck,board,new Dice(cubeFacets));
             else{
-                players[i] = new Player(this,deck,board,new Dice(cubeFacets));
+                Player p = new Player(this,deck,board,new Dice(cubeFacets));
+                p.registerRolledDicesListener(result -> notifyEnableAllCardsListeners());
+                players[i] =p;
             }
             players[i].setRetriesNumber(retriesNumber);
         }
@@ -337,5 +349,45 @@ public class GameManager implements Serializable{
         }
 
         return e;
+    }
+
+    public void registerDisableAllCardsListener(DisableAllCardsListener listener){
+        disableAllCardsListeners.add(listener);
+    }
+
+    public void registerEnableAllCardsListener(EnableAllCardsListener listener){
+        enableAllCardsListeners.add(listener);
+    }
+
+    public void registerCardSelectedListener(CardSelectedListener listener){
+        cardSelectedListeners.add(listener);
+    }
+
+    public void registerCardChangedListener(CardChangedListener listener){
+        cardChangedListeners.add(listener);
+    }
+
+    public void registerCardRemovedListener(CardRemovedListener listener ){
+        cardRemovedListeners.add(listener);
+    }
+
+    private void notifyDisableAllCardsListeners(){
+        disableAllCardsListeners.forEach(listener->listener.disableAllCards());
+    }
+
+    private void notifyEnableAllCardsListeners(){
+        enableAllCardsListeners.forEach(listener->listener.enableAllCards());
+    }
+
+    private void notifyCardSelectedListeners(int row,int col){
+        cardSelectedListeners.forEach(listener->listener.selectCard(row,col));
+    }
+
+    private void notifyCardRemovedListeners(int row,int col){
+        cardRemovedListeners.forEach(listener->listener.removeCard(row,col));
+    }
+
+    public void notifyCardChangedListener(Card card){
+        cardChangedListeners.forEach(listener->listener.cardChanged(card));
     }
 }

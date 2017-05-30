@@ -88,6 +88,13 @@ public class Board implements java.io.Serializable{
         return  str.toUpperCase();
     }
 
+    protected void addMangerCardsListener(GameManager manager)
+    {
+        //if (cards != null){
+        //    Arrays.stream(cards).flatMap(x->Arrays.stream(x)).forEach(card->card.setMangerListener(manager));
+        //}
+    }
+
     protected void ChangeAllCardsToUnrevealed(){
         Arrays.stream(cards).forEach(cardRows-> Arrays.stream(cardRows).filter(card->card!=null).forEach(card->card.unReveal()));
     }
@@ -126,6 +133,8 @@ public class Board implements java.io.Serializable{
 
     private void setBoardCard(int row,int col,Card card){
         this.cards[row-1][col-1] = card;
+        this.cards[row-1][col-1].setLocation(row,col);
+        manager.notifyCardChangedListener(cards[row-1][col-1]);
     }
 
     protected void setInitCards(ArrayList<Card> initCards){
@@ -136,6 +145,8 @@ public class Board implements java.io.Serializable{
             for (int j=0;j<boardSize;j++)
             {
                 cards[i][j] = initCards.get(z);
+                cards[i][j].setLocation(i+1,j+1);
+                manager.notifyCardChangedListener(cards[i][j]);
                 z++;
             }
         }

@@ -1,5 +1,6 @@
 package engine;
 
+import com.sun.org.glassfish.gmbal.GmbalException;
 import engine.exception.letter.AlphabetExeption;
 import engine.exception.letter.DuplicateLetterException;
 import engine.exception.letter.LetterException;
@@ -23,6 +24,7 @@ public class Deck implements java.io.Serializable{
     private int deckSize;
     private LinkedList<Card> cards;
     private Map<Character,Long> initCharFrequency;
+    private GameManager manager;
 
     protected Deck(Document doc, XPath xpath) throws XPathExpressionException, LetterException {
         XPathExpression expr =  xpath.compile("/GameDescriptor/Structure/Letters/@target-deck-size");
@@ -32,6 +34,7 @@ public class Deck implements java.io.Serializable{
         this.deckSize =0;
         letterArr.stream().forEach(letter->this.deckSize+=letter.getOccurence());
     }
+
 
     public Map<Character,Long> CreateMapStructureCharToLong()
     {// The function creates Map structure : Character -> Long
@@ -72,7 +75,8 @@ public class Deck implements java.io.Serializable{
                 currLetterArr.remove(n);
             }
             letter.decOccurence();
-            cards.add(new Card(letter.getSign(),letter.getScore()));
+            Card card = new Card(letter.getSign(),letter.getScore());
+            cards.add(card);
         }
         this.initCharFrequency = CreateMapStructureCharToLong();
     }

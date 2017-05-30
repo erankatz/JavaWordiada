@@ -2,8 +2,12 @@
  * Created by eran on 20/05/2017.
  */
 
+import engine.Card;
 import engine.GameManager;
 import engine.exception.EngineException;
+import engine.exception.dice.DiceException;
+import engine.listener.DisableAllCardsListener;
+import javafx.application.Platform;
 import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.fxml.*;
@@ -37,21 +41,22 @@ public class GameUIController implements Initializable  {
     @FXML Button buttonStart;
     @FXML Button buttonExit;
     @FXML Button buttonLoadXml;
-    GameManager manger;
+    @FXML Button buttonRollDice;
+    GameModel model = new GameModel();
     BoardButtonController boardButtonController;
     @Override
     public void initialize(URL url, ResourceBundle rb) {
+        setConsumers(model);
         FXMLLoader fxmlLoader = new FXMLLoader();
         buttonStart.setOnMouseClicked((Event e) -> {
-                    List<Boolean> f = new ArrayList<>();
-                    f.add(false);
-                    f.add(false);
-                    try {
-                        manger.newGame(f);
-                    } catch (Exception ex){
-                        ex.printStackTrace();
-                    }
-                });
+                try{
+                    model.newGame();
+                    boardButtonController.setModel(model);
+                } catch (DiceException ex){
+                    Utils.showExceptionMessage(ex);
+                } catch (IOException ex){
+                    Utils.showExceptionMessage(ex);
+                }});
         buttonStart.setDisable(true);
 
         buttonLoadXml.setOnMouseClicked((Event e)->{
@@ -60,15 +65,9 @@ public class GameUIController implements Initializable  {
             fileChooser.setTitle("Open Resource File");
             File file = fileChooser.showOpenDialog(newStage);
             if (file != null){
-                manger = new GameManager();
                 try{
-                    manger.readXmlFile(file);
-                    List<Boolean> f = new ArrayList<>();
-                    f.add(false);
-                    f.add(false);
-                    manger.newGame(f);
+                    model.readXmlFile(file);
                     buttonStart.setDisable(false);
-                    boardButtonController.setLogicBoard(manger.getBoard());
                 } catch (IOException ex){
                     Utils.showExceptionMessage(ex);
                 } catch (EngineException ex)
@@ -79,9 +78,13 @@ public class GameUIController implements Initializable  {
                 }
             }
         });
+
+        this.buttonRollDice.setOnMouseClicked((Event e) -> {
+            model.rollDice();
+        });
         url = getClass().getResource("BoardButton.fxml");
         fxmlLoader.setLocation(url);
-        try{
+        try {
             Node boardButton = fxmlLoader.load();
             boardButtonController = fxmlLoader.getController();
             boarderPane.setCenter(boardButton);
@@ -92,4 +95,15 @@ public class GameUIController implements Initializable  {
         }
     }
 
+    private void setConsumers(GameModel model) {
+        model.setDisableAllCardsConsumer((Boolean flag)->
+                Platform.runLater(
+                        ()-> boardButtonController.setDisable(flag)
+                )
+        );
+        model.setCardConsumer((Card c)->
+            Platform.runLater(
+                    ()->boardButtonController.updateCharCardLetter(c.getRow(),c.getCol(),c.getLetter())
+            ));
+    }
 }

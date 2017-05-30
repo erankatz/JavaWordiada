@@ -8,6 +8,10 @@ import engine.exception.card.CardException;
 import engine.exception.card.NoCardsLeftToRevealException;
 import engine.exception.dice.DiceException;
 import engine.exception.dice.DiceNotRolledException;
+import engine.listener.CardRemovedListener;
+import engine.listener.EnableAllCardsListener;
+import engine.listener.RolledDicesListener;
+import javafx.event.Event;
 
 import java.util.*;
 
@@ -23,6 +27,8 @@ public class Player implements java.io.Serializable{
     private long score;
     private Map<String,Long> composedWords = new HashMap<>();
     private int retriesNumber;
+    private List<RolledDicesListener> rolledDicesListenerListeners = new ArrayList<>();
+
 
     public Player (GameManager manager,Deck deck,Board board,Dice cube)
     {
@@ -36,6 +42,7 @@ public class Player implements java.io.Serializable{
     public int rollDice()
     {
         leftCardNumToReveal = cube.role();
+        notifyRolledDicesListeners(leftCardNumToReveal);
         return leftCardNumToReveal;
     }
 
@@ -109,5 +116,13 @@ public class Player implements java.io.Serializable{
 
     public void setRetriesNumber(int retriesNumber) {
         this.retriesNumber = retriesNumber;
+    }
+
+    public void registerRolledDicesListener(RolledDicesListener listener ){
+        rolledDicesListenerListeners.add(listener);
+    }
+
+    private void notifyRolledDicesListeners(int result){
+        rolledDicesListenerListeners.forEach(listener->listener.rolldDice(result));
     }
 }

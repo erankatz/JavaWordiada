@@ -1,5 +1,6 @@
 import com.sun.xml.internal.ws.api.pipe.Engine;
 import engine.Board;
+import engine.Card;
 import engine.GameManager;
 import engine.exception.EngineException;
 import engine.exception.file.FileException;
@@ -9,6 +10,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.Node;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -26,6 +28,7 @@ import java.util.ResourceBundle;
 public class BoardButtonController implements Initializable {
     @FXML
     private GridPane gridPaneBoard;
+    GameModel model;
     Board logicBoard;
     private int rows;
     private int columns;
@@ -54,6 +57,7 @@ public class BoardButtonController implements Initializable {
             alert.setContentText(ex.getMessage());
             alert.showAndWait();
         }*/
+
     }
 
     private VBox createVboxCell() {
@@ -80,18 +84,8 @@ public class BoardButtonController implements Initializable {
     private void createButtons(){
         for (int i = 0; i < rows; i++) {
             for (int j = 0; j < columns; j++) {
-                try{
-                    CardUI card = new CardUI(logicBoard.getBoardCard(i+1,j+1));
+                    CardUI card = new CardUI(model,i+1,j+1);
                     gridPaneBoard.add(card,i,j);
-                }catch (EngineException ex)
-                {
-                    Alert alert = new Alert(Alert.AlertType.INFORMATION);
-                    alert.setTitle("Information Dialog");
-                    alert.setHeaderText(null);
-                    alert.setContentText(ex.getMessage());
-                    alert.showAndWait();
-                }
-
             }
         }
     }
@@ -107,8 +101,8 @@ public class BoardButtonController implements Initializable {
         this.gridPaneBoard.setHgap(0);
         this.gridPaneBoard.setVgap(0);
         this.gridPaneBoard.setPadding(new Insets(0, 25.0D, 0, 25.0D));
-        this.rows = logicBoard.getBoardSize();
-        this.columns = logicBoard.getBoardSize();
+        this.rows = model.getBoardSize();
+        this.columns = model.getBoardSize();
         createRowsAndCols();
         createButtons();
         /*
@@ -195,5 +189,19 @@ public class BoardButtonController implements Initializable {
     {
         this.logicBoard = logicBoard;
         draw();
+    }
+
+    public void setModel(GameModel model) {
+        this.model = model;
+        draw();
+    }
+
+    public void setDisable(Boolean flag){
+        gridPaneBoard.setDisable(flag);
+    }
+
+    public void updateCharCardLetter(int row,int col,char ch){
+        CardUI cardUI = (CardUI)Utils.getNodeByRowColumnIndex(row-1,col-1,gridPaneBoard);
+        cardUI.setText(Character.toString(ch));
     }
 }
