@@ -201,7 +201,16 @@ public class BoardButtonController implements Initializable {
     }
 
     public void updateCharCardLetter(int row,int col,char ch){
-        CardUI cardUI = (CardUI)Utils.getNodeByRowColumnIndex(row-1,col-1,gridPaneBoard);
+        CardUI cardUI = (CardUI)Utils.getNodeByRowColumnIndex(col-1,row-1,gridPaneBoard);
         cardUI.setText(Character.toString(ch));
+    }
+
+    public void removeCard(int row, int col) {
+        gridPaneBoard.getChildren().remove(Utils.getNodeByRowColumnIndex(col-1,row-1,gridPaneBoard));
+    }
+
+    public void selectCard(int row,int col){
+        CardUI cardUI = (CardUI)Utils.getNodeByRowColumnIndex(col-1,row-1,gridPaneBoard);
+        cardUI.setStyleSelected();
     }
 }

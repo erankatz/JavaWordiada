@@ -67,7 +67,7 @@ public class UIPlayer {
 
             try {
                 List<Map.Entry<Integer,Integer>> pairs = MapStringCardsPairsToList(line);
-                if(currentPlayer.revealWord(pairs)){
+                if(currentPlayer.revealWord()){
                     System.out.println("You are right! you built a valid word!");
                 } else {
                     System.out.println("You are wrong :( ");

@@ -21,8 +21,20 @@ public class CardUI extends javafx.scene.control.Button{
         //this.disableProperty().bind(Bindings.createBooleanBinding(()->!model.getIsEnabledCard(row,col)));
         //this.textProperty().bind(Bindings.format("%c",model.getCardLetter(row,col)));
         this.setOnMouseClicked((Event e) -> {
-
+            model.selectCard(row,col);
         });
+    }
 
+    void setStyleSelected(){
+        setStyle("-fx-background-color: gray");
+    }
+
+    void setStyleEmpty(){
+        setStyle("-fx-base: #ffffff");
+        setText("");
+    }
+    void setStyleUndefined(){
+        setStyle("-fx-base: #d3f3ff");
+        setText("?");
     }
 }

@@ -57,12 +57,10 @@ public class Card implements java.io.Serializable {
         revealed =false;
     }
 
-    public void select(){
-    }
 
     public void setLocation(int row,int col){
         this.row = row;
-        this.col =col;
+        this.col = col;
     }
 
     public int getRow(){

@@ -43,6 +43,10 @@ public class GameManager implements Serializable{
     private List<DisableAllCardsListener> disableAllCardsListeners = new ArrayList<>();
     private List<EnableAllCardsListener> enableAllCardsListeners = new ArrayList<>();
     private List<CardChangedListener> cardChangedListeners = new ArrayList<>();
+    private List<WordRevealedListener> wordRevealedListeners = new ArrayList<>();
+    private List<RolledDicesListener> RolledDicesListeners = new ArrayList<>();
+    private List<PlayerTurnListener> playerTurnListeners = new ArrayList<>();
+    private List<LetterFrequencyInDeckListener> letterFrequencyInDeckListeners = new ArrayList<>();
 
     private Deck deck;
     private final int NUMOFPLAYERS = 2;
@@ -60,6 +64,9 @@ public class GameManager implements Serializable{
     private int winnerPlayer;
     private boolean isGoldFishMode;
 
+    public boolean getIsGoldFishMode(){
+        return isGoldFishMode;
+    }
 
     public int getNumOfTurnsElapsed()
     {
@@ -93,12 +100,17 @@ public class GameManager implements Serializable{
         isGameStarted = true;
         roundCounter = 0;
         this.gameStartedTime = LocalTime.now();
+        notifyPlayerTurnListeners(getCurrentPlayerTurn());
+        notifyLetterFrequencyInDeckListeners(getCharFrequency());
         if (isComputerMode()){
             while (!gameOver){
+                notifyPlayerTurnListeners(getCurrentPlayerTurn());
+                notifyLetterFrequencyInDeckListeners(getCharFrequency());
                 ((ComputerPlayer)players[getCurrentPlayerTurn()]).playTurn();
                 endPlayerTurn();
             }
         } else if (players[getCurrentPlayerTurn()] instanceof ComputerPlayer){
+
             ((ComputerPlayer)players[getCurrentPlayerTurn()]).playTurn();
         }
     }
@@ -290,6 +302,7 @@ public class GameManager implements Serializable{
         this.board.setInitCards(initCards);
         board.setDictionary(createDictionary());
         board.addMangerCardsListener(this);
+        notifyLetterFrequencyInDeckListeners(getCharFrequency());
         for (int i =0;i<players.length; i++)
         {
             if (booleanList.get(i))
@@ -371,23 +384,55 @@ public class GameManager implements Serializable{
         cardRemovedListeners.add(listener);
     }
 
-    private void notifyDisableAllCardsListeners(){
+    public void registerRollDices(RolledDicesListener listener ){
+        RolledDicesListeners.add(listener);
+    }
+
+
+    public void registerPlayerTurn(PlayerTurnListener listener ){
+        playerTurnListeners.add(listener);
+    }
+
+    public void notifyRollDices(int result){
+        RolledDicesListeners.forEach(listener->listener.rolldDice(result));
+    }
+    public void notifyDisableAllCardsListeners(){
         disableAllCardsListeners.forEach(listener->listener.disableAllCards());
     }
 
-    private void notifyEnableAllCardsListeners(){
+    public void notifyLetterFrequencyInDeckListeners(Map<Character,Long> frequency){
+        letterFrequencyInDeckListeners.forEach(listener->listener.LetterFrequencyInDeck(frequency));
+    }
+
+    public void notifyPlayerTurnListeners(int playerId){
+        playerTurnListeners.forEach(listener->listener.playerTurn(playerId));
+    }
+
+    public void notifyEnableAllCardsListeners(){
         enableAllCardsListeners.forEach(listener->listener.enableAllCards());
     }
 
-    private void notifyCardSelectedListeners(int row,int col){
+    public void notifyCardSelectedListeners(int row,int col){
         cardSelectedListeners.forEach(listener->listener.selectCard(row,col));
     }
 
-    private void notifyCardRemovedListeners(int row,int col){
+    public void notifyCardRemovedListeners(int row,int col){
         cardRemovedListeners.forEach(listener->listener.removeCard(row,col));
     }
 
     public void notifyCardChangedListener(Card card){
         cardChangedListeners.forEach(listener->listener.cardChanged(card));
+    }
+
+    public void registerWordRevealedListener(WordRevealedListener listener ){
+        wordRevealedListeners.add(listener);
+    }
+
+    public void registerLetterFrequencyInDeckListener(LetterFrequencyInDeckListener listener ){
+        letterFrequencyInDeckListeners.add(listener);
+    }
+
+    public void notifyWordRevealedListeners(boolean result){
+        wordRevealedListeners.forEach(listener->listener.PrintResultOfWordRevealed(result));
     }
 }

@@ -56,7 +56,7 @@ public class ComputerPlayer extends Player implements java.io.Serializable {
                 }
             }
             try{
-                board.revealWord(wordPairs);
+                board.revealWord();
             }catch (Exception ex)
             {
                 System.out.println("Error occurred");

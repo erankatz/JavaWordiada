@@ -28,4 +28,12 @@ public class Utils {
 
         return result;
     }
+
+    public static void printMessage(String message){
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Game Message");
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
+    }
 }

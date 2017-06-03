@@ -2,8 +2,10 @@
 
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.ButtonBar?>
+<?import javafx.scene.control.Label?>
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextArea?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
@@ -36,9 +38,16 @@
    <right>
    </right>
    <right>
-      <AnchorPane prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+      <AnchorPane prefHeight="506.0" prefWidth="253.0" BorderPane.alignment="CENTER">
          <children>
-            <Button fx:id="buttonRollDice" layoutX="38.0" layoutY="26.0" mnemonicParsing="false" prefHeight="39.0" prefWidth="104.0" text="Play Turn" />
+            <Button fx:id="buttonRollDice" layoutX="35.0" layoutY="58.0" mnemonicParsing="false" prefHeight="39.0" prefWidth="104.0" text="Roll Dices" />
+            <Button fx:id="buttonRevealWord" layoutX="38.0" layoutY="187.0" mnemonicParsing="false" prefHeight="44.0" prefWidth="99.0" text="Reveal Word" />
+            <Button fx:id="buttonRevealCard" layoutX="38.0" layoutY="121.0" mnemonicParsing="false" prefHeight="44.0" prefWidth="99.0" text="Reveal Cards" />
+            <Label fx:id="labelScoreMode" layoutX="24.0" layoutY="249.0" prefHeight="17.0" prefWidth="111.0" text="Score Mode :" />
+            <Label fx:id="labelIsGoldfishMode" layoutX="24.0" layoutY="266.0" prefHeight="17.0" prefWidth="137.0" text="Gold FIsh Mode : " />
+            <TextArea fx:id="textBoxLowestFrequencyDictionaryWords" editable="false" layoutX="24.0" layoutY="285.0" prefHeight="206.0" prefWidth="121.0" />
+            <TextArea fx:id="textBoxLetterFrequencyInDeck" editable="false" layoutX="168.0" layoutY="57.0" prefHeight="436.0" prefWidth="74.0" />
+            <Label fx:id="labelPlayerTurn" layoutX="30.0" layoutY="26.0" prefHeight="17.0" prefWidth="71.0" text="Player Turn :" />
          </children>
       </AnchorPane>
    </right>

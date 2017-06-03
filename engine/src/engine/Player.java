@@ -43,13 +43,13 @@ public class Player implements java.io.Serializable{
     {
         leftCardNumToReveal = cube.role();
         notifyRolledDicesListeners(leftCardNumToReveal);
+        manager.notifyRollDices(leftCardNumToReveal);
         return leftCardNumToReveal;
     }
 
     public void endTurn() {
         manager.endPlayerTurn();
         cube.endTurn();
-
     }
 
     public void revealCard(int row,int col) throws DiceException,CardException,WrongCardPositionException
@@ -66,6 +66,7 @@ public class Player implements java.io.Serializable{
             Card card = board.getBoardCard(row,col);
             if (!card.isRevealed()){
                 card.reveal(); // changing flag to 'reveal'
+                manager.notifyCardChangedListener(card);
                 leftCardNumToReveal--;
             } else {
                 throw new CardAlreadyRevealedException(row,col);
@@ -80,8 +81,8 @@ public class Player implements java.io.Serializable{
         }
     }
 
-    public boolean revealWord(List<Map.Entry<Integer,Integer>> pairs) throws WrongCardPositionException,CardNotReveledException,BoardException {
-        boolean ret = board.revealWord(pairs);
+    public boolean revealWord() throws WrongCardPositionException,CardNotReveledException,BoardException {
+        boolean ret = board.revealWord();
         if (ret == true){
             retriesNumber=0;
         } else{

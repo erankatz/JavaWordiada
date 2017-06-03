@@ -1,9 +1,12 @@
 package engine;
 
+import engine.exception.EngineException;
 import engine.exception.board.BoardException;
 import engine.exception.board.CardNotReveledException;
 import engine.exception.board.DuplicateCardPositionException;
 import engine.exception.board.WrongCardPositionException;
+import engine.exception.card.CardException;
+import engine.exception.dice.DiceException;
 import engine.wordSearch.WordSearch;
 
 import java.util.*;
@@ -21,6 +24,7 @@ public class Board implements java.io.Serializable{
     private Map<String, Long> word2FrequencyDic;
     private Deck deck;
     private WordSearch wordSearcher;
+    private List<Map.Entry<Integer,Integer>> selectedCardsList = new ArrayList<>();
 
     protected Board(int boardSize,GameManager manager,Deck deck)
     {
@@ -45,14 +49,19 @@ public class Board implements java.io.Serializable{
         return wordSearcher.findWords(filteredCards);
     }
 
-    public boolean revealWord(List<Map.Entry<Integer,Integer>> pairs) throws WrongCardPositionException,CardNotReveledException,BoardException {
+    public boolean revealWord() throws WrongCardPositionException,CardNotReveledException,BoardException {
+        List<Map.Entry<Integer,Integer>> pairs = selectedCardsList;
         String str = buildWord(pairs);
         if (word2FrequencyDic.containsKey(str))
         {
             replaceCards(pairs);
             manager.wordRevealed(str,word2FrequencyDic.get(str)); //After word is revealed and validation
+            manager.notifyWordRevealedListeners(true);
+            selectedCardsList.clear();
             return true;
         }
+        manager.notifyWordRevealedListeners(false);
+        selectedCardsList.clear();
         return false;
     }
 
@@ -150,5 +159,24 @@ public class Board implements java.io.Serializable{
                 z++;
             }
         }
+    }
+
+    public void selectBoardCard(int row, int col) {
+        manager.notifyCardSelectedListeners(row,col);
+
+    }
+
+    public void revealCards() throws DiceException,CardException,WrongCardPositionException {
+        //ToDO:Handle too many cards or few cards selected
+        for (Map.Entry<Integer,Integer> e : selectedCardsList )
+        {
+            try{
+                manager.getPlayers()[manager.getCurrentPlayerTurn()].revealCard(e.getKey(),e.getValue());
+            } catch (Exception ex){
+                selectedCardsList.clear();
+                throw ex;
+            }
+        }
+        selectedCardsList.clear();
     }
 }
