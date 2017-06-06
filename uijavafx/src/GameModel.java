@@ -1,6 +1,4 @@
-import engine.Board;
-import engine.Card;
-import engine.GameManager;
+import engine.*;
 import engine.exception.EngineException;
 import engine.exception.board.BoardSizeOutOfRangeException;
 import engine.exception.board.NotEnoughCardsToFillBoardException;
@@ -40,6 +38,7 @@ public class GameModel {
     private Consumer<Boolean> isReaveledCardPending;
     private Consumer<Boolean> isRolledDicesPending;
     private Consumer<Integer> gameOverConsumer;
+    private Consumer<PlayerData> updatePlayerScoreConsumer;
 
     public void readXmlFile(File file)throws java.io.IOException,LetterException,XPathExpressionException,BoardSizeOutOfRangeException,NotEnoughCardsToFillBoardException,FileExtensionException,DiceException {
         manager = new GameManager();
@@ -58,6 +57,7 @@ public class GameModel {
         manager.registerRevealCardPendingListener((isPending) ->isReaveledCardPending.accept(isPending));
         manager.registerRollDicesPendingListeners((isPending) ->isRolledDicesPending.accept(isPending));
         manager.registerGameOverListener((id)->gameOverConsumer.accept(id));
+        manager.registerPlayerDataChangedListener(pl->updatePlayerScoreConsumer.accept(pl));
         manager.readXmlFile(file);
     }
 
@@ -167,6 +167,10 @@ public class GameModel {
         this.isReaveledCardPending = isRealedWordPending;
     }
 
+    public void setUpdatePlayerScoreConsumer(Consumer<PlayerData> pl){
+        this.updatePlayerScoreConsumer = pl;
+    }
+
     public void setIsRolledDicesPendingConsumer(Consumer<Boolean> isRolledDicesPending) {
         this.isRolledDicesPending = isRolledDicesPending;
     }
@@ -186,5 +190,13 @@ public class GameModel {
     public String getLowestFrequencyDictionaryWords(){
         return manager.getBoard().getLowestFrequencyDictionaryWords();
 
+    }
+
+    public List<PlayerData> getPlayersData(){
+        return manager.getPlayersData();
+    }
+
+    public void quitGame() {
+        manager.playerQuit();
     }
 }

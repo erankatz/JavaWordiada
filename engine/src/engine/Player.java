@@ -131,4 +131,6 @@ public class Player implements java.io.Serializable{
         manager.notifyRevealCardPendingListener(false);
         manager.notifyRevealWordPendingListener(true);
     }
+
+
 }

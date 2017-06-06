@@ -31,6 +31,7 @@ import javax.xml.xpath.XPathFactory;
 import javax.xml.validation.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -51,6 +52,7 @@ public class GameManager implements Serializable{
     private List<RevealCardPendingListener> revealCardPendingListeners = new ArrayList<>();
     private List<RollDicesPendingListener> rollDicesPendingListeners = new ArrayList<>();
     private List<GameOverListener> gameOverListeners = new ArrayList<>();
+    private List<PlayerDataChangedListener> playerDataChangedListeners = new ArrayList<>();
 
     private Deck deck;
     private final int NUMOFPLAYERS = 2;
@@ -126,7 +128,11 @@ public class GameManager implements Serializable{
     protected void wordRevealed(String word, long frequency){
         players[getCurrentPlayerTurn()].increaseScore(1);
         players[getCurrentPlayerTurn()].addComposedWord(word,frequency);
-
+        Player pl = players[getCurrentPlayerTurn()];
+        if (players[getCurrentPlayerTurn()] instanceof ComputerPlayer)
+            notifyPlayerDataChangedListener(new PlayerData("computer",getCurrentPlayerTurn(),null,pl.getScore(),getCurrentPlayerTurn()));
+        else
+            notifyPlayerDataChangedListener(new PlayerData("human",getCurrentPlayerTurn(),null,pl.getScore(),getCurrentPlayerTurn()));
     }
 
     public Player[] getPlayers()
@@ -418,6 +424,11 @@ public class GameManager implements Serializable{
         gameOverListeners.add(listener);
     }
 
+
+    public void registerPlayerDataChangedListener(PlayerDataChangedListener listener){
+        playerDataChangedListeners.add(listener);
+    }
+
     public void notifyRollDices(int result,int retriesNumber){
         RolledDicesListeners.forEach(listener->listener.rolldDice(result,retriesNumber));
     }
@@ -479,4 +490,12 @@ public class GameManager implements Serializable{
         gameOverListeners.forEach(listener->listener.gameOver(id));
     }
 
+    public void notifyPlayerDataChangedListener(PlayerData score){
+        playerDataChangedListeners.forEach(listener->listener.updateScore(score));
+    }
+
+    public List<PlayerData> getPlayersData(){
+        AtomicInteger i = new AtomicInteger(0);
+        return  Arrays.stream(players).map(pl-> new PlayerData("human",i.get(),null,pl.getScore(),i.getAndIncrement())).collect(Collectors.toList());
+    }
 }

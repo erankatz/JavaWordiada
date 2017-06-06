@@ -27,11 +27,12 @@
       </HBox>
    </top>
    <left>
-      <TableView prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+      <TableView fx:id="playersTable" prefHeight="506.0" prefWidth="245.0" BorderPane.alignment="CENTER">
         <columns>
-          <TableColumn prefWidth="55.0" text="Type" />
-          <TableColumn prefWidth="65.0" text="ID" />
-            <TableColumn prefWidth="105.0" text="Name" />
+          <TableColumn fx:id="typeCol" prefWidth="55.0" text="Type" />
+          <TableColumn fx:id="idCol" prefWidth="42.0" text="ID" />
+            <TableColumn fx:id="nameCol" prefWidth="72.0" text="Name" />
+            <TableColumn fx:id="scoreCol" prefWidth="74.0" text="Score" />
         </columns>
       </TableView>
    </left>
@@ -40,15 +41,16 @@
    <right>
       <AnchorPane prefHeight="506.0" prefWidth="253.0" BorderPane.alignment="CENTER">
          <children>
-            <Button fx:id="buttonRollDice" layoutX="35.0" layoutY="58.0" mnemonicParsing="false" prefHeight="39.0" prefWidth="104.0" text="Roll Dices" />
-            <Button fx:id="buttonRevealWord" layoutX="38.0" layoutY="187.0" mnemonicParsing="false" prefHeight="44.0" prefWidth="99.0" text="Reveal Word" />
-            <Button fx:id="buttonRevealCard" layoutX="38.0" layoutY="121.0" mnemonicParsing="false" prefHeight="44.0" prefWidth="99.0" text="Reveal Cards" />
+            <Button fx:id="buttonRollDice" layoutX="16.0" layoutY="141.0" mnemonicParsing="false" prefHeight="15.0" prefWidth="126.0" text="Roll Dices" />
+            <Button fx:id="buttonRevealWord" layoutX="17.0" layoutY="222.0" mnemonicParsing="false" prefHeight="27.0" prefWidth="128.0" text="Reveal Word" />
+            <Button fx:id="buttonRevealCard" layoutX="15.0" layoutY="180.0" mnemonicParsing="false" prefHeight="28.0" prefWidth="128.0" text="Reveal Cards" />
             <Label fx:id="labelScoreMode" layoutX="24.0" layoutY="249.0" prefHeight="17.0" prefWidth="111.0" text="Score Mode :" />
             <Label fx:id="labelIsGoldfishMode" layoutX="24.0" layoutY="266.0" prefHeight="17.0" prefWidth="137.0" text="Gold FIsh Mode : " />
             <TextArea fx:id="textBoxLowestFrequencyDictionaryWords" editable="false" layoutX="24.0" layoutY="285.0" prefHeight="206.0" prefWidth="121.0" />
             <TextArea fx:id="textBoxLetterFrequencyInDeck" editable="false" layoutX="168.0" layoutY="57.0" prefHeight="436.0" prefWidth="74.0" />
             <Label fx:id="labelPlayerTurn" layoutX="32.0" layoutY="6.0" prefHeight="17.0" prefWidth="210.0" text="Player Turn :" />
-            <Button fx:id="buttonClearCardSelection" layoutX="12.0" layoutY="23.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="128.0" text="Clear Card Selection" />
+            <Button fx:id="buttonClearCardSelection" layoutX="15.0" layoutY="106.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="128.0" text="Clear Card Selection" />
+            <Button fx:id="buttonQuitGame" layoutX="15.0" layoutY="73.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="128.0" text="Quit" />
          </children>
       </AnchorPane>
    </right>

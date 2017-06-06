@@ -77,8 +77,11 @@ public class Board implements java.io.Serializable{
                     Card c = deck.removeTopCard();
                     if (c == null){
                         manager.notifyCardRemovedListeners(entry.getKey(),entry.getValue());
+                    } else{
+                        setBoardCard(entry.getKey(),entry.getValue(),c);
+                        manager.notifyCardChangedListener(c);
                     }
-                    setBoardCard(entry.getKey(),entry.getValue(),c);
+
                 });
     }
 
@@ -182,7 +185,8 @@ public class Board implements java.io.Serializable{
     }
 
     public void clearSelectedCards(){
-        Arrays.stream(cards).flatMap(Arrays::stream).forEach(c->selectBoardCard(c.getRow(),c.getCol(),false));
+        selectedCardsList.clear();
+        Arrays.stream(cards).flatMap(Arrays::stream).filter(c->c!=null).forEach(c->selectBoardCard(c.getRow(),c.getCol(),false));
     }
 
     public void revealCards() throws DiceException,CardException,WrongCardPositionException {

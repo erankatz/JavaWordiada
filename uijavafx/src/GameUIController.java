@@ -5,6 +5,7 @@
 import engine.Card;
 import engine.GameManager;
 import engine.Player;
+import engine.PlayerData;
 import engine.exception.EngineException;
 import engine.exception.dice.DiceException;
 import engine.listener.DisableAllCardsListener;
@@ -25,6 +26,7 @@ import javafx.fxml.Initializable;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
@@ -51,16 +53,28 @@ public class GameUIController implements Initializable  {
     @FXML TextArea textBoxLowestFrequencyDictionaryWords;
     @FXML TextArea textBoxLetterFrequencyInDeck;
     @FXML Button buttonClearCardSelection;
+    @FXML TableColumn nameCol;
+    @FXML TableColumn typeCol;
+    @FXML TableColumn idCol;
+    @FXML TableColumn scoreCol;
+    @FXML TableView<PlayerData> playersTable;
+    @FXML Button buttonQuitGame;
 
     GameModel model = new GameModel();
     BoardButtonController boardButtonController;
     @Override
     public void initialize(URL url, ResourceBundle rb) {
+        nameCol.setCellValueFactory(new PropertyValueFactory<>("name"));
+        typeCol.setCellValueFactory(new PropertyValueFactory<>("type"));
+        idCol.setCellValueFactory(new PropertyValueFactory<>("id"));
+        scoreCol.setCellValueFactory(new PropertyValueFactory<>("score"));
+
         setConsumers(model);
         FXMLLoader fxmlLoader = new FXMLLoader();
         buttonRevealWord.setDisable(true);
         buttonRevealCard.setDisable(true);
         buttonRollDice.setDisable(true);
+        buttonQuitGame.setOnMouseClicked(e->model.quitGame());
         buttonStart.setOnMouseClicked((Event e) ->
             model.startGame());
         buttonClearCardSelection.setOnMouseClicked((Event e)->model.clearCardSelection());
@@ -89,6 +103,7 @@ public class GameUIController implements Initializable  {
                     else
                             labelIsGoldfishMode.setText("Gold Fish Mode: False");
                     model.newGame();
+                    model.getPlayersData().forEach(pl->playersTable.getItems().add(pl));
                     boardButtonController.setModel(model);
                     textBoxLowestFrequencyDictionaryWords.setText(model.getLowestFrequencyDictionaryWords());
                 } catch (IOException ex){
@@ -175,6 +190,11 @@ public class GameUIController implements Initializable  {
         model.setGameOverConsumer((id)->
         Platform.runLater(()->
             Utils.printMessage("The winner is player id :" + id)));
+        model.setUpdatePlayerScoreConsumer(pl->{
+            playersTable.getItems().get(pl.getIndex()).setScore(pl.getScore());
+            playersTable.refresh();
+        }
+        );
     }
 
     private void updateLetterFrequencyInDeckTextBox(Map<Character,Long> frequency) {
