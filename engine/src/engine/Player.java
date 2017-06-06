@@ -1,5 +1,6 @@
 package engine;
 
+import engine.exception.EngineException;
 import engine.exception.board.BoardException;
 import engine.exception.board.CardNotReveledException;
 import engine.exception.board.WrongCardPositionException;
@@ -8,6 +9,7 @@ import engine.exception.card.CardException;
 import engine.exception.card.NoCardsLeftToRevealException;
 import engine.exception.dice.DiceException;
 import engine.exception.dice.DiceNotRolledException;
+import engine.exception.player.ChosenWrongNumberOfCardsException;
 import engine.listener.CardRemovedListener;
 import engine.listener.EnableAllCardsListener;
 import engine.listener.RolledDicesListener;
@@ -29,7 +31,6 @@ public class Player implements java.io.Serializable{
     private int retriesNumber;
     private List<RolledDicesListener> rolledDicesListenerListeners = new ArrayList<>();
 
-
     public Player (GameManager manager,Deck deck,Board board,Dice cube)
     {
         this.manager = manager;
@@ -42,8 +43,10 @@ public class Player implements java.io.Serializable{
     public int rollDice()
     {
         leftCardNumToReveal = cube.role();
-        notifyRolledDicesListeners(leftCardNumToReveal);
-        manager.notifyRollDices(leftCardNumToReveal);
+        notifyRolledDicesListeners(leftCardNumToReveal,retriesNumber);
+        manager.notifyRollDicesPendingListener(false);
+        manager.notifyRollDices(leftCardNumToReveal,retriesNumber);
+        manager.notifyRevealCardPendingListener(true);
         return leftCardNumToReveal;
     }
 
@@ -52,31 +55,12 @@ public class Player implements java.io.Serializable{
         cube.endTurn();
     }
 
-    public void revealCard(int row,int col) throws DiceException,CardException,WrongCardPositionException
-    {
-        if (cube.getResult() == null)
-        {
-            throw new DiceNotRolledException();
-        }
-        if (leftCardNumToReveal == 0)
-        {
-            throw new NoCardsLeftToRevealException();
-        }
 
-            Card card = board.getBoardCard(row,col);
-            if (!card.isRevealed()){
-                card.reveal(); // changing flag to 'reveal'
-                manager.notifyCardChangedListener(card);
-                leftCardNumToReveal--;
-            } else {
-                throw new CardAlreadyRevealedException(row,col);
-            }
-    }
 
     public boolean revealWordPending(){
         if (this.retriesNumber >0 && !manager.isGameOver()){
             return true;
-        }else {
+        } else {
             return false;
         }
     }
@@ -87,6 +71,10 @@ public class Player implements java.io.Serializable{
             retriesNumber=0;
         } else{
             retriesNumber--;
+        }
+        if (revealWordPending() == false){
+            manager.notifyRevealWordPendingListener(false);
+            endTurn();
         }
         return ret;
     }
@@ -123,7 +111,24 @@ public class Player implements java.io.Serializable{
         rolledDicesListenerListeners.add(listener);
     }
 
-    private void notifyRolledDicesListeners(int result){
-        rolledDicesListenerListeners.forEach(listener->listener.rolldDice(result));
+    private void notifyRolledDicesListeners(int result,int retriesNumber){
+        rolledDicesListenerListeners.forEach(listener->listener.rolldDice(result,retriesNumber));
+    }
+
+    public void revealCards() throws EngineException,DiceNotRolledException,NoCardsLeftToRevealException,ChosenWrongNumberOfCardsException {
+        if (cube.getResult() == null)
+        {
+            throw new DiceNotRolledException();
+        }
+        if (leftCardNumToReveal == 0)
+        {
+            throw new NoCardsLeftToRevealException();
+        }
+        if (board.getSelectedCardsList().size() != cube.getResult()){
+            throw new ChosenWrongNumberOfCardsException(cube.getResult(),board.getSelectedCardsList().size());
+        }
+        board.revealCards();
+        manager.notifyRevealCardPendingListener(false);
+        manager.notifyRevealWordPendingListener(true);
     }
 }

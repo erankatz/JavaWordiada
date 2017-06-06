@@ -16,10 +16,9 @@ import javafx.fxml.*;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.ResourceBundle;
+import java.util.*;
+import java.util.stream.Collectors;
+
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -51,6 +50,7 @@ public class GameUIController implements Initializable  {
     @FXML Label labelPlayerTurn;
     @FXML TextArea textBoxLowestFrequencyDictionaryWords;
     @FXML TextArea textBoxLetterFrequencyInDeck;
+    @FXML Button buttonClearCardSelection;
 
     GameModel model = new GameModel();
     BoardButtonController boardButtonController;
@@ -58,15 +58,13 @@ public class GameUIController implements Initializable  {
     public void initialize(URL url, ResourceBundle rb) {
         setConsumers(model);
         FXMLLoader fxmlLoader = new FXMLLoader();
-        buttonStart.setOnMouseClicked((Event e) -> {
-                try{
-                    model.newGame();
-                    boardButtonController.setModel(model);
-                } catch (DiceException ex){
-                    Utils.showExceptionMessage(ex);
-                } catch (IOException ex){
-                    Utils.showExceptionMessage(ex);
-                }});
+        buttonRevealWord.setDisable(true);
+        buttonRevealCard.setDisable(true);
+        buttonRollDice.setDisable(true);
+        buttonStart.setOnMouseClicked((Event e) ->
+            model.startGame());
+        buttonClearCardSelection.setOnMouseClicked((Event e)->model.clearCardSelection());
+        buttonClearCardSelection.disableProperty().bind(((buttonRevealCard.disabledProperty().not()).or(buttonRevealWord.disabledProperty().not())).not());
         buttonRevealCard.setOnMouseClicked((Event e) ->{
             model.revealCards();
         }) ;
@@ -90,7 +88,9 @@ public class GameUIController implements Initializable  {
                             labelIsGoldfishMode.setText("Gold Fish Mode: True");
                     else
                             labelIsGoldfishMode.setText("Gold Fish Mode: False");
-
+                    model.newGame();
+                    boardButtonController.setModel(model);
+                    textBoxLowestFrequencyDictionaryWords.setText(model.getLowestFrequencyDictionaryWords());
                 } catch (IOException ex){
                     Utils.showExceptionMessage(ex);
                 } catch (EngineException ex)
@@ -126,10 +126,10 @@ public class GameUIController implements Initializable  {
         );
         model.setCardConsumer((Card c)->
             Platform.runLater(
-                    ()->boardButtonController.updateCharCardLetter(c.getRow(),c.getCol(),c.getLetter())
+                    ()->boardButtonController.updateCharCard(c)
             ));
-        model.setRolledDicesConsumer((Integer result)->{
-            Utils.printMessage(String.format("Pick %d Cards in the board\n", result));
+        model.setRolledDicesConsumer((result)->{
+            Utils.printMessage(String.format("Pick %d Cards in the board\n", result.getKey(),result.getValue()));
         });
         model.setCardRemovedConsumer((e)->
                 Platform.runLater(()->
@@ -151,21 +151,45 @@ public class GameUIController implements Initializable  {
                     labelPlayerTurn.setText("Player Turn: " + playerId)
             )
         );
-
+        model.setWordRevealedWord2Score((e)->
+            Platform.runLater(()->
+                   Utils.printMessage("You got " + e.getValue() + " for trying to composing word " + e.getKey() +
+                           " you have "+ model.getCurrentPlayerRetriesLeft() + " more chances " )
+            )
+        );
+        model.setIsRealedWordPendingConsumer((isPending)->
+            Platform.runLater(()->
+                    buttonRevealWord.setDisable(!isPending)
+            )
+        );
+        model.setIsRevealedCardPendingConsumer((isPending)->
+                Platform.runLater(()->
+                        buttonRevealCard.setDisable(!isPending)
+                )
+        );
+        model.setIsRolledDicesPendingConsumer((isPending)->
+            Platform.runLater(()->
+                    buttonRollDice.setDisable(!isPending)
+            )
+        );
+        model.setGameOverConsumer((id)->
+        Platform.runLater(()->
+            Utils.printMessage("The winner is player id :" + id)));
     }
 
-    private void updateLetterFrequencyInDeckTextBox(Map<Character,Long> frequency){
-        textBoxLetterFrequencyInDeck.clear();
-            frequency
+    private void updateLetterFrequencyInDeckTextBox(Map<Character,Long> frequency) {
+        String charFrequencyToTextBoxText = frequency
                 .entrySet()
                 .stream()
                 .sorted(Map.Entry.comparingByKey())
-                .forEach(e1->printCharFrequencyToTextBox(e1,model.getNumOfCardInDeck()));
+                .map(e1 -> printCharFrequencyToTextBox(e1, model.getNumOfCardInDeck()))
+                .collect(Collectors.joining());
+        Platform.runLater(() ->
+                textBoxLetterFrequencyInDeck.setText(charFrequencyToTextBoxText)
+        );
     }
 
-    private void printCharFrequencyToTextBox(Map.Entry<Character,Long> ch2Freq,int NumOfCardInDeck){
-        textBoxLetterFrequencyInDeck.appendText(
-                String.format("%c - %d/%d\n",ch2Freq.getKey(),ch2Freq.getValue(), NumOfCardInDeck)
-        );;
+    private String printCharFrequencyToTextBox(Map.Entry<Character,Long> ch2Freq,int NumOfCardInDeck){
+        return String.format("%c - %d/%d\n",ch2Freq.getKey(),ch2Freq.getValue(), NumOfCardInDeck);
     }
 }

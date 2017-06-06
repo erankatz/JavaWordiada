@@ -1,5 +1,7 @@
 package engine;
 
+import javafx.concurrent.Task;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -24,7 +26,8 @@ public class ComputerPlayer extends Player implements java.io.Serializable {
                 Map.Entry<Integer, Integer> pair = pairs.get(rand.nextInt(pairs.size()));
                 pairs.remove(pair);
                 try {
-                    revealCard(pair.getKey(), pair.getValue());
+                    board.getBoardCard(pair.getKey(), pair.getValue()).reveal();
+                    manager.notifyCardChangedListener(board.getBoardCard(pair.getKey(), pair.getValue()));
                 } catch (Exception ex) {
                     System.out.println("Error occurred");
                     System.exit(1);

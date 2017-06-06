@@ -13,6 +13,7 @@ public class Card implements java.io.Serializable {
     private boolean isEnabled;
     private int row;
     private int col;
+    private boolean isSelected;
 
     protected Card(char letter,byte score)
     {
@@ -23,10 +24,6 @@ public class Card implements java.io.Serializable {
         this.isEnabled = false;
     }
 
-    protected void setMangerListener(GameManager manger){
-        manger.registerDisableAllCardsListener(()->isEnabled=false);
-        manger.registerEnableAllCardsListener(()->isEnabled=true);
-    }
 
     public boolean getIsEnabled(){
         return isEnabled;
@@ -69,5 +66,13 @@ public class Card implements java.io.Serializable {
 
     public int getCol(){
         return col;
+    }
+
+    public boolean getSelected() {
+        return isSelected;
+    }
+
+    public void setSelected(boolean selected) {
+        isSelected = selected;
     }
 }

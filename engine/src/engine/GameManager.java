@@ -47,6 +47,10 @@ public class GameManager implements Serializable{
     private List<RolledDicesListener> RolledDicesListeners = new ArrayList<>();
     private List<PlayerTurnListener> playerTurnListeners = new ArrayList<>();
     private List<LetterFrequencyInDeckListener> letterFrequencyInDeckListeners = new ArrayList<>();
+    private List<RevealWordPendingListener> revealWordPendingListeners = new ArrayList<>();
+    private List<RevealCardPendingListener> revealCardPendingListeners = new ArrayList<>();
+    private List<RollDicesPendingListener> rollDicesPendingListeners = new ArrayList<>();
+    private List<GameOverListener> gameOverListeners = new ArrayList<>();
 
     private Deck deck;
     private final int NUMOFPLAYERS = 2;
@@ -110,9 +114,9 @@ public class GameManager implements Serializable{
                 endPlayerTurn();
             }
         } else if (players[getCurrentPlayerTurn()] instanceof ComputerPlayer){
-
             ((ComputerPlayer)players[getCurrentPlayerTurn()]).playTurn();
         }
+        notifyRollDicesPendingListener(true);
     }
 
     public boolean isComputerMode(){
@@ -250,6 +254,7 @@ public class GameManager implements Serializable{
         isGameStarted = false;
         endPlayerTurn();
         gameOver = true;
+        notifyGameOverListeners(getCurrentPlayerTurn());
     }
 
     public boolean isGameOver(){
@@ -276,6 +281,7 @@ public class GameManager implements Serializable{
             } else {
                 winnerPlayer =1;
             }
+            notifyGameOverListeners(getCurrentPlayerTurn());
         }
         this.roundCounter++;
         if (isGoldFishMode){
@@ -286,6 +292,8 @@ public class GameManager implements Serializable{
         if (!isComputerMode() && players[getCurrentPlayerTurn()] instanceof ComputerPlayer){
             ((ComputerPlayer)players[getCurrentPlayerTurn()]).playTurn();
         }
+        notifyRollDicesPendingListener(true);
+        notifyPlayerTurnListeners(getCurrentPlayerTurn());
     }
 
     public void newGame(List<Boolean> booleanList) throws java.io.IOException,DiceException
@@ -309,7 +317,7 @@ public class GameManager implements Serializable{
                 players[i] = new ComputerPlayer(this,deck,board,new Dice(cubeFacets));
             else{
                 Player p = new Player(this,deck,board,new Dice(cubeFacets));
-                p.registerRolledDicesListener(result -> notifyEnableAllCardsListeners());
+                p.registerRolledDicesListener((result,retries) -> notifyEnableAllCardsListeners());
                 players[i] =p;
             }
             players[i].setRetriesNumber(retriesNumber);
@@ -364,6 +372,7 @@ public class GameManager implements Serializable{
         return e;
     }
 
+
     public void registerDisableAllCardsListener(DisableAllCardsListener listener){
         disableAllCardsListeners.add(listener);
     }
@@ -393,8 +402,24 @@ public class GameManager implements Serializable{
         playerTurnListeners.add(listener);
     }
 
-    public void notifyRollDices(int result){
-        RolledDicesListeners.forEach(listener->listener.rolldDice(result));
+    public void registerRevealWordPendingListener(RevealWordPendingListener listener ){
+        revealWordPendingListeners.add(listener);
+    }
+
+    public void registerRevealCardPendingListener(RevealCardPendingListener listener ){
+        revealCardPendingListeners.add(listener);
+    }
+
+    public void registerRollDicesPendingListeners(RollDicesPendingListener listener){
+        rollDicesPendingListeners.add(listener);
+    }
+
+    public void registerGameOverListener(GameOverListener listener){
+        gameOverListeners.add(listener);
+    }
+
+    public void notifyRollDices(int result,int retriesNumber){
+        RolledDicesListeners.forEach(listener->listener.rolldDice(result,retriesNumber));
     }
     public void notifyDisableAllCardsListeners(){
         disableAllCardsListeners.forEach(listener->listener.disableAllCards());
@@ -402,6 +427,20 @@ public class GameManager implements Serializable{
 
     public void notifyLetterFrequencyInDeckListeners(Map<Character,Long> frequency){
         letterFrequencyInDeckListeners.forEach(listener->listener.LetterFrequencyInDeck(frequency));
+    }
+
+
+    public void notifyRevealWordPendingListener(boolean isPending){
+        revealWordPendingListeners.forEach(listener->listener.isWordPendingToBeRevealed(isPending));
+    }
+
+    public void notifyRevealCardPendingListener(boolean isPending){
+        revealCardPendingListeners.forEach(listener->listener.isCardPendingToBeRevealed(isPending));
+    }
+
+
+    public void notifyRollDicesPendingListener(boolean isPending){
+        rollDicesPendingListeners.forEach(listener->listener.isRollDicesToBeRevealed(isPending));
     }
 
     public void notifyPlayerTurnListeners(int playerId){
@@ -432,7 +471,12 @@ public class GameManager implements Serializable{
         letterFrequencyInDeckListeners.add(listener);
     }
 
-    public void notifyWordRevealedListeners(boolean result){
-        wordRevealedListeners.forEach(listener->listener.PrintResultOfWordRevealed(result));
+    public void notifyWordRevealedListeners(String word,int score){
+        wordRevealedListeners.forEach(listener->listener.PrintResultOfWordRevealed(word,score));
     }
+
+    public void notifyGameOverListeners(int id){
+        gameOverListeners.forEach(listener->listener.gameOver(id));
+    }
+
 }

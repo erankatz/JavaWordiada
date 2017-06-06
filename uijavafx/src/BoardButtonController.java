@@ -200,10 +200,7 @@ public class BoardButtonController implements Initializable {
         gridPaneBoard.setDisable(flag);
     }
 
-    public void updateCharCardLetter(int row,int col,char ch){
-        CardUI cardUI = (CardUI)Utils.getNodeByRowColumnIndex(col-1,row-1,gridPaneBoard);
-        cardUI.setText(Character.toString(ch));
-    }
+
 
     public void removeCard(int row, int col) {
         gridPaneBoard.getChildren().remove(Utils.getNodeByRowColumnIndex(col-1,row-1,gridPaneBoard));
@@ -212,5 +209,15 @@ public class BoardButtonController implements Initializable {
     public void selectCard(int row,int col){
         CardUI cardUI = (CardUI)Utils.getNodeByRowColumnIndex(col-1,row-1,gridPaneBoard);
         cardUI.setStyleSelected();
+    }
+
+    public void updateCharCard(Card c) {
+        CardUI cardUI = (CardUI)Utils.getNodeByRowColumnIndex(c.getCol()-1,c.getRow()-1,gridPaneBoard);
+        cardUI.setText(Character.toString(c.getLetter()));
+        if (c.getSelected()){
+            cardUI.setStyleSelected();
+        } else{
+            cardUI.setStyleUndefined();
+        }
     }
 }

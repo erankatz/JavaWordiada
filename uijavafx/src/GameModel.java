@@ -31,11 +31,15 @@ public class GameModel {
     private Consumer<Map.Entry<Integer,Integer>> cardRemoved;
     private Consumer<Map.Entry<Integer,Integer>> cardSelected;
     private Consumer<Boolean> isDisabledAllCards;
-    private Consumer<Integer> rolledDices;
+    private Consumer<Map.Entry<Integer,Integer>> rolledDicesResult2RetriesLeft;
     private Consumer<Card> updateCard;
     private Consumer<Map<Character,Long>> letterFrequencyInDeck;
     private Consumer<Integer> playerTurn;
-
+    private Consumer<Map.Entry<String,Integer>> wordRevealedWord2Score;
+    private Consumer<Boolean> isRealedWordPending;
+    private Consumer<Boolean> isReaveledCardPending;
+    private Consumer<Boolean> isRolledDicesPending;
+    private Consumer<Integer> gameOverConsumer;
 
     public void readXmlFile(File file)throws java.io.IOException,LetterException,XPathExpressionException,BoardSizeOutOfRangeException,NotEnoughCardsToFillBoardException,FileExtensionException,DiceException {
         manager = new GameManager();
@@ -46,18 +50,27 @@ public class GameModel {
                 (int row,int col) -> cardSelected.accept(new  AbstractMap.SimpleEntry(row,col))
         );
         manager.registerCardRemovedListener((row,col)->cardRemoved.accept(new AbstractMap.SimpleEntry(row,col)));
-        manager.registerRollDices((int result) -> rolledDices.accept(result));
+        manager.registerRollDices((result,retriesNumber) -> rolledDicesResult2RetriesLeft.accept(new AbstractMap.SimpleEntry(result,retriesNumber)));
         manager.registerLetterFrequencyInDeckListener((map) ->letterFrequencyInDeck.accept(map));
         manager.registerPlayerTurn((playerId -> playerTurn.accept(playerId)));
+        manager.registerWordRevealedListener((word,score)->wordRevealedWord2Score.accept(new AbstractMap.SimpleEntry(word,score)));
+        manager.registerRevealWordPendingListener((isPending) ->isRealedWordPending.accept(isPending));
+        manager.registerRevealCardPendingListener((isPending) ->isReaveledCardPending.accept(isPending));
+        manager.registerRollDicesPendingListeners((isPending) ->isRolledDicesPending.accept(isPending));
+        manager.registerGameOverListener((id)->gameOverConsumer.accept(id));
         manager.readXmlFile(file);
     }
 
     public void selectCard(int row,int col){
-        manager.getBoard().selectBoardCard(row, col);
+        manager.getBoard().selectBoardCard(row, col,true);
     }
 
     public void setCardRemovedConsumer(Consumer<Map.Entry<Integer,Integer>> listenerConsumer){
         cardRemoved = listenerConsumer;
+    }
+
+    public void setWordRevealedWord2Score(Consumer<Map.Entry<String,Integer>> listenerConsumer){
+        wordRevealedWord2Score = listenerConsumer;
     }
 
     public void setCardSelectedConsumer(Consumer<Map.Entry<Integer,Integer>> listenerConsumer){
@@ -72,8 +85,12 @@ public class GameModel {
         isDisabledAllCards = listenerConsumer;
     }
 
-    public void setRolledDicesConsumer(Consumer<Integer> listenerConsumer){
-        rolledDices = listenerConsumer;
+    public void setRolledDicesConsumer(Consumer<Map.Entry<Integer,Integer>> listenerConsumer){
+        rolledDicesResult2RetriesLeft = listenerConsumer;
+    }
+
+    public int getCurrentPlayerRetriesLeft(){
+        return  manager.getPlayers()[manager.getCurrentPlayerTurn()].getRetriesNumber();
     }
 
     public void setLetterFrequencyInDeckConsumer(Consumer<Map<Character,Long>> listenerConsumer){
@@ -120,7 +137,7 @@ public class GameModel {
 
     public void revealCards() {
         try{
-            manager.getBoard().revealCards();
+            manager.getPlayers()[manager.getCurrentPlayerTurn()].revealCards();
         } catch (EngineException ex){
             Utils.showExceptionMessage(ex);
         }
@@ -128,7 +145,7 @@ public class GameModel {
 
     public void revealWord(){
         try{
-            manager.getBoard().revealWord();
+            manager.getPlayers()[manager.getCurrentPlayerTurn()].revealWord();
         } catch (EngineException ex){
             Utils.showExceptionMessage(ex);
         }
@@ -140,5 +157,34 @@ public class GameModel {
 
     public boolean getIsGoldFish() {
         return manager.getIsGoldFishMode();
+    }
+
+    public void setIsRealedWordPendingConsumer(Consumer<Boolean> isRealedWordPending) {
+        this.isRealedWordPending = isRealedWordPending;
+    }
+
+    public void setIsRevealedCardPendingConsumer(Consumer<Boolean> isRealedWordPending) {
+        this.isReaveledCardPending = isRealedWordPending;
+    }
+
+    public void setIsRolledDicesPendingConsumer(Consumer<Boolean> isRolledDicesPending) {
+        this.isRolledDicesPending = isRolledDicesPending;
+    }
+
+    public void setGameOverConsumer(Consumer<Integer> listener){
+        gameOverConsumer = listener;
+    }
+
+    public void startGame() {
+        manager.startGame();
+    }
+
+    public void clearCardSelection() {
+        manager.getBoard().clearSelectedCards();
+    }
+
+    public String getLowestFrequencyDictionaryWords(){
+        return manager.getBoard().getLowestFrequencyDictionaryWords();
+
     }
 }

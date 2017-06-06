@@ -5,11 +5,14 @@ import engine.exception.board.BoardException;
 import engine.exception.board.CardNotReveledException;
 import engine.exception.board.DuplicateCardPositionException;
 import engine.exception.board.WrongCardPositionException;
+import engine.exception.card.CardAlreadyRevealedException;
 import engine.exception.card.CardException;
 import engine.exception.dice.DiceException;
 import engine.wordSearch.WordSearch;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -56,11 +59,13 @@ public class Board implements java.io.Serializable{
         {
             replaceCards(pairs);
             manager.wordRevealed(str,word2FrequencyDic.get(str)); //After word is revealed and validation
-            manager.notifyWordRevealedListeners(true);
+            manager.notifyWordRevealedListeners(str,1);
+            clearSelectedCards();
             selectedCardsList.clear();
             return true;
         }
-        manager.notifyWordRevealedListeners(false);
+        manager.notifyWordRevealedListeners(str,0);
+        clearSelectedCards();
         selectedCardsList.clear();
         return false;
     }
@@ -68,7 +73,13 @@ public class Board implements java.io.Serializable{
     private void replaceCards(List<Map.Entry<Integer,Integer>> pairs)  {
 
         pairs.stream()
-                .forEach(entry-> setBoardCard(entry.getKey(),entry.getValue(),deck.removeTopCard()));
+                .forEach(entry-> {
+                    Card c = deck.removeTopCard();
+                    if (c == null){
+                        manager.notifyCardRemovedListeners(entry.getKey(),entry.getValue());
+                    }
+                    setBoardCard(entry.getKey(),entry.getValue(),c);
+                });
     }
 
 
@@ -106,6 +117,7 @@ public class Board implements java.io.Serializable{
 
     protected void ChangeAllCardsToUnrevealed(){
         Arrays.stream(cards).forEach(cardRows-> Arrays.stream(cardRows).filter(card->card!=null).forEach(card->card.unReveal()));
+        Arrays.stream(cards).forEach(cardRows-> Arrays.stream(cardRows).filter(card->card!=null).forEach(card->manager.notifyCardChangedListener(card)));
     }
 
     public List<Map.Entry<Integer,Integer>> AllCardsPositionsFilter(Predicate<Card> filter) {
@@ -161,9 +173,16 @@ public class Board implements java.io.Serializable{
         }
     }
 
-    public void selectBoardCard(int row, int col) {
-        manager.notifyCardSelectedListeners(row,col);
+    public void selectBoardCard(int row, int col,boolean value) {
+        if (value ==true)
+            selectedCardsList.add(new AbstractMap.SimpleEntry<Integer, Integer>(row,col));
+        cards[row-1][col-1].setSelected(value);
+        manager.notifyCardChangedListener(cards[row-1][col-1]);
 
+    }
+
+    public void clearSelectedCards(){
+        Arrays.stream(cards).flatMap(Arrays::stream).forEach(c->selectBoardCard(c.getRow(),c.getCol(),false));
     }
 
     public void revealCards() throws DiceException,CardException,WrongCardPositionException {
@@ -171,12 +190,40 @@ public class Board implements java.io.Serializable{
         for (Map.Entry<Integer,Integer> e : selectedCardsList )
         {
             try{
-                manager.getPlayers()[manager.getCurrentPlayerTurn()].revealCard(e.getKey(),e.getValue());
+
+                Card card = cards[e.getKey()-1][e.getValue()-1];
+                if (!card.isRevealed()){
+                    card.reveal(); // changing flag to 'reveal'
+                    card.setSelected(false);
+                    manager.notifyCardChangedListener(card);
+                } else {
+                    throw new CardAlreadyRevealedException(card.getRow(),card.getCol());
+                }
             } catch (Exception ex){
                 selectedCardsList.clear();
+                clearSelectedCards();
                 throw ex;
             }
         }
         selectedCardsList.clear();
+        clearSelectedCards();
+    }
+
+    public List<Map.Entry<Integer,Integer>> getSelectedCardsList(){
+        return  selectedCardsList;
+    }
+
+    public String getLowestFrequencyDictionaryWords(){
+        return  word2FrequencyDic
+                .entrySet()
+                .stream().filter(distinctByKey(p -> p.getKey()))
+                .sorted(Map.Entry.comparingByValue())
+                .map(e->e.getKey() + "-" + e.getValue())
+                .limit(10)
+                .collect(Collectors.joining("\n"));
+    }
+    public static <T> Predicate<T> distinctByKey(Function<? super T, ?> keyExtractor) {
+        Map<Object,Boolean> seen = new ConcurrentHashMap<>();
+        return t -> seen.putIfAbsent(keyExtractor.apply(t), Boolean.TRUE) == null;
     }
 }
