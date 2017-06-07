@@ -59,11 +59,13 @@ public class GameUIController implements Initializable  {
     @FXML TableColumn scoreCol;
     @FXML TableView<PlayerData> playersTable;
     @FXML Button buttonQuitGame;
+    @FXML Label labelStatus;
 
     GameModel model = new GameModel();
     BoardButtonController boardButtonController;
     @Override
     public void initialize(URL url, ResourceBundle rb) {
+        labelStatus.setText("");
         nameCol.setCellValueFactory(new PropertyValueFactory<>("name"));
         typeCol.setCellValueFactory(new PropertyValueFactory<>("type"));
         idCol.setCellValueFactory(new PropertyValueFactory<>("id"));
@@ -144,7 +146,7 @@ public class GameUIController implements Initializable  {
                     ()->boardButtonController.updateCharCard(c)
             ));
         model.setRolledDicesConsumer((result)->{
-            Utils.printMessage(String.format("Pick %d Cards in the board\n", result.getKey(),result.getValue()));
+            labelStatus.setText(String.format("Pick %d Cards in the board\n", result.getKey(),result.getValue()));
         });
         model.setCardRemovedConsumer((e)->
                 Platform.runLater(()->
@@ -168,7 +170,7 @@ public class GameUIController implements Initializable  {
         );
         model.setWordRevealedWord2Score((e)->
             Platform.runLater(()->
-                   Utils.printMessage("You got " + e.getValue() + " for trying to composing word " + e.getKey() +
+                    labelStatus.setText("You got " + e.getValue() + " for trying to composing word " + e.getKey() +
                            " you have "+ model.getCurrentPlayerRetriesLeft() + " more chances " )
             )
         );
@@ -188,8 +190,8 @@ public class GameUIController implements Initializable  {
             )
         );
         model.setGameOverConsumer((id)->
-        Platform.runLater(()->
-            Utils.printMessage("The winner is player id :" + id)));
+        Platform.runLater(
+                ()-> labelStatus.setText("The winner is player id :" + id)));
         model.setUpdatePlayerScoreConsumer(pl->{
             playersTable.getItems().get(pl.getIndex()).setScore(pl.getScore());
             playersTable.refresh();

@@ -11,6 +11,7 @@ import java.util.Random;
  * Created by eran on 15/04/2017.
  */
 public class ComputerPlayer extends Player implements java.io.Serializable {
+    private final int sleepTime = 5;
 
     public ComputerPlayer (GameManager manager,Deck deck,Board board,Dice cube){
         super(manager,deck,board,cube);
@@ -21,6 +22,7 @@ public class ComputerPlayer extends Player implements java.io.Serializable {
         Random rand = new Random();
         if (board.getNumOfUnrevealedCard() != 0) {
         rollDice();
+        Utils.sleepForAWhile(sleepTime);
         pairs = board.AllCardsPositionsFilter(card->card != null && !card.isRevealed());
             while (isLeftCardsToReveal() && pairs.size() !=0) {
                 Map.Entry<Integer, Integer> pair = pairs.get(rand.nextInt(pairs.size()));
@@ -28,6 +30,7 @@ public class ComputerPlayer extends Player implements java.io.Serializable {
                 try {
                     board.getBoardCard(pair.getKey(), pair.getValue()).reveal();
                     manager.notifyCardChangedListener(board.getBoardCard(pair.getKey(), pair.getValue()));
+                    Utils.sleepForAWhile(sleepTime);
                 } catch (Exception ex) {
                     System.out.println("Error occurred");
                     System.exit(1);
@@ -45,6 +48,8 @@ public class ComputerPlayer extends Player implements java.io.Serializable {
                     try {
                         int row = pairs.get(i).getKey();
                         int col = pairs.get(i).getValue();
+                        manager.notifyCardChangedListener(board.getBoardCard(row,col));
+                        Utils.sleepForAWhile(sleepTime);
                         if (board.getBoardCard(row, col).getLetter() == word.charAt(k)) {
                             Map.Entry<Integer, Integer> pair = pairs.get(i);
                             pairs.remove(pair);
@@ -60,6 +65,7 @@ public class ComputerPlayer extends Player implements java.io.Serializable {
             }
             try{
                 board.revealWord();
+                Utils.sleepForAWhile(sleepTime);
             }catch (Exception ex)
             {
                 System.out.println("Error occurred");

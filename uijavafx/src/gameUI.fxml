@@ -22,7 +22,7 @@
                 <Button fx:id="buttonExit" mnemonicParsing="false" prefHeight="25.0" prefWidth="139.0" text="Exit" />
                </buttons>
             </ButtonBar>
-            <ButtonBar prefHeight="40.0" prefWidth="200.0" />
+            <Label fx:id="labelStatus" prefHeight="100.0" prefWidth="427.0" text="Game Status" />
          </children>
       </HBox>
    </top>
