@@ -6,13 +6,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.stream.Collectors;
 
 /**
  * Created by eran on 15/04/2017.
  */
 public class ComputerPlayer extends Player implements java.io.Serializable {
-    private final int sleepTime = 5;
-
+    private final int sleepTime = 1000;
     public ComputerPlayer (GameManager manager,Deck deck,Board board,Dice cube){
         super(manager,deck,board,cube);
     }
@@ -28,16 +28,27 @@ public class ComputerPlayer extends Player implements java.io.Serializable {
                 Map.Entry<Integer, Integer> pair = pairs.get(rand.nextInt(pairs.size()));
                 pairs.remove(pair);
                 try {
-                    board.getBoardCard(pair.getKey(), pair.getValue()).reveal();
-                    manager.notifyCardChangedListener(board.getBoardCard(pair.getKey(), pair.getValue()));
+                    board.selectBoardCard(pair.getKey(), pair.getValue(),true);
                     Utils.sleepForAWhile(sleepTime);
+                    leftCardNumToReveal--;
                 } catch (Exception ex) {
                     System.out.println("Error occurred");
                     System.exit(1);
                 }
             }
+            Utils.sleepForAWhile(sleepTime);
+            try{
+                leftCardNumToReveal =cube.getResult();
+                revealCards();
+            } catch (Exception ex)
+            {
+                ex.printStackTrace();
+                System.exit(1);
+            }
         }
-        List<String> words =  board.getLegalWords(card->card!=null && card.isRevealed());
+
+
+        List<String> words =  board.getLegalWords(card->card!=null && card.isRevealed()).stream().distinct().collect(Collectors.toList());
         if (words.size() >0){
             List<Map.Entry<Integer,Integer>> wordPairs = new ArrayList<>();
             String word = words.get(rand.nextInt(words.size()));
@@ -48,9 +59,9 @@ public class ComputerPlayer extends Player implements java.io.Serializable {
                     try {
                         int row = pairs.get(i).getKey();
                         int col = pairs.get(i).getValue();
-                        manager.notifyCardChangedListener(board.getBoardCard(row,col));
-                        Utils.sleepForAWhile(sleepTime);
                         if (board.getBoardCard(row, col).getLetter() == word.charAt(k)) {
+                            board.selectBoardCard(row,col,true);
+                            Utils.sleepForAWhile(sleepTime);
                             Map.Entry<Integer, Integer> pair = pairs.get(i);
                             pairs.remove(pair);
                             wordPairs.add(pair);
@@ -66,6 +77,7 @@ public class ComputerPlayer extends Player implements java.io.Serializable {
             try{
                 board.revealWord();
                 Utils.sleepForAWhile(sleepTime);
+                board.clearSelectedCards();
             }catch (Exception ex)
             {
                 System.out.println("Error occurred");
@@ -76,5 +88,13 @@ public class ComputerPlayer extends Player implements java.io.Serializable {
 
         if (!manager.isComputerMode())
             endTurn();
+    }
+
+    @Override
+    public int rollDice()
+    {
+        leftCardNumToReveal = cube.role();
+        manager.notifyRollDices(leftCardNumToReveal,retriesNumber);
+        return leftCardNumToReveal;
     }
 }

@@ -112,13 +112,13 @@ public class GameManager implements Serializable{
             while (!gameOver){
                 notifyPlayerTurnListeners(getCurrentPlayerTurn());
                 notifyLetterFrequencyInDeckListeners(getCharFrequency());
-                ((ComputerPlayer)players[getCurrentPlayerTurn()]).playTurn();
+                new Thread(()-> ((ComputerPlayer)players[getCurrentPlayerTurn()]).playTurn()).run();
                 endPlayerTurn();
             }
         } else if (players[getCurrentPlayerTurn()] instanceof ComputerPlayer){
-            ((ComputerPlayer)players[getCurrentPlayerTurn()]).playTurn();
+            new Thread(()-> ((ComputerPlayer)players[getCurrentPlayerTurn()]).playTurn()).run();
         }
-        notifyRollDicesPendingListener(true);
+        notifyStartPlayerTurn();
     }
 
     public boolean isComputerMode(){
@@ -289,16 +289,30 @@ public class GameManager implements Serializable{
             }
             notifyGameOverListeners(getCurrentPlayerTurn());
         }
+
         this.roundCounter++;
         if (isGoldFishMode){
             board.ChangeAllCardsToUnrevealed();
         }
         players[getCurrentPlayerTurn()].setRetriesNumber(retriesNumber);
-
         if (!isComputerMode() && players[getCurrentPlayerTurn()] instanceof ComputerPlayer){
-            ((ComputerPlayer)players[getCurrentPlayerTurn()]).playTurn();
+            new Thread(()-> ((ComputerPlayer)players[getCurrentPlayerTurn()]).playTurn()).run();
         }
-        notifyRollDicesPendingListener(true);
+        notifyStartPlayerTurn();
+    }
+
+    private void notifyStartPlayerTurn(){
+        if (board.getNumOfUnrevealedCard() != 0){
+            notifyRollDicesPendingListener(true);
+            notifyRevealCardPendingListener(false);
+            notifyRevealWordPendingListener(false);
+        }
+        else{
+            notifyRollDicesPendingListener(false);
+            notifyRevealCardPendingListener(false);
+            notifyRevealWordPendingListener(true);
+        }
+        notifyEnableAllCardsListeners();
         notifyPlayerTurnListeners(getCurrentPlayerTurn());
     }
 

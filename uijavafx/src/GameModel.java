@@ -111,7 +111,7 @@ public class GameModel {
 
     public void newGame() throws DiceException,IOException{
         List<Boolean> f = new ArrayList<>();
-        f.add(false);
+        f.add(true);
         f.add(false);
         manager.newGame(f);
         board = manager.getBoard();

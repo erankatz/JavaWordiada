@@ -23,12 +23,12 @@ import java.util.*;
 public class Player implements java.io.Serializable{
     private Deck deck;
     protected Board board;
-    private Dice cube;
+    protected Dice cube;
     protected GameManager manager;
-    private int leftCardNumToReveal;
+    protected int leftCardNumToReveal;
     private long score;
     private Map<String,Long> composedWords = new HashMap<>();
-    private int retriesNumber;
+    protected int retriesNumber;
     private List<RolledDicesListener> rolledDicesListenerListeners = new ArrayList<>();
 
     public Player (GameManager manager,Deck deck,Board board,Dice cube)
