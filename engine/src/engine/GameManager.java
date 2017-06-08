@@ -19,6 +19,7 @@ import engine.exception.file.FileException;
 import engine.exception.file.FileExtensionException;
 import engine.exception.letter.LetterException;
 import engine.listener.*;
+import engine.tasks.ComputerPlayerPlayTurnTask;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
@@ -112,11 +113,13 @@ public class GameManager implements Serializable{
             while (!gameOver){
                 notifyPlayerTurnListeners(getCurrentPlayerTurn());
                 notifyLetterFrequencyInDeckListeners(getCharFrequency());
-                new Thread(()-> ((ComputerPlayer)players[getCurrentPlayerTurn()]).playTurn()).run();
+                ComputerPlayerPlayTurnTask task = new ComputerPlayerPlayTurnTask((ComputerPlayer)players[getCurrentPlayerTurn()]);
+                new Thread(task).start();
                 endPlayerTurn();
             }
         } else if (players[getCurrentPlayerTurn()] instanceof ComputerPlayer){
-            new Thread(()-> ((ComputerPlayer)players[getCurrentPlayerTurn()]).playTurn()).run();
+            ComputerPlayerPlayTurnTask task = new ComputerPlayerPlayTurnTask((ComputerPlayer)players[getCurrentPlayerTurn()]);
+            new Thread(task).start();
         }
         notifyStartPlayerTurn();
     }
@@ -296,7 +299,8 @@ public class GameManager implements Serializable{
         }
         players[getCurrentPlayerTurn()].setRetriesNumber(retriesNumber);
         if (!isComputerMode() && players[getCurrentPlayerTurn()] instanceof ComputerPlayer){
-            new Thread(()-> ((ComputerPlayer)players[getCurrentPlayerTurn()]).playTurn()).run();
+            ComputerPlayerPlayTurnTask task = new ComputerPlayerPlayTurnTask((ComputerPlayer)players[getCurrentPlayerTurn()]);
+            new Thread(task).start();
         }
         notifyStartPlayerTurn();
     }
