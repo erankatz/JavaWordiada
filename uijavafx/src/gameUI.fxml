@@ -39,7 +39,7 @@
    <right>
    </right>
    <right>
-      <AnchorPane prefHeight="506.0" prefWidth="253.0" BorderPane.alignment="CENTER">
+      <AnchorPane fx:id="anchorPane" prefHeight="506.0" prefWidth="253.0" BorderPane.alignment="CENTER">
          <children>
             <Button fx:id="buttonRollDice" layoutX="16.0" layoutY="141.0" mnemonicParsing="false" prefHeight="15.0" prefWidth="126.0" text="Roll Dices" />
             <Button fx:id="buttonRevealWord" layoutX="17.0" layoutY="222.0" mnemonicParsing="false" prefHeight="27.0" prefWidth="128.0" text="Reveal Word" />
@@ -51,9 +51,14 @@
             <Label fx:id="labelPlayerTurn" layoutX="32.0" layoutY="1.0" prefHeight="17.0" prefWidth="210.0" text="Player Turn :" />
             <Button fx:id="buttonClearCardSelection" layoutX="15.0" layoutY="106.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="128.0" text="Clear Card Selection" />
             <Button fx:id="buttonQuitGame" layoutX="15.0" layoutY="73.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="128.0" text="Quit" />
-            <Button fx:id="buttonPrev" layoutX="32.0" layoutY="18.0" mnemonicParsing="false" text="Prev" />
-            <Button fx:id="buttonNext" layoutX="85.0" layoutY="18.0" mnemonicParsing="false" text="Next" />
             <Button fx:id="buttonGetCurrentPlayerStatus" layoutX="16.0" layoutY="45.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="126.0" text="Score Detailed" />
+            <HBox id="hBoxHistory" fx:id="hBoxHistoryPlays" layoutX="16.0" layoutY="18.0" prefHeight="27.0" prefWidth="200.0" spacing="10.0">
+               <children>
+                  <Button fx:id="buttonPrev" mnemonicParsing="false" text="Prev" />
+                  <Button fx:id="buttonNext" mnemonicParsing="false" text="Next" />
+                  <Button fx:id="buttonPlayTurn" mnemonicParsing="false" prefHeight="25.0" prefWidth="75.0" text="Play Turn" />
+               </children>
+            </HBox>
          </children>
       </AnchorPane>
    </right>

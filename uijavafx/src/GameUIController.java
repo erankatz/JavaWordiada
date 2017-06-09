@@ -16,6 +16,7 @@ import javafx.fxml.*;
 
 import java.io.File;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.net.URL;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -28,10 +29,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.ColumnConstraints;
-import javafx.scene.layout.GridPane;
+import javafx.scene.layout.*;
 import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
@@ -63,14 +61,22 @@ public class GameUIController implements Initializable  {
     @FXML Button buttonPrev;
     @FXML Button buttonNext;
     @FXML Button buttonGetCurrentPlayerStatus;
+    @FXML Button buttonPlayTurn;
+    @FXML AnchorPane anchorPane;
+    @FXML HBox hBoxHistoryPlays;
+    private NumberTextField textBoxHistoryPlays;
+
     GameModel model = new GameModel();
     BoardButtonController boardButtonController;
     @Override
     public void initialize(URL url, ResourceBundle rb) {
+        initNumberTextField();
+        buttonPlayTurn.setVisible(false);
         playersTable.setDisable(true);
-        buttonPrev.setVisible(false);
-        buttonNext.setVisible(false);
+        //buttonPrev.setVisible(false);
+        //buttonNext.setVisible(false);
         buttonQuitGame.setDisable(true);
+        //textBoxHistoryPlays.setVisible(false);
         buttonGetCurrentPlayerStatus.setVisible(false);
         labelStatus.setText("");
         nameCol.setCellValueFactory(new PropertyValueFactory<>("name"));
@@ -91,14 +97,20 @@ public class GameUIController implements Initializable  {
         );
         buttonClearCardSelection.setOnMouseClicked((Event e)->model.clearCardSelection());
         buttonClearCardSelection.disableProperty().bind(((buttonRevealCard.disabledProperty().not()).or(buttonRevealWord.disabledProperty().not())).not());
+        buttonQuitGame.disableProperty().bind(((buttonRevealCard.disabledProperty().not()).or(buttonRevealWord.disabledProperty().not()).or(buttonRollDice.disabledProperty().not())).not());
         buttonRevealCard.setOnMouseClicked((Event e) ->{
             model.revealCards();
         }) ;
         buttonRevealWord.setOnMouseClicked((Event e) ->{
             model.revealWord();
         });
+        buttonNext.setOnMouseClicked((Event e)->{
+            textBoxHistoryPlays.setNumber(textBoxHistoryPlays.getNumber().add(new BigDecimal(1)));
+        });
+        buttonPrev.setOnMouseClicked((Event e)->{
+            textBoxHistoryPlays.setNumber(textBoxHistoryPlays.getNumber().subtract(new BigDecimal(1)));
+        });
         buttonStart.setDisable(true);
-
         buttonLoadXml.setOnMouseClicked((Event e)->{
             Stage newStage = new Stage();
             FileChooser fileChooser = new FileChooser();
@@ -128,7 +140,7 @@ public class GameUIController implements Initializable  {
                 }
             }
         });
-        this.buttonPrev.setOnMouseClicked((Event e)-> model.playPrevMove());
+        this.buttonPlayTurn.setOnMouseClicked((Event e)-> model.playPrevMove(Integer.parseInt(textBoxHistoryPlays.getText())));
         this.buttonRollDice.setOnMouseClicked((Event e) -> {
             model.rollDice();
         });
@@ -143,6 +155,13 @@ public class GameUIController implements Initializable  {
         } catch (java.io.IOException ex){
 
         }
+    }
+
+    private void initNumberTextField(){
+        textBoxHistoryPlays = new NumberTextField();
+        textBoxHistoryPlays.setNumber(new BigDecimal(0));
+        hBoxHistoryPlays.getChildren().add(2,textBoxHistoryPlays);
+        textBoxHistoryPlays.setDisable(true);
     }
 
     private void setConsumers(GameModel model) {
@@ -213,10 +232,10 @@ public class GameUIController implements Initializable  {
                     labelStatus.setText("The winner is player id :" + id);
                     buttonPrev.setVisible(true);
                     buttonNext.setVisible(true);
+                    textBoxHistoryPlays.setVisible(true);
                     buttonGetCurrentPlayerStatus.setDisable(true);
                     buttonRollDice.setDisable(true);
                     buttonRevealCard.setDisable(true);
-                    buttonQuitGame.setDisable(true);
                     buttonRevealWord.setDisable(true);
                 }));
 

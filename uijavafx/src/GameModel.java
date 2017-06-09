@@ -78,8 +78,8 @@ public class GameModel {
         cardSelected = listenerConsumer;
     }
 
-    public void playPrevMove(){
-       new Thread(()->manager.playPrevMove()).start();
+    public void playPrevMove(int index){
+       new Thread(()->manager.playMove(index)).start();
        //manager.playPrevMove();
     }
 

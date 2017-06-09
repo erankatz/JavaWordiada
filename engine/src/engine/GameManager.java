@@ -324,17 +324,17 @@ public class GameManager implements Serializable,Cloneable{
         }
     }
 
-    public synchronized void playPrevMove(){
+    public synchronized void playMove(int index){
         //TODO: Handle no exist move
         roundCounter--;
         AtomicInteger i= new AtomicInteger(0);
-        moves.get(roundCounter).getPlayersData().forEach(pl->players[i.getAndAdd(1)].setScore(pl.getScore()));
-        Move move = moves.get(roundCounter).clone();
+        moves.get(index).getPlayersData().forEach(pl->players[i.getAndAdd(1)].setScore(pl.getScore()));
+        Move move = moves.get(index).clone();
         this.board = move.getBoard().clone();
         this.deck = move.getBoard().getDeck();
         //this.players = move.getPlayers();
         move.setManager(this);
-        this.moves.get(roundCounter).playMove();
+        move.playMove();
     }
 
     private void notifyStartPlayerTurn(){
