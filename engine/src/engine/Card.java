@@ -5,7 +5,7 @@ import engine.exception.card.CardAlreadyRevealedException;
 /**
  * Created by eran on 29/03/2017.
  */
-public class Card implements java.io.Serializable {
+public class Card implements java.io.Serializable,Cloneable{
     private char letter;
     private byte score;
     private boolean revealed;
@@ -22,6 +22,18 @@ public class Card implements java.io.Serializable {
         this.revealed = false;
         this.isEverRevealed = false;
         this.isEnabled = false;
+    }
+    @Override
+    public Card clone(){
+        Card c = new Card(letter,score);
+        c.revealed = revealed;
+        c.isEverRevealed = isEverRevealed;
+        c.isEnabled = isEnabled;
+        c.row = row;
+        c.col = col;
+        c.isSelected = isSelected;
+
+        return c;
     }
 
 

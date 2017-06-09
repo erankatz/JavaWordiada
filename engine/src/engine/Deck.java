@@ -19,13 +19,14 @@ import java.util.stream.Collectors;
 /**
  * Created by eran on 29/03/2017.
  */
-public class Deck implements java.io.Serializable{
+public class Deck implements java.io.Serializable,Cloneable{
     private HashSet<Letter> letterArr;
     private int deckSize;
     private LinkedList<Card> cards;
     private Map<Character,Long> initCharFrequency;
     private GameManager manager;
 
+    private Deck(){}
     protected Deck(Document doc, XPath xpath) throws XPathExpressionException, LetterException {
         XPathExpression expr =  xpath.compile("/GameDescriptor/Structure/Letters/@target-deck-size");
         Number deckSize = (Number) expr.evaluate(doc, XPathConstants.NUMBER); // get target-deck-size
@@ -35,6 +36,17 @@ public class Deck implements java.io.Serializable{
         letterArr.stream().forEach(letter->this.deckSize+=letter.getOccurence());
     }
 
+    @Override
+    public Deck clone(){
+        Deck deck = new Deck();
+        deck.letterArr =letterArr;
+        deck.deckSize = deckSize;
+        deck.manager =manager;
+        deck.initCharFrequency = initCharFrequency;
+        deck.cards = new LinkedList<>();
+        cards.stream().forEach(c->deck.cards.add(c.clone()));
+        return deck;
+    }
 
     public Map<Character,Long> CreateMapStructureCharToLong()
     {// The function creates Map structure : Character -> Long

@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
  * Created by eran on 15/04/2017.
  */
 public class ComputerPlayer extends Player implements java.io.Serializable {
-    private final int sleepTime = 1000;
+    private final int sleepTime = Utils.sleepTime;
     public ComputerPlayer (GameManager manager,Deck deck,Board board,Dice cube){
         super(manager,deck,board,cube);
     }

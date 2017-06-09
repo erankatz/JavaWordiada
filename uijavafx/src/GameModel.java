@@ -7,6 +7,7 @@ import engine.exception.dice.DiceException;
 import engine.exception.file.FileExtensionException;
 import engine.exception.letter.LetterException;
 import engine.listener.*;
+import javafx.scene.image.WritableImage;
 
 import javax.xml.xpath.XPathExpressionException;
 import java.io.File;
@@ -25,7 +26,7 @@ public class GameModel {
     private GameManager manager;
     private Board board;
     private BoardButtonController boardButtonController;
-
+    private List<List<WritableImage>> gameHistory;
     private Consumer<Map.Entry<Integer,Integer>> cardRemoved;
     private Consumer<Map.Entry<Integer,Integer>> cardSelected;
     private Consumer<Boolean> isDisabledAllCards;
@@ -76,6 +77,7 @@ public class GameModel {
     public void setCardSelectedConsumer(Consumer<Map.Entry<Integer,Integer>> listenerConsumer){
         cardSelected = listenerConsumer;
     }
+
 
     public void setCardConsumer(Consumer<Card> listenerConsumer){
         updateCard = listenerConsumer;

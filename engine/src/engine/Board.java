@@ -19,15 +19,23 @@ import java.util.stream.Collectors;
 /**
  * Created by eran on 29/03/2017.
  */
-public class Board implements java.io.Serializable{
+public class Board implements java.io.Serializable,Cloneable{
     private Card cards[][];
     private int boardSize;
-    private int numOfUnrevealedCard;
+    private int numOfUnrevealedCard=0;
     private GameManager manager;
     private Map<String, Long> word2FrequencyDic;
     private Deck deck;
     private WordSearch wordSearcher;
     private List<Map.Entry<Integer,Integer>> selectedCardsList = new ArrayList<>();
+
+    private Board(int boardSize,int numOfUnrevealedCard,GameManager manager, Map<String,Long> word2FrequencyDic,WordSearch wordSearcher){
+        this.boardSize = boardSize;
+        this.numOfUnrevealedCard = numOfUnrevealedCard;
+        this.manager = manager;
+        this.word2FrequencyDic = word2FrequencyDic;
+        this.wordSearcher = wordSearcher;
+    }
 
     protected Board(int boardSize,GameManager manager,Deck deck)
     {
@@ -37,6 +45,16 @@ public class Board implements java.io.Serializable{
         this.deck = deck;
     }
 
+    @Override
+    public Board clone(){
+        Board b= new Board(boardSize,numOfUnrevealedCard,manager,word2FrequencyDic,wordSearcher);
+        b.deck = this.deck.clone();
+        return b;
+    }
+
+    protected Deck getDeck(){
+        return deck;
+    }
     protected void setDictionary(Map<String ,Long> dictionary)
     {
         this.word2FrequencyDic =dictionary;
@@ -70,6 +88,7 @@ public class Board implements java.io.Serializable{
         return false;
     }
 
+
     private void replaceCards(List<Map.Entry<Integer,Integer>> pairs)  {
 
         pairs.stream()
@@ -85,6 +104,9 @@ public class Board implements java.io.Serializable{
                 });
     }
 
+    public void notifyAllCardsChanged(){
+        Arrays.stream(cards).flatMap(x->Arrays.stream(x)).filter(x->x!= null).forEach(c->manager.notifyCardChangedListener(c));
+    }
 
     private String buildWord(List<Map.Entry<Integer,Integer>> pairs) throws BoardException,WrongCardPositionException,CardNotReveledException{
         String str = new String("");
@@ -209,6 +231,7 @@ public class Board implements java.io.Serializable{
                 throw ex;
             }
         }
+        manager.setRevealCardsMove(selectedCardsList);
         selectedCardsList.clear();
         clearSelectedCards();
     }

@@ -70,6 +70,7 @@ public class GameManager implements Serializable{
     private boolean gameOver;
     private int winnerPlayer;
     private boolean isGoldFishMode;
+    private List<Move> moves;
 
     public boolean getIsGoldFishMode(){
         return isGoldFishMode;
@@ -305,6 +306,15 @@ public class GameManager implements Serializable{
         notifyStartPlayerTurn();
     }
 
+    public void playPrevMove(){
+        //TODO: Handle no exist move
+        roundCounter--;
+        AtomicInteger i= new AtomicInteger(0);
+        moves.get(roundCounter).getPlayersData().forEach(pl->players[i.getAndAdd(1)].setScore(pl.getScore()));
+        board = moves.get(roundCounter).getBoard();
+        deck = moves.get(roundCounter).getBoard().getDeck();
+        moves.get(roundCounter).playMove();
+    }
     private void notifyStartPlayerTurn(){
         if (board.getNumOfUnrevealedCard() != 0){
             notifyRollDicesPendingListener(true);
@@ -520,5 +530,18 @@ public class GameManager implements Serializable{
             else
                 return new PlayerData("human",i.get(),null,pl.getScore(),i.getAndIncrement());
         }).collect(Collectors.toList());
+    }
+
+    protected void setRevealCardsMove(List<Map.Entry<Integer,Integer>> revealCardsMove) {
+        List<Card> revealedCards = new ArrayList<>();
+        revealCardsMove.forEach(pair-> {
+            try {
+                revealedCards.add(board.getBoardCard(pair.getKey(), pair.getValue()));
+                moves.get(roundCounter).setRevealedCards(revealedCards);
+            } catch (Exception ex) {
+                ex.printStackTrace();
+                System.exit(1);
+            }
+        });
     }
 }

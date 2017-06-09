@@ -83,6 +83,10 @@ public class Player implements java.io.Serializable{
         score+=value;
     }
 
+    protected void setScore(long value){
+        score =value;
+    }
+
     protected void addComposedWord(String word, long frequency){
         this.composedWords.put(word,frequency);
     }
