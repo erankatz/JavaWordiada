@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
  * Created by eran on 29/03/2017.
  */
 public class Board implements java.io.Serializable,Cloneable{
-    private Card cards[][];
+    private Card cards[][] = new Card[0][0];
     private int boardSize;
     private int numOfUnrevealedCard=0;
     private GameManager manager;
@@ -49,6 +49,8 @@ public class Board implements java.io.Serializable,Cloneable{
     public Board clone(){
         Board b= new Board(boardSize,numOfUnrevealedCard,manager,word2FrequencyDic,wordSearcher);
         b.deck = this.deck.clone();
+        b.cards = this.cards.clone();
+        b.cards = cloneCards();
         return b;
     }
 
@@ -70,9 +72,10 @@ public class Board implements java.io.Serializable,Cloneable{
         return wordSearcher.findWords(filteredCards);
     }
 
-    public boolean revealWord() throws WrongCardPositionException,CardNotReveledException,BoardException {
+    public synchronized boolean revealWord() throws WrongCardPositionException,CardNotReveledException,BoardException {
         List<Map.Entry<Integer,Integer>> pairs = selectedCardsList;
         String str = buildWord(pairs);
+        manager.addRevealWordMove(selectedCardsList);
         if (word2FrequencyDic.containsKey(str))
         {
             replaceCards(pairs);
@@ -89,7 +92,7 @@ public class Board implements java.io.Serializable,Cloneable{
     }
 
 
-    private void replaceCards(List<Map.Entry<Integer,Integer>> pairs)  {
+    private synchronized void replaceCards(List<Map.Entry<Integer,Integer>> pairs)  {
 
         pairs.stream()
                 .forEach(entry-> {
@@ -104,7 +107,7 @@ public class Board implements java.io.Serializable,Cloneable{
                 });
     }
 
-    public void notifyAllCardsChanged(){
+    public synchronized void notifyAllCardsChanged(){
         Arrays.stream(cards).flatMap(x->Arrays.stream(x)).filter(x->x!= null).forEach(c->manager.notifyCardChangedListener(c));
     }
 
@@ -198,7 +201,7 @@ public class Board implements java.io.Serializable,Cloneable{
         }
     }
 
-    public void selectBoardCard(int row, int col,boolean value) {
+    public synchronized void selectBoardCard(int row, int col,boolean value) {
         if (value ==true)
             selectedCardsList.add(new AbstractMap.SimpleEntry<Integer, Integer>(row,col));
         cards[row-1][col-1].setSelected(value);
@@ -206,12 +209,12 @@ public class Board implements java.io.Serializable,Cloneable{
 
     }
 
-    public void clearSelectedCards(){
+    public synchronized void clearSelectedCards(){
         selectedCardsList.clear();
         Arrays.stream(cards).flatMap(Arrays::stream).filter(c->c!=null).forEach(c->selectBoardCard(c.getRow(),c.getCol(),false));
     }
 
-    public void revealCards() throws DiceException,CardException,WrongCardPositionException {
+    public synchronized void  revealCards() throws DiceException,CardException,WrongCardPositionException {
         //ToDO:Handle too many cards or few cards selected
         for (Map.Entry<Integer,Integer> e : selectedCardsList )
         {
@@ -240,6 +243,17 @@ public class Board implements java.io.Serializable,Cloneable{
         return  selectedCardsList;
     }
 
+    private Card[][]  cloneCards(){
+        Card[][] cards = new Card[getBoardSize()][getBoardSize()];
+        for (int i = 0; i<getBoardSize();i++){
+            for (int j=0; j<getBoardSize();j++){
+                if (this.cards[i][j] != null){
+                    cards[i][j] = this.cards[i][j].clone();
+                }
+            }
+        }
+        return cards;
+    }
     public String getLowestFrequencyDictionaryWords(){
         return  word2FrequencyDic
                 .entrySet()

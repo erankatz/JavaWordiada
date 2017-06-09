@@ -7,7 +7,7 @@ import java.util.List;
 /**
  * Created by eran on 09/06/2017.
  */
-public class Move {
+public class Move implements Cloneable {
     private final int sleepTime = Utils.sleepTime;
     private Integer diceResult;
     private List<PlayerData> playersData;
@@ -16,28 +16,30 @@ public class Move {
     private List<List<Card>> revealedWords = new ArrayList<>();
     private GameManager manager;
     private Board board;
+    private Player[] players;
 
-    public void playMove(){
+    public synchronized void playMove(){
         playersData.stream().forEach(pl ->manager.notifyPlayerDataChangedListener(pl));
         manager.notifyPlayerTurnListeners(currentPlayerIndex);
+        Utils.sleepForAWhile(sleepTime);
         board.clearSelectedCards();
+        Utils.sleepForAWhile(sleepTime);
         board.notifyAllCardsChanged();
         Utils.sleepForAWhile(sleepTime);
-
         if (diceResult != null) {
-            manager.notifyRollDices(diceResult, 0);
+            manager.notifyRollDices(diceResult);
             Utils.sleepForAWhile(sleepTime);
-            revealedCards.forEach(c->board.selectBoardCard(c.getRow(),c.getCol(),true));
+            revealedCards.forEach(c ->{ board.selectBoardCard(c.getRow(), c.getCol(), true);Utils.sleepForAWhile(sleepTime);});
             Utils.sleepForAWhile(sleepTime);
             try {
                 board.revealCards();
                 Utils.sleepForAWhile(sleepTime);
-            }catch (Exception ex){
+            } catch (Exception ex) {
                 ex.printStackTrace();
             }
-
-            revealedWords.forEach(cardWord-> {
-                        cardWord.stream().forEach(c -> board.selectBoardCard(c.getRow(), c.getCol(), true));
+        }
+        revealedWords.forEach(cardWord-> {
+                        cardWord.stream().forEach(c -> {board.selectBoardCard(c.getRow(), c.getCol(), true);Utils.sleepForAWhile(sleepTime);});
                         try {
                             Utils.sleepForAWhile(sleepTime);
                             board.revealWord();
@@ -47,10 +49,21 @@ public class Move {
                             System.exit(1);
                         }
                     }
-            );
-        }
+        );
+        manager.endPlayerTurn();
     }
 
+    @Override
+    public Move clone(){
+        Move m = new Move();
+        m.diceResult = this.diceResult;
+        m.playersData = this.playersData;
+        m.currentPlayerIndex =  this.currentPlayerIndex;
+        m.revealedCards = this.revealedCards;
+        m.revealedWords = this.revealedWords;
+        m.board = this.board.clone();
+        return m;
+    }
     public void setDiceResult(Integer diceResult) {
         this.diceResult = diceResult;
     }
@@ -64,7 +77,7 @@ public class Move {
     }
 
     public void setRevealedCards(List<Card> revealedCards) {
-        revealedCards = revealedCards;
+        this.revealedCards = revealedCards;
     }
 
     public void setManager(GameManager manager) {
@@ -85,5 +98,13 @@ public class Move {
 
     public List<PlayerData> getPlayersData() {
         return playersData;
+    }
+
+    public Player[] getPlayers(){
+        return players;
+    }
+
+    public void setPlayers(Player[] players2){
+        this.players = players2;
     }
 }

@@ -11,6 +11,7 @@ import java.time.Duration;
 import java.time.LocalTime;
 import java.util.*;
 
+import com.sun.org.apache.xpath.internal.operations.Bool;
 import engine.exception.EngineException;
 import engine.exception.board.BoardSizeOutOfRangeException;
 import engine.exception.board.NotEnoughCardsToFillBoardException;
@@ -39,7 +40,7 @@ import java.util.stream.Collectors;
 /**
  * Created by eran on 21/03/2017.
  */
-public class GameManager implements Serializable{
+public class GameManager implements Serializable,Cloneable{
     private List<CardRemovedListener> cardRemovedListeners = new ArrayList<>();
     private List<CardSelectedListener> cardSelectedListeners = new ArrayList<>();
     private List<DisableAllCardsListener> disableAllCardsListeners = new ArrayList<>();
@@ -70,7 +71,7 @@ public class GameManager implements Serializable{
     private boolean gameOver;
     private int winnerPlayer;
     private boolean isGoldFishMode;
-    private List<Move> moves;
+    private List<Move> moves = new ArrayList<>();
 
     public boolean getIsGoldFishMode(){
         return isGoldFishMode;
@@ -103,11 +104,27 @@ public class GameManager implements Serializable{
         return deck.getDeckSize();
     }
 
+    private void createNewMove(){
+        if (!gameOver){
+            Move move = new Move();
+            move.setBoard(board.clone());
+            Player[] players2 = new Player[this.players.length];
+            AtomicInteger i = new AtomicInteger(0);
+            Arrays.stream(this.players).forEach(pl->players2[i.getAndAdd(1)] = pl.clone());
+            move.setPlayers(players2);
+            move.setCurrentPlayerIndex(getCurrentPlayerTurn());
+            move.setPlayersData(getPlayersData());
+            move.setManager(this);
+            moves.add(move);
+        }
+    }
+
     public  void startGame()
     {
         isGameStarted = true;
         roundCounter = 0;
         this.gameStartedTime = LocalTime.now();
+        createNewMove();
         notifyPlayerTurnListeners(getCurrentPlayerTurn());
         notifyLetterFrequencyInDeckListeners(getCharFrequency());
         if (isComputerMode()){
@@ -130,13 +147,13 @@ public class GameManager implements Serializable{
     }
 
     protected void wordRevealed(String word, long frequency){
-        players[getCurrentPlayerTurn()].increaseScore(1);
-        players[getCurrentPlayerTurn()].addComposedWord(word,frequency);
-        Player pl = players[getCurrentPlayerTurn()];
-        if (players[getCurrentPlayerTurn()] instanceof ComputerPlayer)
-            notifyPlayerDataChangedListener(new PlayerData("computer",getCurrentPlayerTurn(),null,pl.getScore(),getCurrentPlayerTurn()));
-        else
-            notifyPlayerDataChangedListener(new PlayerData("human",getCurrentPlayerTurn(),null,pl.getScore(),getCurrentPlayerTurn()));
+            players[getCurrentPlayerTurn()].increaseScore(1);
+            players[getCurrentPlayerTurn()].addComposedWord(word,frequency);
+            Player pl = players[getCurrentPlayerTurn()];
+            if (players[getCurrentPlayerTurn()] instanceof ComputerPlayer)
+                notifyPlayerDataChangedListener(new PlayerData("computer",getCurrentPlayerTurn(),null,pl.getScore(),getCurrentPlayerTurn()));
+            else
+                notifyPlayerDataChangedListener(new PlayerData("human",getCurrentPlayerTurn(),null,pl.getScore(),getCurrentPlayerTurn()));
     }
 
     public Player[] getPlayers()
@@ -262,8 +279,8 @@ public class GameManager implements Serializable{
 
     public void playerQuit(){
         isGameStarted = false;
-        endPlayerTurn();
         gameOver = true;
+        endPlayerTurn();
         notifyGameOverListeners(getCurrentPlayerTurn());
     }
 
@@ -278,10 +295,10 @@ public class GameManager implements Serializable{
         return totalWordsInDict;
     }
 
-    protected void endPlayerTurn(){
+    protected synchronized void endPlayerTurn(){
         notifyDisableAllCardsListeners();
         if ((deck.getDeckSize() == 0 && board.getNumOfUnrevealedCard() ==0) ||
-                (this.isGoldFishMode && board.getNumberOfLegalWords(card->true) ==0)){
+                (this.isGoldFishMode && board.getNumberOfLegalWords(card->true) ==0 || gameOver)){
             gameOver =true;
             isGameStarted =false;
             if (players[0].getScore() > players[1].getScore()){
@@ -292,29 +309,34 @@ public class GameManager implements Serializable{
                 winnerPlayer =1;
             }
             notifyGameOverListeners(getCurrentPlayerTurn());
+        } else {
+            this.roundCounter++;
+            notifyStartPlayerTurn();
+            createNewMove();
+            if (isGoldFishMode){
+                board.ChangeAllCardsToUnrevealed();
+            }
+            players[getCurrentPlayerTurn()].setRetriesNumber(retriesNumber);
+            if (!isComputerMode() && players[getCurrentPlayerTurn()] instanceof ComputerPlayer){
+                ComputerPlayerPlayTurnTask task = new ComputerPlayerPlayTurnTask((ComputerPlayer)players[getCurrentPlayerTurn()]);
+                new Thread(task).start();
+            }
         }
-
-        this.roundCounter++;
-        if (isGoldFishMode){
-            board.ChangeAllCardsToUnrevealed();
-        }
-        players[getCurrentPlayerTurn()].setRetriesNumber(retriesNumber);
-        if (!isComputerMode() && players[getCurrentPlayerTurn()] instanceof ComputerPlayer){
-            ComputerPlayerPlayTurnTask task = new ComputerPlayerPlayTurnTask((ComputerPlayer)players[getCurrentPlayerTurn()]);
-            new Thread(task).start();
-        }
-        notifyStartPlayerTurn();
     }
 
-    public void playPrevMove(){
+    public synchronized void playPrevMove(){
         //TODO: Handle no exist move
         roundCounter--;
         AtomicInteger i= new AtomicInteger(0);
         moves.get(roundCounter).getPlayersData().forEach(pl->players[i.getAndAdd(1)].setScore(pl.getScore()));
-        board = moves.get(roundCounter).getBoard();
-        deck = moves.get(roundCounter).getBoard().getDeck();
-        moves.get(roundCounter).playMove();
+        Move move = moves.get(roundCounter).clone();
+        this.board = move.getBoard().clone();
+        this.deck = move.getBoard().getDeck();
+        //this.players = move.getPlayers();
+        move.setManager(this);
+        this.moves.get(roundCounter).playMove();
     }
+
     private void notifyStartPlayerTurn(){
         if (board.getNumOfUnrevealedCard() != 0){
             notifyRollDicesPendingListener(true);
@@ -351,7 +373,7 @@ public class GameManager implements Serializable{
                 players[i] = new ComputerPlayer(this,deck,board,new Dice(cubeFacets));
             else{
                 Player p = new Player(this,deck,board,new Dice(cubeFacets));
-                p.registerRolledDicesListener((result,retries) -> notifyEnableAllCardsListeners());
+                p.registerRolledDicesListener((result) -> notifyEnableAllCardsListeners());
                 players[i] =p;
             }
             players[i].setRetriesNumber(retriesNumber);
@@ -457,8 +479,9 @@ public class GameManager implements Serializable{
         playerDataChangedListeners.add(listener);
     }
 
-    public void notifyRollDices(int result,int retriesNumber){
-        RolledDicesListeners.forEach(listener->listener.rolldDice(result,retriesNumber));
+    public void notifyRollDices(int result){
+        moves.get(roundCounter).setDiceResult(result);
+        RolledDicesListeners.forEach(listener->listener.rolldDice(result));
     }
     public void notifyDisableAllCardsListeners(){
         disableAllCardsListeners.forEach(listener->listener.disableAllCards());
@@ -533,15 +556,34 @@ public class GameManager implements Serializable{
     }
 
     protected void setRevealCardsMove(List<Map.Entry<Integer,Integer>> revealCardsMove) {
-        List<Card> revealedCards = new ArrayList<>();
-        revealCardsMove.forEach(pair-> {
-            try {
-                revealedCards.add(board.getBoardCard(pair.getKey(), pair.getValue()));
-                moves.get(roundCounter).setRevealedCards(revealedCards);
-            } catch (Exception ex) {
-                ex.printStackTrace();
-                System.exit(1);
-            }
-        });
+        if (!gameOver){
+            List<Card> revealedCards = new ArrayList<>();
+            revealCardsMove.forEach(pair-> {
+                try {
+                    revealedCards.add(board.getBoardCard(pair.getKey(), pair.getValue()));
+                    moves.get(roundCounter).setRevealedCards(revealedCards);
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                    System.exit(1);
+                }
+            });
+            moves.get(roundCounter).setRevealedCards(revealedCards);
+        }
     }
+
+    protected void addRevealWordMove(List<Map.Entry<Integer,Integer>> revealCardsMove){
+        if (!gameOver){
+            List<Card> revealedCards = new ArrayList<>();
+            revealCardsMove.forEach(pair-> {
+                try {
+                    revealedCards.add(board.getBoardCard(pair.getKey(), pair.getValue()));
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                    System.exit(1);
+                }
+            });
+            moves.get(roundCounter).addRevealWordTry(revealedCards);
+        }
+    }
+
 }

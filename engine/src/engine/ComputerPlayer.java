@@ -94,7 +94,7 @@ public class ComputerPlayer extends Player implements java.io.Serializable {
     public int rollDice()
     {
         leftCardNumToReveal = cube.role();
-        manager.notifyRollDices(leftCardNumToReveal,retriesNumber);
+        manager.notifyRollDices(leftCardNumToReveal);
         return leftCardNumToReveal;
     }
 }

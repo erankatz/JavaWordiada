@@ -20,7 +20,7 @@ import java.util.*;
 /**
  * Created by eran on 30/03/2017.
  */
-public class Player implements java.io.Serializable{
+public class Player implements java.io.Serializable,Cloneable{
     private Deck deck;
     protected Board board;
     protected Dice cube;
@@ -43,9 +43,9 @@ public class Player implements java.io.Serializable{
     public int rollDice()
     {
         leftCardNumToReveal = cube.role();
-        notifyRolledDicesListeners(leftCardNumToReveal,retriesNumber);
+        notifyRolledDicesListeners(leftCardNumToReveal);
         manager.notifyRollDicesPendingListener(false);
-        manager.notifyRollDices(leftCardNumToReveal,retriesNumber);
+        manager.notifyRollDices(leftCardNumToReveal);
         manager.notifyRevealCardPendingListener(true);
         return leftCardNumToReveal;
     }
@@ -79,15 +79,15 @@ public class Player implements java.io.Serializable{
         return ret;
     }
 
-    protected void increaseScore(long value){
+    protected synchronized void increaseScore(long value){
         score+=value;
     }
 
-    protected void setScore(long value){
+    protected synchronized void setScore(long value){
         score =value;
     }
 
-    protected void addComposedWord(String word, long frequency){
+    protected synchronized void addComposedWord(String word, long frequency){
         this.composedWords.put(word,frequency);
     }
 
@@ -115,8 +115,8 @@ public class Player implements java.io.Serializable{
         rolledDicesListenerListeners.add(listener);
     }
 
-    private void notifyRolledDicesListeners(int result,int retriesNumber){
-        rolledDicesListenerListeners.forEach(listener->listener.rolldDice(result,retriesNumber));
+    private void notifyRolledDicesListeners(int result){
+        rolledDicesListenerListeners.forEach(listener->listener.rolldDice(result));
     }
 
     public void revealCards() throws EngineException,DiceNotRolledException,NoCardsLeftToRevealException,ChosenWrongNumberOfCardsException {
@@ -136,5 +136,15 @@ public class Player implements java.io.Serializable{
         manager.notifyRevealWordPendingListener(true);
     }
 
-
+    @Override
+    public Player clone(){
+        Player pl = new Player(this.manager,this.deck.clone(),this.board.clone(),cube);
+        pl.leftCardNumToReveal =this.leftCardNumToReveal;
+        pl.score = this.score;
+        pl.composedWords = new HashMap<>();
+        this.composedWords.entrySet().stream().forEach(pair->pl.composedWords.put(pair.getKey(),pair.getValue()));
+        pl.retriesNumber = this.retriesNumber;
+        pl.rolledDicesListenerListeners = this.rolledDicesListenerListeners;
+        return pl;
+    }
 }

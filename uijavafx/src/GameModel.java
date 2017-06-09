@@ -50,7 +50,7 @@ public class GameModel {
                 (int row,int col) -> cardSelected.accept(new  AbstractMap.SimpleEntry(row,col))
         );
         manager.registerCardRemovedListener((row,col)->cardRemoved.accept(new AbstractMap.SimpleEntry(row,col)));
-        manager.registerRollDices((result,retriesNumber) -> rolledDicesResult2RetriesLeft.accept(new AbstractMap.SimpleEntry(result,retriesNumber)));
+        manager.registerRollDices((result) -> rolledDicesResult2RetriesLeft.accept(new AbstractMap.SimpleEntry(result,0)));
         manager.registerLetterFrequencyInDeckListener((map) ->letterFrequencyInDeck.accept(map));
         manager.registerPlayerTurn((playerId -> playerTurn.accept(playerId)));
         manager.registerWordRevealedListener((word,score)->wordRevealedWord2Score.accept(new AbstractMap.SimpleEntry(word,score)));
@@ -78,6 +78,10 @@ public class GameModel {
         cardSelected = listenerConsumer;
     }
 
+    public void playPrevMove(){
+       new Thread(()->manager.playPrevMove()).start();
+       //manager.playPrevMove();
+    }
 
     public void setCardConsumer(Consumer<Card> listenerConsumer){
         updateCard = listenerConsumer;
@@ -203,6 +207,7 @@ public class GameModel {
     }
 
     public void quitGame() {
-        manager.playerQuit();
+        if (!isComputerPlayerPlays())
+            manager.playerQuit();
     }
 }

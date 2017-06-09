@@ -70,6 +70,7 @@ public class GameUIController implements Initializable  {
         playersTable.setDisable(true);
         buttonPrev.setVisible(false);
         buttonNext.setVisible(false);
+        buttonQuitGame.setDisable(true);
         buttonGetCurrentPlayerStatus.setVisible(false);
         labelStatus.setText("");
         nameCol.setCellValueFactory(new PropertyValueFactory<>("name"));
@@ -83,8 +84,11 @@ public class GameUIController implements Initializable  {
         buttonRevealCard.setDisable(true);
         buttonRollDice.setDisable(true);
         buttonQuitGame.setOnMouseClicked(e->model.quitGame());
-        buttonStart.setOnMouseClicked((Event e) ->
-            model.startGame());
+        buttonStart.setOnMouseClicked((Event e) ->{
+                    buttonQuitGame.setDisable(false);
+                    model.startGame();
+                }
+        );
         buttonClearCardSelection.setOnMouseClicked((Event e)->model.clearCardSelection());
         buttonClearCardSelection.disableProperty().bind(((buttonRevealCard.disabledProperty().not()).or(buttonRevealWord.disabledProperty().not())).not());
         buttonRevealCard.setOnMouseClicked((Event e) ->{
@@ -124,7 +128,7 @@ public class GameUIController implements Initializable  {
                 }
             }
         });
-
+        this.buttonPrev.setOnMouseClicked((Event e)-> model.playPrevMove());
         this.buttonRollDice.setOnMouseClicked((Event e) -> {
             model.rollDice();
         });
@@ -205,7 +209,16 @@ public class GameUIController implements Initializable  {
         );
         model.setGameOverConsumer((id)->
         Platform.runLater(
-                ()-> labelStatus.setText("The winner is player id :" + id)));
+                ()-> {
+                    labelStatus.setText("The winner is player id :" + id);
+                    buttonPrev.setVisible(true);
+                    buttonNext.setVisible(true);
+                    buttonGetCurrentPlayerStatus.setDisable(true);
+                    buttonRollDice.setDisable(true);
+                    buttonRevealCard.setDisable(true);
+                    buttonQuitGame.setDisable(true);
+                    buttonRevealWord.setDisable(true);
+                }));
 
         model.setUpdatePlayerScoreConsumer(pl->
             Platform.runLater(() -> {

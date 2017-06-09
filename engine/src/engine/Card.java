@@ -84,7 +84,7 @@ public class Card implements java.io.Serializable,Cloneable{
         return isSelected;
     }
 
-    public void setSelected(boolean selected) {
+    public synchronized void setSelected(boolean selected) {
         isSelected = selected;
     }
 }

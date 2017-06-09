@@ -34,10 +34,10 @@ public class CardUI extends javafx.scene.control.Button{
         setStyle("-fx-base: #ffffff");
         setText("");
     }
-    void setStyleUndefined(){
+    void setStyleUndefined(Card c){
         setDisable(false);
         setStyle("-fx-base: #d3f3ff");
-        if (model.getCardLetter(row,col) == '?')
+        if (c.getLetter() == '?')
             setStyle("-fx-background-color: green");
         else
             setStyle("-fx-background-color: white");

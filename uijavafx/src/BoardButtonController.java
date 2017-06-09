@@ -218,7 +218,7 @@ public class BoardButtonController implements Initializable {
         if (c.getSelected()){
             cardUI.setStyleSelected();
         } else{
-            cardUI.setStyleUndefined();
+            cardUI.setStyleUndefined(c);
         }
     }
 }
