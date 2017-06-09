@@ -101,6 +101,7 @@ public class BoardButtonController implements Initializable {
         this.gridPaneBoard.setHgap(0);
         this.gridPaneBoard.setVgap(0);
         this.gridPaneBoard.setPadding(new Insets(0, 25.0D, 0, 25.0D));
+        this.gridPaneBoard.setPadding(new Insets(0, 25.0D, 0, 25.0D));
         this.rows = model.getBoardSize();
         this.columns = model.getBoardSize();
         createRowsAndCols();

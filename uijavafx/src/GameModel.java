@@ -183,6 +183,10 @@ public class GameModel {
         manager.startGame();
     }
 
+    public boolean isComputerPlayerPlays(){
+        return manager.getPlayers()[manager.getCurrentPlayerTurn()] instanceof ComputerPlayer;
+    }
+
     public void clearCardSelection() {
         manager.getBoard().clearSelectedCards();
     }

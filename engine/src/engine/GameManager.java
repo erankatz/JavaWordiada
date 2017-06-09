@@ -514,6 +514,11 @@ public class GameManager implements Serializable{
 
     public List<PlayerData> getPlayersData(){
         AtomicInteger i = new AtomicInteger(0);
-        return  Arrays.stream(players).map(pl-> new PlayerData("human",i.get(),null,pl.getScore(),i.getAndIncrement())).collect(Collectors.toList());
+        return  Arrays.stream(players).map(pl-> {
+            if (pl instanceof ComputerPlayer)
+                return new PlayerData("computer",i.get(),null,pl.getScore(),i.getAndIncrement());
+            else
+                return new PlayerData("human",i.get(),null,pl.getScore(),i.getAndIncrement());
+        }).collect(Collectors.toList());
     }
 }

@@ -29,8 +29,8 @@
    <left>
       <TableView fx:id="playersTable" prefHeight="506.0" prefWidth="245.0" BorderPane.alignment="CENTER">
         <columns>
-          <TableColumn fx:id="typeCol" prefWidth="55.0" text="Type" />
-          <TableColumn fx:id="idCol" prefWidth="42.0" text="ID" />
+          <TableColumn fx:id="typeCol" prefWidth="62.0" text="Type" />
+          <TableColumn fx:id="idCol" prefWidth="35.0" text="ID" />
             <TableColumn fx:id="nameCol" prefWidth="72.0" text="Name" />
             <TableColumn fx:id="scoreCol" prefWidth="74.0" text="Score" />
         </columns>
@@ -48,9 +48,12 @@
             <Label fx:id="labelIsGoldfishMode" layoutX="24.0" layoutY="266.0" prefHeight="17.0" prefWidth="137.0" text="Gold FIsh Mode : " />
             <TextArea fx:id="textBoxLowestFrequencyDictionaryWords" editable="false" layoutX="24.0" layoutY="285.0" prefHeight="206.0" prefWidth="121.0" />
             <TextArea fx:id="textBoxLetterFrequencyInDeck" editable="false" layoutX="168.0" layoutY="57.0" prefHeight="436.0" prefWidth="74.0" />
-            <Label fx:id="labelPlayerTurn" layoutX="32.0" layoutY="6.0" prefHeight="17.0" prefWidth="210.0" text="Player Turn :" />
+            <Label fx:id="labelPlayerTurn" layoutX="32.0" layoutY="1.0" prefHeight="17.0" prefWidth="210.0" text="Player Turn :" />
             <Button fx:id="buttonClearCardSelection" layoutX="15.0" layoutY="106.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="128.0" text="Clear Card Selection" />
             <Button fx:id="buttonQuitGame" layoutX="15.0" layoutY="73.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="128.0" text="Quit" />
+            <Button fx:id="buttonPrev" layoutX="32.0" layoutY="18.0" mnemonicParsing="false" text="Prev" />
+            <Button fx:id="buttonNext" layoutX="85.0" layoutY="18.0" mnemonicParsing="false" text="Next" />
+            <Button fx:id="buttonGetCurrentPlayerStatus" layoutX="16.0" layoutY="45.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="126.0" text="Score Detailed" />
          </children>
       </AnchorPane>
    </right>

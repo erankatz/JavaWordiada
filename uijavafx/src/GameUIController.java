@@ -60,11 +60,17 @@ public class GameUIController implements Initializable  {
     @FXML TableView<PlayerData> playersTable;
     @FXML Button buttonQuitGame;
     @FXML Label labelStatus;
-
+    @FXML Button buttonPrev;
+    @FXML Button buttonNext;
+    @FXML Button buttonGetCurrentPlayerStatus;
     GameModel model = new GameModel();
     BoardButtonController boardButtonController;
     @Override
     public void initialize(URL url, ResourceBundle rb) {
+        playersTable.setDisable(true);
+        buttonPrev.setVisible(false);
+        buttonNext.setVisible(false);
+        buttonGetCurrentPlayerStatus.setVisible(false);
         labelStatus.setText("");
         nameCol.setCellValueFactory(new PropertyValueFactory<>("name"));
         typeCol.setCellValueFactory(new PropertyValueFactory<>("type"));
@@ -145,9 +151,13 @@ public class GameUIController implements Initializable  {
             Platform.runLater(
                     ()->boardButtonController.updateCharCard(c)
             ));
-        model.setRolledDicesConsumer((result)->{
-            labelStatus.setText(String.format("Pick %d Cards in the board\n", result.getKey(),result.getValue()));
-        });
+        model.setRolledDicesConsumer((result)->
+            Platform.runLater(()->{
+                    if (!model.isComputerPlayerPlays())
+                        labelStatus.setText(String.format("Pick %d Cards in the board\n", result.getKey(),result.getValue()));
+                    else
+                        labelStatus.setText(String.format("Computer Player got %d Cards on dices, \ncurrently reveling cards in the board\n", result.getKey(),result.getValue()));
+            }));
         model.setCardRemovedConsumer((e)->
                 Platform.runLater(()->
                     boardButtonController.removeCard(e.getKey(),e.getValue())
@@ -163,16 +173,20 @@ public class GameUIController implements Initializable  {
                     updateLetterFrequencyInDeckTextBox(frequency)
             )
         );
-        model.setPlayerTurnConsumer((playerId)->
-            Platform.runLater(()->
-                    labelPlayerTurn.setText("Player Turn: " + playerId)
-            )
+        model.setPlayerTurnConsumer((playerIndex)->
+            Platform.runLater(()-> {
+                playersTable.getSelectionModel().select(playerIndex);
+                //labelPlayerTurn.setText("Player Turn: " + playerId)
+            })
         );
         model.setWordRevealedWord2Score((e)->
-            Platform.runLater(()->
-                    labelStatus.setText("You got " + e.getValue() + " for trying to composing word " + e.getKey() +
-                           " you have "+ model.getCurrentPlayerRetriesLeft() + " more chances " )
-            )
+            Platform.runLater(()->{
+                    if (!model.isComputerPlayerPlays())
+                        labelStatus.setText("You got " + e.getValue() + " for trying to composing word " + e.getKey() +
+                               " you have "+ model.getCurrentPlayerRetriesLeft() + " more chances " );
+                    else
+                        labelStatus.setText("Computer Player got " + e.getValue() + " for trying to composing word " + e.getKey());
+            })
         );
         model.setIsRealedWordPendingConsumer((isPending)->
             Platform.runLater(()->
@@ -192,13 +206,13 @@ public class GameUIController implements Initializable  {
         model.setGameOverConsumer((id)->
         Platform.runLater(
                 ()-> labelStatus.setText("The winner is player id :" + id)));
-        model.setUpdatePlayerScoreConsumer(pl->{
-            playersTable.getItems().get(pl.getIndex()).setScore(pl.getScore());
-            playersTable.refresh();
-        }
-        );
-    }
 
+        model.setUpdatePlayerScoreConsumer(pl->
+            Platform.runLater(() -> {
+                        playersTable.getItems().get(pl.getIndex()).setScore(pl.getScore());
+                        playersTable.refresh();
+                    }));
+    }
     private void updateLetterFrequencyInDeckTextBox(Map<Character,Long> frequency) {
         String charFrequencyToTextBoxText = frequency
                 .entrySet()
