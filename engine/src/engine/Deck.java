@@ -36,6 +36,14 @@ public class Deck implements java.io.Serializable,Cloneable{
         letterArr.stream().forEach(letter->this.deckSize+=letter.getOccurence());
     }
 
+    public long getScoreLetter(char ch ){
+        Optional<Letter> letter = letterArr.stream().filter(letter1->letter1.getSign()==ch).findFirst();
+        if (letter.isPresent()){
+            return ( Byte.toUnsignedLong(letter.get().getScore()));
+        }
+        return 0;
+    }
+
     @Override
     public Deck clone(){
         Deck deck = new Deck();

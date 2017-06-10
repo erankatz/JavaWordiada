@@ -23,8 +23,6 @@ import java.util.function.Consumer;
 public class GameModel {
     private GameManager manager;
     private Board board;
-    private BoardButtonController boardButtonController;
-    private List<List<WritableImage>> gameHistory;
     private Consumer<Map.Entry<Integer,Integer>> cardRemoved;
     private Consumer<Map.Entry<Integer,Integer>> cardSelected;
     private Consumer<Boolean> isDisabledAllCards;

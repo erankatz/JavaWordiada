@@ -13,22 +13,22 @@ import java.util.stream.Collectors;
  */
 public class ComputerPlayer extends Player implements java.io.Serializable {
     private final int sleepTime = Utils.sleepTime;
-    public ComputerPlayer (GameManager manager,Deck deck,Board board,Dice cube){
-        super(manager,deck,board,cube);
+    public ComputerPlayer (GameManager manager,String id,String name){
+        super(manager,id,name);
     }
 
     public void playTurn(){
         List<Map.Entry<Integer,Integer>> pairs;
         Random rand = new Random();
-        if (board.getNumOfUnrevealedCard() != 0) {
+        if (manager.getBoard().getNumOfUnrevealedCard() != 0) {
         rollDice();
         Utils.sleepForAWhile(sleepTime);
-        pairs = board.AllCardsPositionsFilter(card->card != null && !card.isRevealed());
+        pairs = manager.getBoard().AllCardsPositionsFilter(card->card != null && !card.isRevealed());
             while (isLeftCardsToReveal() && pairs.size() !=0) {
                 Map.Entry<Integer, Integer> pair = pairs.get(rand.nextInt(pairs.size()));
                 pairs.remove(pair);
                 try {
-                    board.selectBoardCard(pair.getKey(), pair.getValue(),true);
+                    manager.getBoard().selectBoardCard(pair.getKey(), pair.getValue(),true);
                     Utils.sleepForAWhile(sleepTime);
                     leftCardNumToReveal--;
                 } catch (Exception ex) {
@@ -48,19 +48,19 @@ public class ComputerPlayer extends Player implements java.io.Serializable {
         }
 
 
-        List<String> words =  board.getLegalWords(card->card!=null && card.isRevealed()).stream().distinct().collect(Collectors.toList());
+        List<String> words =  manager.getBoard().getLegalWords(card->card!=null && card.isRevealed()).stream().distinct().collect(Collectors.toList());
         if (words.size() >0){
             List<Map.Entry<Integer,Integer>> wordPairs = new ArrayList<>();
             String word = words.get(rand.nextInt(words.size()));
-            pairs = board.AllCardsPositionsFilter(card->card!=null && card.isRevealed());
+            pairs = manager.getBoard().AllCardsPositionsFilter(card->card!=null && card.isRevealed());
             for (int k=0;k<word.length();k++) {
                 boolean found =false;
                 for (int i = 0; i < pairs.size() && !found; i++){
                     try {
                         int row = pairs.get(i).getKey();
                         int col = pairs.get(i).getValue();
-                        if (board.getBoardCard(row, col).getLetter() == word.charAt(k)) {
-                            board.selectBoardCard(row,col,true);
+                        if (manager.getBoard().getBoardCard(row, col).getLetter() == word.charAt(k)) {
+                            manager.getBoard().selectBoardCard(row,col,true);
                             Utils.sleepForAWhile(sleepTime);
                             Map.Entry<Integer, Integer> pair = pairs.get(i);
                             pairs.remove(pair);
@@ -75,9 +75,9 @@ public class ComputerPlayer extends Player implements java.io.Serializable {
                 }
             }
             try{
-                board.revealWord();
+                manager.getBoard().revealWord();
                 Utils.sleepForAWhile(sleepTime);
-                board.clearSelectedCards();
+                manager.getBoard().clearSelectedCards();
             }catch (Exception ex)
             {
                 System.out.println("Error occurred");

@@ -12,6 +12,8 @@ import engine.wordSearch.WordSearch;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -25,6 +27,7 @@ public class Board implements java.io.Serializable,Cloneable{
     private int numOfUnrevealedCard=0;
     private GameManager manager;
     private Map<String, Long> word2FrequencyDic;
+    private Map<String,Integer> word2Segment;
     private Deck deck;
     private WordSearch wordSearcher;
     private List<Map.Entry<Integer,Integer>> selectedCardsList = new ArrayList<>();
@@ -45,6 +48,30 @@ public class Board implements java.io.Serializable,Cloneable{
         this.deck = deck;
     }
 
+    public void createWord2Segment(){
+        this.word2Segment = new HashMap<>();
+        //Get Sorted Dict
+        List<Map.Entry<String,Long>> sortedWordByFreq =
+                word2FrequencyDic.entrySet().stream().sorted((e1,e2)->e2.getValue().compareTo(e1.getValue())).collect(Collectors.toList());
+
+        //Calc Semgment Size
+        AtomicLong totalWords = new AtomicLong(0);
+        word2FrequencyDic.entrySet().stream().map((e)->e.getValue()).forEach(freq->totalWords.addAndGet(freq));
+        Long numberOfWordsPerSegment = totalWords.get() /3;
+
+        AtomicInteger segmentIndex = new AtomicInteger(1);
+        AtomicLong currentSegementSize = new AtomicLong(0);
+        sortedWordByFreq.stream().forEach((entry) ->{
+            if (currentSegementSize.get() > numberOfWordsPerSegment){
+                segmentIndex.addAndGet(1);
+            }
+            this.word2Segment.put(entry.getKey(),segmentIndex.get());
+        });
+    }
+
+    public int getWord2Segment(String word){
+        return word2Segment.get(word);
+    }
     @Override
     public Board clone(){
         Board b= new Board(boardSize,numOfUnrevealedCard,manager,word2FrequencyDic,wordSearcher);

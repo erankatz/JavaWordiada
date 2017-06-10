@@ -5,14 +5,14 @@ package engine;
  */
 public class PlayerData {
     private String type;
-    private int id;
+    private String id;
     private String name;
     private long score;
     private int index;
 
-    public PlayerData(String type, int id, String name, long score,int index) {
+    public PlayerData(String type, String id, String name, long score,int index) {
         this.type = type;
-        this.id = index;
+        this.id = id;
         this.name = name;
         this.score = score;
         this.index = index;
@@ -22,7 +22,7 @@ public class PlayerData {
         return type;
     }
 
-    public int getId() {
+    public String getId() {
         return id;
     }
 

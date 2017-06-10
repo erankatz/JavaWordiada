@@ -13,7 +13,7 @@ public class ChosenWrongNumberOfCardsException extends PlayerException {
 
     @Override
     public String getMessage(){
-        return "You chosen wrong number of card you got " + cubeResult + " and chosen " + numberOfSelectedCards;
+        return "You chose wrong number of cards. Instead of picking " + cubeResult + " cards you picked " + numberOfSelectedCards;
     }
 
 }

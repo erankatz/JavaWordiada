@@ -93,13 +93,16 @@ public class GameUIController implements Initializable  {
         buttonRevealWord.setDisable(true);
         buttonRevealCard.setDisable(true);
         buttonRollDice.setDisable(true);
-        buttonQuitGame.setOnMouseClicked(e->model.quitGame());
+        buttonQuitGame.setOnMouseClicked(e-> {
+            if (Utils.YesNoDialog("Are You sure","Quite Game Dialog")){{
+                    model.quitGame();
+            }}});
         buttonStart.setOnMouseClicked((Event e) ->{
                     clearGameUI();
                     model.startGame();
                     initNewGameUI();
                     buttonGetCurrentPlayerStatus.disableProperty().bind(((buttonRevealCard.disabledProperty().not()).or(buttonRevealWord.disabledProperty().not()).or(buttonRollDice.disabledProperty().not())).not());
-                }
+            }
         );
         buttonClearCardSelection.setOnMouseClicked((Event e)->model.clearCardSelection());
         buttonClearCardSelection.disableProperty().bind(((buttonRevealCard.disabledProperty().not()).or(buttonRevealWord.disabledProperty().not())).not());
@@ -193,8 +196,9 @@ public class GameUIController implements Initializable  {
 
     private void setConsumers(GameModel model) {
         model.setDisableAllCardsConsumer((Boolean flag)->
-                Platform.runLater(
-                        ()-> boardButtonController.setDisable(flag)
+                Platform.runLater(()->
+                        //()-> boardButtonController.setDisable(flag)
+                        labelIsGoldfishMode.setText(labelIsGoldfishMode.getText())
                 )
         );
         model.setCardConsumer((Card c)->
@@ -203,7 +207,8 @@ public class GameUIController implements Initializable  {
             ));
         model.setRolledDicesConsumer((result)->
             Platform.runLater(()->{
-                    if (!model.isComputerPlayerPlays())
+                boardButtonController.setDisable(false);
+                if (!model.isComputerPlayerPlays())
                         labelStatus.setText(String.format("Pick %d Cards in the board\n", result.getKey(),result.getValue()));
                     else
                         labelStatus.setText(String.format("Computer Player got %d Cards on dices, \ncurrently reveling cards in the board\n", result.getKey(),result.getValue()));
@@ -261,6 +266,7 @@ public class GameUIController implements Initializable  {
         );
         model.setIsRolledDicesPendingConsumer((isPending)->
             Platform.runLater(()->{
+                    boardButtonController.setDisable(true);
                     if (!model.isComputerPlayerPlays() && !model.getIsReplayMode()){
                         buttonRollDice.setDisable(!isPending);
                     } else {

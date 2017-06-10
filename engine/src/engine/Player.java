@@ -22,25 +22,23 @@ import java.util.*;
  */
 public class Player implements java.io.Serializable,Cloneable{
     private Deck deck;
-    protected Board board;
     protected Dice cube;
     protected GameManager manager;
     protected int leftCardNumToReveal;
     private long score;
-    private int id =0;
+    private String id;
+    private String name;
     private Map<String,Long> composedWords = new HashMap<>();
     protected int retriesNumber;
     private List<RolledDicesListener> rolledDicesListenerListeners = new ArrayList<>();
     private int numberOfWordsRevealed =0;
 
-    public Player (GameManager manager,Deck deck,Board board,Dice cube)
+    public Player (GameManager manager,String id,String name)
     {
         this.manager = manager;
-        this.deck = deck;
-        this.cube = cube;
-        this.board = board;
         this.leftCardNumToReveal = 0;
-
+        this.id = id;
+        this.name = name;
     }
     public int rollDice()
     {
@@ -68,7 +66,7 @@ public class Player implements java.io.Serializable,Cloneable{
     }
 
     public boolean revealWord() throws WrongCardPositionException,CardNotReveledException,BoardException {
-        boolean ret = board.revealWord();
+        boolean ret = manager.getBoard().revealWord();
         if (ret == true){
             retriesNumber=0;
         } else{
@@ -110,7 +108,7 @@ public class Player implements java.io.Serializable,Cloneable{
     }
 
     public boolean isLeftCardsToReveal() {
-        return !(board.getNumOfUnrevealedCard() == 0 || leftCardNumToReveal == 0);
+        return !(manager.getBoard().getNumOfUnrevealedCard() == 0 || leftCardNumToReveal == 0);
     }
 
     public int getRetriesNumber(){
@@ -138,20 +136,20 @@ public class Player implements java.io.Serializable,Cloneable{
         {
             throw new NoCardsLeftToRevealException();
         }
-        if (board.getSelectedCardsList().size() != cube.getResult()){
-            throw new ChosenWrongNumberOfCardsException(cube.getResult(),board.getSelectedCardsList().size());
+        if (manager.getBoard().getSelectedCardsList().size() != cube.getResult()){
+            throw new ChosenWrongNumberOfCardsException(cube.getResult(),manager.getBoard().getSelectedCardsList().size());
         }
-        board.revealCards();
+        manager.getBoard().revealCards();
         manager.notifyRevealCardPendingListener(false);
         manager.notifyRevealWordPendingListener(true);
     }
 
-    public int getId(){
+    public String getId(){
         return id;
     }
     @Override
     public Player clone(){
-        Player pl = new Player(this.manager,this.deck.clone(),this.board.clone(),cube);
+        Player pl = new Player(manager,this.id,this.name);
         pl.leftCardNumToReveal =this.leftCardNumToReveal;
         pl.score = this.score;
         pl.composedWords = new HashMap<>();
@@ -159,10 +157,25 @@ public class Player implements java.io.Serializable,Cloneable{
         pl.retriesNumber = this.retriesNumber;
         pl.rolledDicesListenerListeners = this.rolledDicesListenerListeners;
         pl.numberOfWordsRevealed = this.numberOfWordsRevealed;
+        pl.deck = this.deck.clone();
+        pl.cube = this.cube;
         return pl;
     }
 
     public int getNumberOfWordsRevealed() {
         return numberOfWordsRevealed;
+    }
+
+    public void setDeck(Deck deck) {
+        this.deck = deck;
+    }
+
+
+    public void setDice(Dice dice) {
+        this.cube = dice;
+    }
+
+    public String getName(){
+        return this.name;
     }
 }

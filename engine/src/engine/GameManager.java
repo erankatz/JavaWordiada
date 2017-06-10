@@ -18,10 +18,14 @@ import engine.exception.board.NotEnoughCardsToFillBoardException;
 import engine.exception.dice.DiceException;
 import engine.exception.file.FileException;
 import engine.exception.file.FileExtensionException;
+import engine.exception.letter.AlphabetExeption;
+import engine.exception.letter.DuplicateLetterException;
 import engine.exception.letter.LetterException;
 import engine.listener.*;
 import engine.tasks.ComputerPlayerPlayTurnTask;
 import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 
@@ -34,6 +38,7 @@ import javax.xml.validation.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -74,6 +79,7 @@ public class GameManager implements Serializable,Cloneable{
     private List<Move> moves = new ArrayList<>();
     private int totalNumberofTurnsElapses = 0;
     private boolean replayMode = false;
+    private EnumScoreMode scoreMode;
 
     public boolean getIsGoldFishMode(){
         return isGoldFishMode;
@@ -150,12 +156,19 @@ public class GameManager implements Serializable,Cloneable{
     }
 
     protected void wordRevealed(String word, long frequency){
-            players[getCurrentPlayerTurn()].addComposedWord(word,1);
+            if (scoreMode == EnumScoreMode.WORDCOUNT)
+                players[getCurrentPlayerTurn()].addComposedWord(word,1);
+            else {
+                AtomicLong sumOfCharsScore = new AtomicLong(0);
+                word.chars().forEach(ch->sumOfCharsScore.addAndGet(board.getDeck().getScoreLetter((char)ch)));
+                long score = sumOfCharsScore.get() * board.getWord2Segment(word);
+                players[getCurrentPlayerTurn()].addComposedWord(word,score);
+            }
             Player pl = players[getCurrentPlayerTurn()];
             if (players[getCurrentPlayerTurn()] instanceof ComputerPlayer)
-                notifyPlayerDataChangedListener(new PlayerData("computer",getCurrentPlayerTurn(),null,pl.getScore(),getCurrentPlayerTurn()));
+                notifyPlayerDataChangedListener(new PlayerData("Computer",pl.getId(),pl.getName(),pl.getScore(),getCurrentPlayerTurn()));
             else
-                notifyPlayerDataChangedListener(new PlayerData("human",getCurrentPlayerTurn(),null,pl.getScore(),getCurrentPlayerTurn()));
+                notifyPlayerDataChangedListener(new PlayerData("Human",pl.getId(),pl.getName(),pl.getScore(),getCurrentPlayerTurn()));
     }
 
     public Player[] getPlayers()
@@ -222,6 +235,9 @@ public class GameManager implements Serializable,Cloneable{
             //Create deck
             deck = new Deck(doc,xpath);
 
+            //Create Players
+            players = readPlayersFromXml(doc,xpath);
+
             //GetDictionaryFileNameFromFile
             expr =  xpath.compile("/GameDescriptor/Structure/DictionaryFileName/text()");
             dictionaryFilePath =  fXmlFile.getParent() + "\\dictionary\\"+  (String)expr.evaluate(doc, XPathConstants.STRING);
@@ -247,7 +263,37 @@ public class GameManager implements Serializable,Cloneable{
             //CheckIfGoldFishMode
             expr =  xpath.compile("/GameDescriptor/GameType/@gold-fish-mode");
             isGoldFishMode = Boolean.parseBoolean((String) expr.evaluate(doc, XPathConstants.STRING));
+
+        //scoreMode
+        expr =  xpath.compile("/GameDescriptor/GameType/@winner-according-to");
+        String scoreMode = (String) expr.evaluate(doc, XPathConstants.STRING);
+        if(scoreMode.equals("WordScore")){
+            this.scoreMode = EnumScoreMode.WORDSCORE;
+        }else{ //WordCount
+            this.scoreMode = EnumScoreMode.WORDCOUNT;
+        }
     }
+
+    private Player[] readPlayersFromXml(Document doc, XPath xpath) throws XPathExpressionException {
+        XPathExpression expr = xpath.compile("/GameDescriptor/Players/Player");
+        NodeList nodes = (NodeList) expr.evaluate(doc, XPathConstants.NODESET);
+        Player[] players = new Player[nodes.getLength()];
+        for (int i = 0; i < nodes.getLength(); i++){
+            Element element = (Element)nodes.item(i);
+            String name = element.getElementsByTagName("Name").item(0).getTextContent();
+            String id = element.getAttribute("id");
+
+            //Create
+            String type = element.getElementsByTagName("Type").item(0).getTextContent();
+            if (type.equals("Human")){
+                players[i] = new Player(this,id,name);
+            } else if (type.equals("Computer")){
+                players[i] = new ComputerPlayer(this,id,name);
+            }
+        }
+        return players;
+    }
+
 
     public Map<String,Long> createDictionary() throws  java.io.IOException{
         String bookStr;
@@ -370,18 +416,16 @@ public class GameManager implements Serializable,Cloneable{
         }
         this.board.setInitCards(initCards);
         board.setDictionary(createDictionary());
+        if (scoreMode == EnumScoreMode.WORDSCORE)
+            board.createWord2Segment();
         board.addMangerCardsListener(this);
         notifyLetterFrequencyInDeckListeners(getCharFrequency());
         for (int i =0;i<players.length; i++)
         {
-            if (booleanList.get(i))
-                players[i] = new ComputerPlayer(this,deck,board,new Dice(cubeFacets));
-            else{
-                Player p = new Player(this,deck,board,new Dice(cubeFacets));
-                p.registerRolledDicesListener((result) -> notifyEnableAllCardsListeners());
-                players[i] =p;
-            }
+            players[i].setDeck(deck);
+            players[i].setDice(new Dice(cubeFacets));
             players[i].setRetriesNumber(retriesNumber);
+            players[i].registerRolledDicesListener((result) -> notifyEnableAllCardsListeners());
         }
         gameOver =false;
         isGameStarted = false;
@@ -552,12 +596,11 @@ public class GameManager implements Serializable,Cloneable{
     }
 
     public List<PlayerData> getPlayersData(){
-        AtomicInteger i = new AtomicInteger(0);
         return  Arrays.stream(players).map(pl-> {
             if (pl instanceof ComputerPlayer)
-                return new PlayerData("computer",i.get(),null,pl.getScore(),i.getAndIncrement());
+                return new PlayerData("Computer",pl.getId(),pl.getName(),pl.getScore(),getCurrentPlayerTurn());
             else
-                return new PlayerData("human",i.get(),null,pl.getScore(),i.getAndIncrement());
+                return new PlayerData("Human",pl.getId(),pl.getName(),pl.getScore(),getCurrentPlayerTurn());
         }).collect(Collectors.toList());
     }
 

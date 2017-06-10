@@ -1,7 +1,10 @@
 import javafx.collections.ObservableList;
 import javafx.scene.Node;
 import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
 import javafx.scene.layout.GridPane;
+
+import java.util.Optional;
 
 /**
  * Created by eran on 27/05/2017.
@@ -45,5 +48,16 @@ public class Utils {
 
             }
         }
+    }
+
+    public static boolean YesNoDialog(String message,String title){
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION, message, ButtonType.YES,ButtonType.NO);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        Optional<ButtonType> result = alert.showAndWait();
+        if (result.get() == ButtonType.YES)
+            return true;
+        else
+            return false;
     }
 }
