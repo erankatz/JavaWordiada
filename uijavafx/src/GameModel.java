@@ -4,6 +4,7 @@ import engine.exception.board.BoardSizeOutOfRangeException;
 import engine.exception.board.NotEnoughCardsToFillBoardException;
 import engine.exception.board.WrongCardPositionException;
 import engine.exception.dice.DiceException;
+import engine.exception.dice.WrongNumberOfDiceFacetException;
 import engine.exception.file.FileExtensionException;
 import engine.exception.letter.LetterException;
 import engine.listener.*;
@@ -13,10 +14,7 @@ import javax.xml.xpath.XPathExpressionException;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Executable;
-import java.util.AbstractMap;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Consumer;
 
 /**
@@ -185,8 +183,28 @@ public class GameModel {
         gameOverConsumer = listener;
     }
 
-    public void startGame() {
-        manager.startGame();
+    public void startGame()
+    {
+        if (manager != null && !manager.isGameStarted())
+        {
+            if (manager.isGameOver())
+            {
+                try {
+                    manager.createDictionary();
+                    List<Boolean> a = new ArrayList<>();
+                    a.add(true);
+                    a.add(false);
+                    manager.newGame(a);
+                } catch (EngineException ex){
+                    Utils.printMessage(ex.getMessage());
+                } catch (IOException ex){
+                    System.out.println(ex.getMessage());
+                }
+            }
+            manager.startGame();
+        } else {
+            Utils.printMessage("The Game Not Loaded or already started");
+        }
     }
 
     public boolean isComputerPlayerPlays(){
@@ -235,5 +253,12 @@ public class GameModel {
 
     public boolean getIsReplayMode(){
         return manager.getIsReplayMode();
+    }
+
+    public boolean isGameOver()
+    {
+        if (manager == null)
+            return false;
+        return manager.isGameOver();
     }
 }

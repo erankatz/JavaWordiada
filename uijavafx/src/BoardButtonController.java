@@ -194,7 +194,8 @@ public class BoardButtonController implements Initializable {
 
     public void setModel(GameModel model) {
         this.model = model;
-        draw();
+        if (model != null)
+            draw();
     }
 
     public void setDisable(Boolean flag){
@@ -220,5 +221,9 @@ public class BoardButtonController implements Initializable {
         } else{
             cardUI.setStyleUndefined(c);
         }
+    }
+
+    public void clearAll() {
+        gridPaneBoard.getChildren().clear();
     }
 }

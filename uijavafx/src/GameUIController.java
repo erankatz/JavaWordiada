@@ -95,7 +95,9 @@ public class GameUIController implements Initializable  {
         buttonRollDice.setDisable(true);
         buttonQuitGame.setOnMouseClicked(e->model.quitGame());
         buttonStart.setOnMouseClicked((Event e) ->{
+                    clearGameUI();
                     model.startGame();
+                    initNewGameUI();
                     buttonGetCurrentPlayerStatus.disableProperty().bind(((buttonRevealCard.disabledProperty().not()).or(buttonRevealWord.disabledProperty().not()).or(buttonRollDice.disabledProperty().not())).not());
                 }
         );
@@ -125,18 +127,12 @@ public class GameUIController implements Initializable  {
             File file = fileChooser.showOpenDialog(newStage);
             if (file != null){
                 try{
+                    boardButtonController.clearAll();
+                    clearGameUI();
                     model.readXmlFile(file);
-                    buttonStart.setDisable(false);
-                    labelPlayerTurn.setText("PlayerTurn: 0");
-                    labelIsGoldfishMode.setText("Gold Fish Mode:");
-                    if (model.getIsGoldFish())
-                            labelIsGoldfishMode.setText("Gold Fish Mode: True");
-                    else
-                            labelIsGoldfishMode.setText("Gold Fish Mode: False");
                     model.newGame();
-                    model.getPlayersData().forEach(pl->playersTable.getItems().add(pl));
                     boardButtonController.setModel(model);
-                    textBoxLowestFrequencyDictionaryWords.setText(model.getLowestFrequencyDictionaryWords());
+                    initNewGameUI();
                 } catch (IOException ex){
                     Utils.showExceptionMessage(ex);
                 } catch (EngineException ex)
@@ -167,6 +163,23 @@ public class GameUIController implements Initializable  {
         } catch (java.io.IOException ex){
 
         }
+    }
+
+    private void initNewGameUI() {
+        if (model.getIsGoldFish())
+            labelIsGoldfishMode.setText("Gold Fish Mode: True");
+        else
+            labelIsGoldfishMode.setText("Gold Fish Mode: False");
+        model.getPlayersData().forEach(pl->playersTable.getItems().add(pl));
+        textBoxLowestFrequencyDictionaryWords.setText(model.getLowestFrequencyDictionaryWords());
+    }
+
+    private void clearGameUI(){
+        playersTable.getItems().clear();
+        buttonStart.setDisable(false);
+        labelPlayerTurn.setText("PlayerTurn:");
+        labelRoundNumber.setText("Round Number:");
+        labelIsGoldfishMode.setText("Gold Fish Mode:");
     }
 
     private void initNumberTextField(){

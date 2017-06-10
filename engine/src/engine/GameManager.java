@@ -596,7 +596,7 @@ public class GameManager implements Serializable,Cloneable{
         return totalNumberofTurnsElapses;
     }
 
-    public boolean getIsReplayMode(){
+        public boolean getIsReplayMode(){
         return replayMode;
     }
 }
