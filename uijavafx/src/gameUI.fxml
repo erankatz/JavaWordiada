@@ -6,23 +6,25 @@
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.TextArea?>
+<?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
 
 <BorderPane fx:id="boarderPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="606.0" prefWidth="890.0" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="GameUIController">
    <top>
-      <HBox prefHeight="100.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+      <HBox prefHeight="75.0" prefWidth="890.0" BorderPane.alignment="CENTER">
          <children>
-            <ButtonBar prefHeight="40.0" prefWidth="200.0" />
             <ButtonBar layoutX="10.0" layoutY="10.0" prefHeight="40.0" prefWidth="200.0">
                <buttons>
+                  <ImageView fx:id="gameLogo" fitHeight="65.0" fitWidth="87.0" pickOnBounds="true" preserveRatio="true" />
                   <Button fx:id="buttonLoadXml" mnemonicParsing="false" text="Load XML" />
                 <Button fx:id="buttonStart" mnemonicParsing="false" text="Start!" />
                 <Button fx:id="buttonExit" mnemonicParsing="false" prefHeight="25.0" prefWidth="139.0" text="Exit" />
                </buttons>
             </ButtonBar>
-            <Label fx:id="labelStatus" prefHeight="100.0" prefWidth="427.0" text="Game Status" />
+            <Label fx:id="labelStatus" prefHeight="90.0" prefWidth="425.0" text="Game Status" />
          </children>
       </HBox>
    </top>
@@ -39,24 +41,33 @@
    <right>
    </right>
    <right>
-      <AnchorPane fx:id="anchorPane" prefHeight="506.0" prefWidth="253.0" BorderPane.alignment="CENTER">
+      <AnchorPane fx:id="anchorPane" prefHeight="524.0" prefWidth="253.0" BorderPane.alignment="CENTER">
          <children>
-            <Button fx:id="buttonRollDice" layoutX="16.0" layoutY="141.0" mnemonicParsing="false" prefHeight="15.0" prefWidth="126.0" text="Roll Dices" />
-            <Button fx:id="buttonRevealWord" layoutX="17.0" layoutY="222.0" mnemonicParsing="false" prefHeight="27.0" prefWidth="128.0" text="Reveal Word" />
-            <Button fx:id="buttonRevealCard" layoutX="15.0" layoutY="180.0" mnemonicParsing="false" prefHeight="28.0" prefWidth="128.0" text="Reveal Cards" />
-            <Label fx:id="labelScoreMode" layoutX="24.0" layoutY="249.0" prefHeight="17.0" prefWidth="111.0" text="Score Mode :" />
-            <Label fx:id="labelIsGoldfishMode" layoutX="24.0" layoutY="266.0" prefHeight="17.0" prefWidth="137.0" text="Gold FIsh Mode : " />
-            <TextArea fx:id="textBoxLowestFrequencyDictionaryWords" editable="false" layoutX="24.0" layoutY="285.0" prefHeight="206.0" prefWidth="121.0" />
-            <TextArea fx:id="textBoxLetterFrequencyInDeck" editable="false" layoutX="168.0" layoutY="57.0" prefHeight="436.0" prefWidth="74.0" />
-            <Label fx:id="labelPlayerTurn" layoutX="32.0" layoutY="1.0" prefHeight="17.0" prefWidth="210.0" text="Player Turn :" />
-            <Button fx:id="buttonClearCardSelection" layoutX="15.0" layoutY="106.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="128.0" text="Clear Card Selection" />
-            <Button fx:id="buttonQuitGame" layoutX="15.0" layoutY="73.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="128.0" text="Quit" />
-            <Button fx:id="buttonGetCurrentPlayerStatus" layoutX="16.0" layoutY="45.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="126.0" text="Score Detailed" />
-            <HBox id="hBoxHistory" fx:id="hBoxHistoryPlays" layoutX="16.0" layoutY="18.0" prefHeight="27.0" prefWidth="200.0" spacing="10.0">
+            <TextArea fx:id="textBoxLetterFrequencyInDeck" editable="false" layoutX="161.0" layoutY="80.0" prefHeight="436.0" prefWidth="81.0" />
+            <HBox id="hBoxHistory" fx:id="hBoxHistoryPlays" layoutY="37.0" prefHeight="31.0" prefWidth="242.0" spacing="10.0">
                <children>
-                  <Button fx:id="buttonPrev" mnemonicParsing="false" text="Prev" />
-                  <Button fx:id="buttonNext" mnemonicParsing="false" text="Next" />
-                  <Button fx:id="buttonPlayTurn" mnemonicParsing="false" prefHeight="25.0" prefWidth="75.0" text="Play Turn" />
+                  <Button fx:id="buttonPrev" mnemonicParsing="false" prefHeight="31.0" prefWidth="44.0" text="Prev" />
+                  <Button fx:id="buttonNext" mnemonicParsing="false" prefHeight="31.0" prefWidth="42.0" text="Next" />
+                  <Button fx:id="buttonPlayTurn" mnemonicParsing="false" prefHeight="32.0" prefWidth="66.0" text="Play Turn" />
+               </children>
+            </HBox>
+            <VBox layoutY="78.0" prefHeight="439.0" prefWidth="154.0" spacing="5.0">
+               <children>
+                  <Button fx:id="buttonGetCurrentPlayerStatus" mnemonicParsing="false" prefHeight="25.0" prefWidth="155.0" text="Score Detailed" />
+                  <Button fx:id="buttonQuitGame" mnemonicParsing="false" prefHeight="25.0" prefWidth="155.0" text="Quit" />
+                  <Button fx:id="buttonClearCardSelection" mnemonicParsing="false" prefHeight="25.0" prefWidth="155.0" text="Clear Card Selection" />
+                  <Button fx:id="buttonRollDice" mnemonicParsing="false" prefHeight="25.0" prefWidth="160.0" text="Roll Dices" />
+                  <Button fx:id="buttonRevealCard" mnemonicParsing="false" prefHeight="28.0" prefWidth="159.0" text="Reveal Cards" />
+                  <Button fx:id="buttonRevealWord" mnemonicParsing="false" prefHeight="27.0" prefWidth="154.0" text="Reveal Word" />
+                  <Label fx:id="labelScoreMode" prefHeight="17.0" prefWidth="111.0" text="Score Mode :" />
+                  <Label fx:id="labelIsGoldfishMode" prefHeight="17.0" prefWidth="137.0" text="Gold FIsh Mode : " />
+                  <TextArea fx:id="textBoxLowestFrequencyDictionaryWords" editable="false" prefHeight="206.0" prefWidth="121.0" />
+               </children>
+            </VBox>
+            <HBox layoutY="14.0" prefHeight="17.0" prefWidth="239.0">
+               <children>
+                  <Label fx:id="labelPlayerTurn" prefHeight="17.0" prefWidth="120.0" text="Player Turn:" />
+                  <Label fx:id="labelRoundNumber" text="Round Number: " />
                </children>
             </HBox>
          </children>

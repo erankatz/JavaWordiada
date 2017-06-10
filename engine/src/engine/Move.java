@@ -21,6 +21,7 @@ public class Move implements Cloneable {
     public synchronized void playMove(){
         playersData.stream().forEach(pl ->manager.notifyPlayerDataChangedListener(pl));
         manager.notifyPlayerTurnListeners(currentPlayerIndex);
+        manager.notifyLetterFrequencyInDeckListeners(board.getDeck().CreateMapStructureCharToLong());
         Utils.sleepForAWhile(sleepTime);
         board.clearSelectedCards();
         Utils.sleepForAWhile(sleepTime);
@@ -62,6 +63,7 @@ public class Move implements Cloneable {
         m.revealedCards = this.revealedCards;
         m.revealedWords = this.revealedWords;
         m.board = this.board.clone();
+        m.players = this.players.clone();
         return m;
     }
     public void setDiceResult(Integer diceResult) {

@@ -28,6 +28,8 @@ import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import javafx.scene.text.Text;
@@ -64,6 +66,8 @@ public class GameUIController implements Initializable  {
     @FXML Button buttonPlayTurn;
     @FXML AnchorPane anchorPane;
     @FXML HBox hBoxHistoryPlays;
+    @FXML Label labelRoundNumber;
+    @FXML ImageView gameLogo;
     private NumberTextField textBoxHistoryPlays;
 
     GameModel model = new GameModel();
@@ -71,13 +75,13 @@ public class GameUIController implements Initializable  {
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         initNumberTextField();
+        Image image = new Image(getClass().getResourceAsStream("gameLogo.jpg"));
+        gameLogo.setImage(image);
         buttonPlayTurn.setVisible(false);
         playersTable.setDisable(true);
-        //buttonPrev.setVisible(false);
-        //buttonNext.setVisible(false);
-        buttonQuitGame.setDisable(true);
-        //textBoxHistoryPlays.setVisible(false);
-        buttonGetCurrentPlayerStatus.setVisible(false);
+        buttonPrev.setVisible(false);
+        buttonNext.setVisible(false);
+        textBoxHistoryPlays.setVisible(false);
         labelStatus.setText("");
         nameCol.setCellValueFactory(new PropertyValueFactory<>("name"));
         typeCol.setCellValueFactory(new PropertyValueFactory<>("type"));
@@ -91,13 +95,14 @@ public class GameUIController implements Initializable  {
         buttonRollDice.setDisable(true);
         buttonQuitGame.setOnMouseClicked(e->model.quitGame());
         buttonStart.setOnMouseClicked((Event e) ->{
-                    buttonQuitGame.setDisable(false);
                     model.startGame();
+                    buttonGetCurrentPlayerStatus.disableProperty().bind(((buttonRevealCard.disabledProperty().not()).or(buttonRevealWord.disabledProperty().not()).or(buttonRollDice.disabledProperty().not())).not());
                 }
         );
         buttonClearCardSelection.setOnMouseClicked((Event e)->model.clearCardSelection());
         buttonClearCardSelection.disableProperty().bind(((buttonRevealCard.disabledProperty().not()).or(buttonRevealWord.disabledProperty().not())).not());
         buttonQuitGame.disableProperty().bind(((buttonRevealCard.disabledProperty().not()).or(buttonRevealWord.disabledProperty().not()).or(buttonRollDice.disabledProperty().not())).not());
+        buttonGetCurrentPlayerStatus.disableProperty().bind(((buttonRevealCard.disabledProperty().not()).or(buttonRevealWord.disabledProperty().not()).or(buttonRollDice.disabledProperty().not())).not());
         buttonRevealCard.setOnMouseClicked((Event e) ->{
             model.revealCards();
         }) ;
@@ -105,10 +110,12 @@ public class GameUIController implements Initializable  {
             model.revealWord();
         });
         buttonNext.setOnMouseClicked((Event e)->{
-            textBoxHistoryPlays.setNumber(textBoxHistoryPlays.getNumber().add(new BigDecimal(1)));
+            if (!textBoxHistoryPlays.getNumber().equals(new BigDecimal(model.getTotalNumOfTurnsElapsed())))
+                textBoxHistoryPlays.setNumber(textBoxHistoryPlays.getNumber().add(new BigDecimal(1)));
         });
         buttonPrev.setOnMouseClicked((Event e)->{
-            textBoxHistoryPlays.setNumber(textBoxHistoryPlays.getNumber().subtract(new BigDecimal(1)));
+            if (!textBoxHistoryPlays.getNumber().equals(new BigDecimal(0)))
+                textBoxHistoryPlays.setNumber(textBoxHistoryPlays.getNumber().subtract(new BigDecimal(1)));
         });
         buttonStart.setDisable(true);
         buttonLoadXml.setOnMouseClicked((Event e)->{
@@ -140,6 +147,11 @@ public class GameUIController implements Initializable  {
                 }
             }
         });
+        this.buttonGetCurrentPlayerStatus.setOnMouseClicked((Event e) ->
+                Platform.runLater(
+                        ()->Utils.printMessage(model.getCurrentPlayerStatus())
+                )
+        );
         this.buttonPlayTurn.setOnMouseClicked((Event e)-> model.playPrevMove(Integer.parseInt(textBoxHistoryPlays.getText())));
         this.buttonRollDice.setOnMouseClicked((Event e) -> {
             model.rollDice();
@@ -159,6 +171,8 @@ public class GameUIController implements Initializable  {
 
     private void initNumberTextField(){
         textBoxHistoryPlays = new NumberTextField();
+        textBoxHistoryPlays.setPrefWidth(30);
+        textBoxHistoryPlays.setPrefHeight(31);
         textBoxHistoryPlays.setNumber(new BigDecimal(0));
         hBoxHistoryPlays.getChildren().add(2,textBoxHistoryPlays);
         textBoxHistoryPlays.setDisable(true);
@@ -199,7 +213,8 @@ public class GameUIController implements Initializable  {
         model.setPlayerTurnConsumer((playerIndex)->
             Platform.runLater(()-> {
                 playersTable.getSelectionModel().select(playerIndex);
-                //labelPlayerTurn.setText("Player Turn: " + playerId)
+                labelPlayerTurn.setText("Player Turn: " + playersTable.getItems().get(playerIndex).getId());
+                labelRoundNumber.setText("Round Number: " + model.getCurrentNumofTurnsElapsed());
             })
         );
         model.setWordRevealedWord2Score((e)->
@@ -212,28 +227,45 @@ public class GameUIController implements Initializable  {
             })
         );
         model.setIsRealedWordPendingConsumer((isPending)->
-            Platform.runLater(()->
-                    buttonRevealWord.setDisable(!isPending)
+            Platform.runLater(()->{
+                if (!model.isComputerPlayerPlays() && !model.getIsReplayMode()){
+                    buttonRevealWord.setDisable(!isPending);
+                } else {
+                    buttonRevealWord.setDisable(true);
+                }
+            }
             )
         );
         model.setIsRevealedCardPendingConsumer((isPending)->
-                Platform.runLater(()->
-                        buttonRevealCard.setDisable(!isPending)
+                Platform.runLater(()->{
+                        if (!model.isComputerPlayerPlays() && !model.getIsReplayMode()){
+                            buttonRevealCard.setDisable(!isPending);
+                        } else {
+                            buttonRevealCard.setDisable(true);
+                        }
+                }
                 )
         );
         model.setIsRolledDicesPendingConsumer((isPending)->
-            Platform.runLater(()->
-                    buttonRollDice.setDisable(!isPending)
+            Platform.runLater(()->{
+                    if (!model.isComputerPlayerPlays() && !model.getIsReplayMode()){
+                        buttonRollDice.setDisable(!isPending);
+                    } else {
+                        buttonRollDice.setDisable(true);
+                    }
+                }
             )
         );
-        model.setGameOverConsumer((id)->
+        model.setGameOverConsumer((playerIndex)->
         Platform.runLater(
                 ()-> {
-                    labelStatus.setText("The winner is player id :" + id);
+                    buttonGetCurrentPlayerStatus.disableProperty().unbind();
+                    buttonGetCurrentPlayerStatus.setDisable(false);
+                    labelStatus.setText("The winner is player id :" + playersTable.getItems().get(playerIndex).getId());
                     buttonPrev.setVisible(true);
                     buttonNext.setVisible(true);
+                    buttonPlayTurn.setVisible(true);
                     textBoxHistoryPlays.setVisible(true);
-                    buttonGetCurrentPlayerStatus.setDisable(true);
                     buttonRollDice.setDisable(true);
                     buttonRevealCard.setDisable(true);
                     buttonRevealWord.setDisable(true);

@@ -72,12 +72,14 @@ public class GameManager implements Serializable,Cloneable{
     private int winnerPlayer;
     private boolean isGoldFishMode;
     private List<Move> moves = new ArrayList<>();
+    private int totalNumberofTurnsElapses = 0;
+    private boolean replayMode = false;
 
     public boolean getIsGoldFishMode(){
         return isGoldFishMode;
     }
 
-    public int getNumOfTurnsElapsed()
+    public int getCurrentNumOfTurnsElapsed()
     {
         return this.roundCounter;
     }
@@ -123,6 +125,7 @@ public class GameManager implements Serializable,Cloneable{
     {
         isGameStarted = true;
         roundCounter = 0;
+        replayMode = false;
         this.gameStartedTime = LocalTime.now();
         createNewMove();
         notifyPlayerTurnListeners(getCurrentPlayerTurn());
@@ -147,8 +150,7 @@ public class GameManager implements Serializable,Cloneable{
     }
 
     protected void wordRevealed(String word, long frequency){
-            players[getCurrentPlayerTurn()].increaseScore(1);
-            players[getCurrentPlayerTurn()].addComposedWord(word,frequency);
+            players[getCurrentPlayerTurn()].addComposedWord(word,1);
             Player pl = players[getCurrentPlayerTurn()];
             if (players[getCurrentPlayerTurn()] instanceof ComputerPlayer)
                 notifyPlayerDataChangedListener(new PlayerData("computer",getCurrentPlayerTurn(),null,pl.getScore(),getCurrentPlayerTurn()));
@@ -326,13 +328,16 @@ public class GameManager implements Serializable,Cloneable{
 
     public synchronized void playMove(int index){
         //TODO: Handle no exist move
-        roundCounter--;
+        this.roundCounter = index;
         AtomicInteger i= new AtomicInteger(0);
         moves.get(index).getPlayersData().forEach(pl->players[i.getAndAdd(1)].setScore(pl.getScore()));
         Move move = moves.get(index).clone();
         this.board = move.getBoard().clone();
         this.deck = move.getBoard().getDeck();
-        //this.players = move.getPlayers();
+        this.players = move.getPlayers();
+        this.replayMode = true;
+        this.gameOver = false;
+        this.isGameStarted = true;
         move.setManager(this);
         move.playMove();
     }
@@ -538,6 +543,7 @@ public class GameManager implements Serializable,Cloneable{
     }
 
     public void notifyGameOverListeners(int id){
+        totalNumberofTurnsElapses = roundCounter;
         gameOverListeners.forEach(listener->listener.gameOver(id));
     }
 
@@ -556,7 +562,7 @@ public class GameManager implements Serializable,Cloneable{
     }
 
     protected void setRevealCardsMove(List<Map.Entry<Integer,Integer>> revealCardsMove) {
-        if (!gameOver){
+        if (!replayMode){
             List<Card> revealedCards = new ArrayList<>();
             revealCardsMove.forEach(pair-> {
                 try {
@@ -572,7 +578,7 @@ public class GameManager implements Serializable,Cloneable{
     }
 
     protected void addRevealWordMove(List<Map.Entry<Integer,Integer>> revealCardsMove){
-        if (!gameOver){
+        if (!replayMode){
             List<Card> revealedCards = new ArrayList<>();
             revealCardsMove.forEach(pair-> {
                 try {
@@ -586,4 +592,11 @@ public class GameManager implements Serializable,Cloneable{
         }
     }
 
+    public int getTotalNumberofTurnsElapses() {
+        return totalNumberofTurnsElapses;
+    }
+
+    public boolean getIsReplayMode(){
+        return replayMode;
+    }
 }

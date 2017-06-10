@@ -27,9 +27,11 @@ public class Player implements java.io.Serializable,Cloneable{
     protected GameManager manager;
     protected int leftCardNumToReveal;
     private long score;
+    private int id =0;
     private Map<String,Long> composedWords = new HashMap<>();
     protected int retriesNumber;
     private List<RolledDicesListener> rolledDicesListenerListeners = new ArrayList<>();
+    private int numberOfWordsRevealed =0;
 
     public Player (GameManager manager,Deck deck,Board board,Dice cube)
     {
@@ -37,7 +39,7 @@ public class Player implements java.io.Serializable,Cloneable{
         this.deck = deck;
         this.cube = cube;
         this.board = board;
-        leftCardNumToReveal = 0;
+        this.leftCardNumToReveal = 0;
 
     }
     public int rollDice()
@@ -87,8 +89,16 @@ public class Player implements java.io.Serializable,Cloneable{
         score =value;
     }
 
-    protected synchronized void addComposedWord(String word, long frequency){
-        this.composedWords.put(word,frequency);
+    protected synchronized void addComposedWord(String word, long score){
+        increaseScore(score);
+        numberOfWordsRevealed++;
+        if (!composedWords.containsKey(word))
+            this.composedWords.put(word,score);
+        else {
+            score += composedWords.get(word);
+            composedWords.remove(word);
+            composedWords.put(word,score);
+        }
     }
 
     public long getScore() {
@@ -136,6 +146,9 @@ public class Player implements java.io.Serializable,Cloneable{
         manager.notifyRevealWordPendingListener(true);
     }
 
+    public int getId(){
+        return id;
+    }
     @Override
     public Player clone(){
         Player pl = new Player(this.manager,this.deck.clone(),this.board.clone(),cube);
@@ -145,6 +158,11 @@ public class Player implements java.io.Serializable,Cloneable{
         this.composedWords.entrySet().stream().forEach(pair->pl.composedWords.put(pair.getKey(),pair.getValue()));
         pl.retriesNumber = this.retriesNumber;
         pl.rolledDicesListenerListeners = this.rolledDicesListenerListeners;
+        pl.numberOfWordsRevealed = this.numberOfWordsRevealed;
         return pl;
+    }
+
+    public int getNumberOfWordsRevealed() {
+        return numberOfWordsRevealed;
     }
 }

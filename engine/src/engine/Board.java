@@ -81,6 +81,7 @@ public class Board implements java.io.Serializable,Cloneable{
             replaceCards(pairs);
             manager.wordRevealed(str,word2FrequencyDic.get(str)); //After word is revealed and validation
             manager.notifyWordRevealedListeners(str,1);
+            manager.notifyLetterFrequencyInDeckListeners(deck.CreateMapStructureCharToLong());
             clearSelectedCards();
             selectedCardsList.clear();
             return true;

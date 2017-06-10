@@ -210,4 +210,30 @@ public class GameModel {
         if (!isComputerPlayerPlays())
             manager.playerQuit();
     }
+
+    public String getCurrentPlayerStatus() {
+        StringBuilder ret = new StringBuilder();
+        Player playerPtr = manager.getPlayers()[manager.getCurrentPlayerTurn()];
+        Map<String,Long> composedWords = playerPtr.getComposedWords();
+        long score = playerPtr.getScore();
+        ret.append(String.format("Player %d composed %d words, scored %d \n",
+                playerPtr.getId(),playerPtr.getNumberOfWordsRevealed(),score));
+        if (composedWords.entrySet().size() != 0){
+            composedWords.entrySet()
+                    .forEach(e1->ret.append(String.format("%s scored %d\n",e1.getKey(),e1.getValue())));
+        }
+        return ret.toString();
+    }
+
+    public int getTotalNumOfTurnsElapsed(){
+        return manager.getTotalNumberofTurnsElapses();
+    }
+
+    public int getCurrentNumofTurnsElapsed(){
+        return manager.getCurrentNumOfTurnsElapsed();
+    }
+
+    public boolean getIsReplayMode(){
+        return manager.getIsReplayMode();
+    }
 }
