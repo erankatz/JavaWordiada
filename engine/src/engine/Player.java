@@ -28,7 +28,7 @@ public class Player implements java.io.Serializable,Cloneable{
     private long score;
     private String id;
     private String name;
-    private Map<String,Long> composedWords = new HashMap<>();
+    private Map<String,WordData> composedWords = new HashMap<>();
     protected int retriesNumber;
     private List<RolledDicesListener> rolledDicesListenerListeners = new ArrayList<>();
     private int numberOfWordsRevealed =0;
@@ -90,12 +90,13 @@ public class Player implements java.io.Serializable,Cloneable{
     protected synchronized void addComposedWord(String word, long score){
         increaseScore(score);
         numberOfWordsRevealed++;
-        if (!composedWords.containsKey(word))
-            this.composedWords.put(word,score);
+        if (!composedWords.containsKey(word)){
+            WordData wordData = new WordData(score);
+            this.composedWords.put(word,wordData);
+        }
         else {
-            score += composedWords.get(word);
-            composedWords.remove(word);
-            composedWords.put(word,score);
+            WordData wordData =composedWords.get(word);
+            wordData.addWord();
         }
     }
 
@@ -103,7 +104,7 @@ public class Player implements java.io.Serializable,Cloneable{
         return score;
     }
 
-    public Map<String,Long> getComposedWords(){
+    public Map<String,WordData> getComposedWords(){
         return composedWords;
     }
 

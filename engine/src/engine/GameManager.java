@@ -62,9 +62,8 @@ public class GameManager implements Serializable,Cloneable{
     private List<PlayerDataChangedListener> playerDataChangedListeners = new ArrayList<>();
 
     private Deck deck;
-    private final int NUMOFPLAYERS = 2;
     private Board board;
-    Player players[] = new Player[NUMOFPLAYERS];
+    Player players[];
     private String dictionaryFilePath;
     private int retriesNumber;
     private int cubeFacets;
@@ -178,7 +177,7 @@ public class GameManager implements Serializable,Cloneable{
 
     public int getCurrentPlayerTurn()
     {
-        return roundCounter % NUMOFPLAYERS ;
+        return roundCounter % players.length ;
     }
 
     public void readXmlFile (String filePath) throws java.io.IOException,LetterException,XPathExpressionException,BoardSizeOutOfRangeException,NotEnoughCardsToFillBoardException,FileExtensionException
