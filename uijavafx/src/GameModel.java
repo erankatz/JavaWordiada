@@ -230,13 +230,13 @@ public class GameModel {
     public String getCurrentPlayerStatus() {
         StringBuilder ret = new StringBuilder();
         Player playerPtr = manager.getPlayers()[manager.getCurrentPlayerTurn()];
-        Map<String,Long> composedWords = playerPtr.getComposedWords();
+        Map<String,WordData> composedWords = playerPtr.getComposedWords();
         long score = playerPtr.getScore();
-        ret.append(String.format("Player %d composed %d words, scored %d \n",
+        ret.append(String.format("Player %s composed %d words, scored %d  \n",
                 playerPtr.getId(),playerPtr.getNumberOfWordsRevealed(),score));
         if (composedWords.entrySet().size() != 0){
             composedWords.entrySet()
-                    .forEach(e1->ret.append(String.format("%s scored %d\n",e1.getKey(),e1.getValue())));
+                    .forEach(e1->ret.append(String.format("%s : Total scored %d (composed %d times)\n",e1.getKey(),e1.getValue().getScore(),e1.getValue().getNumberOfWords())));
         }
         return ret.toString();
     }

@@ -177,6 +177,9 @@ public class GameManager implements Serializable,Cloneable{
 
     public int getCurrentPlayerTurn()
     {
+        if (roundCounter == 0){
+            return 0;
+        }
         return roundCounter % players.length ;
     }
 

@@ -18,6 +18,7 @@ public class CardUI extends javafx.scene.control.Button{
         this.row = row;
         this.col = col;
 
+        //this.autosize();
         //this.disableProperty().bind(Bindings.createBooleanBinding(()->!model.getIsEnabledCard(row,col)));
         //this.textProperty().bind(Bindings.format("%c",model.getCardLetter(row,col)));
         this.setOnMouseClicked((Event e) -> {
@@ -26,20 +27,26 @@ public class CardUI extends javafx.scene.control.Button{
     }
 
     void setStyleSelected(){
-        setStyle("-fx-background-color: yellow");
+        //setStyle("-fx-background-color: yellow");
+        getStyleClass().clear();
+        getStyleClass().add("card-Selected");
+        getStyleClass().add("button");
         setDisable(true);
     }
 
     void setStyleEmpty(){
-        setStyle("-fx-base: #ffffff");
+        getStyleClass().add("card-Empty");
         setText("");
     }
+
     void setStyleUndefined(Card c){
         setDisable(false);
-        setStyle("-fx-base: #d3f3ff");
+        getStyleClass().clear();
+        getStyleClass().add("button");
+        //setStyle("-fx-base: #d3f3ff");
         if (c.getLetter() == '?')
-            setStyle("-fx-background-color: green");
+            getStyleClass().add("card-Hidden");
         else
-            setStyle("-fx-background-color: white");
+            getStyleClass().add("card-UnHidden");
     }
 }

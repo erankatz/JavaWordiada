@@ -3,15 +3,10 @@
  */
 
 import engine.Card;
-import engine.GameManager;
-import engine.Player;
 import engine.PlayerData;
 import engine.exception.EngineException;
-import engine.exception.dice.DiceException;
-import engine.listener.DisableAllCardsListener;
 import javafx.application.Platform;
 import javafx.event.Event;
-import javafx.event.EventHandler;
 import javafx.fxml.*;
 
 import java.io.File;
@@ -21,18 +16,14 @@ import java.net.URL;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.Node;
-import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
-import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 

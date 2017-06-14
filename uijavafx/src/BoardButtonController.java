@@ -14,6 +14,7 @@ import javafx.scene.Node;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.*;
 
 import java.io.IOException;
@@ -28,11 +29,14 @@ import java.util.ResourceBundle;
 public class BoardButtonController implements Initializable {
     @FXML
     private GridPane gridPaneBoard;
+    @FXML
+    private ScrollPane scrollPane;
     GameModel model;
-    Board logicBoard;
     private int rows;
     private int columns;
     public void initialize(URL fxmlFileLocation, ResourceBundle resources){
+        gridPaneBoard.getColumnConstraints().clear();
+        gridPaneBoard.getRowConstraints().clear();
         /*GameManager engine = new GameManager();
         try {
             engine.readXmlFile("c:\\d\\basic_1.xml");
@@ -60,13 +64,6 @@ public class BoardButtonController implements Initializable {
 
     }
 
-    private VBox createVboxCell() {
-        VBox cell = new VBox();
-        cell.setPrefSize(30.0D, 15.0D);
-        cell.setAlignment(Pos.CENTER_RIGHT);
-        cell.setMaxSize(60.0D, 40.0D);
-        return cell;
-    }
 
     private void createRowsAndCols(){
         for (int i = 0; i < rows; i++) {
@@ -79,6 +76,8 @@ public class BoardButtonController implements Initializable {
             rowConst.setPercentHeight(100.0 / rows);
             gridPaneBoard.getRowConstraints().add(rowConst);
         }
+        gridPaneBoard.setPrefHeight(500);
+        gridPaneBoard.setPrefWidth(500);
     }
 
     private void createButtons(){
@@ -86,11 +85,10 @@ public class BoardButtonController implements Initializable {
             for (int j = 0; j < columns; j++) {
                     CardUI card = new CardUI(model,i+1,j+1);
                     gridPaneBoard.add(card,i,j);
+                    card.setPrefSize(50,50);
             }
         }
     }
-
-
 
     public void draw()
     {
@@ -100,8 +98,8 @@ public class BoardButtonController implements Initializable {
         this.gridPaneBoard.setAlignment(Pos.CENTER);
         this.gridPaneBoard.setHgap(0);
         this.gridPaneBoard.setVgap(0);
-        this.gridPaneBoard.setPadding(new Insets(0, 25.0D, 0, 25.0D));
-        this.gridPaneBoard.setPadding(new Insets(0, 25.0D, 0, 25.0D));
+        //this.gridPaneBoard.setPadding(new Insets(0, 25.0D, 0, 25.0D));
+        //this.gridPaneBoard.setPadding(new Insets(0, 25.0D, 0, 25.0D));
         this.rows = model.getBoardSize();
         this.columns = model.getBoardSize();
         createRowsAndCols();
@@ -178,24 +176,14 @@ public class BoardButtonController implements Initializable {
         */
     }
 
-    private HBox createHboxCell() {
-        HBox cell = new HBox();
-        cell.setPrefSize(30.0D, 15.0D);
-        cell.setAlignment(Pos.CENTER_RIGHT);
-        cell.setMaxSize(60.0D, 40.0D);
-        return cell;
-    }
 
-    public void setLogicBoard(Board logicBoard)
-    {
-        this.logicBoard = logicBoard;
-        draw();
-    }
+
 
     public void setModel(GameModel model) {
         this.model = model;
         if (model != null)
             draw();
+        gridPaneBoard.setDisable(true);
     }
 
     public void setDisable(Boolean flag){

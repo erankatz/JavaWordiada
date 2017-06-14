@@ -4,13 +4,9 @@
 
 import javafx.application.Application;
 import javafx.fxml.Initializable;
-import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.layout.ColumnConstraints;
-import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
-import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 
 import java.net.URL;
@@ -32,6 +28,13 @@ public class Main extends Application  {
             Initializable welcomeController = fxmlLoader.getController();
             //welcomeController.setModel(model);
             Scene scene = new Scene(root, 890, 606);
+            URL url2 = this.getClass().getResource("mainStyle.css");
+            if (url2 == null) {
+                System.out.println("Resource not found. Aborting.");
+                System.exit(-1);
+            }
+            String css = url2.toExternalForm();
+            scene.getStylesheets().add(css);
             primaryStage.setScene(scene);
             primaryStage.show();
         } catch(java.io.IOException ex){
