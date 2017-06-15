@@ -28,13 +28,7 @@ public class Main extends Application  {
             Initializable welcomeController = fxmlLoader.getController();
             //welcomeController.setModel(model);
             Scene scene = new Scene(root, 890, 606);
-            URL url2 = this.getClass().getResource("mainStyle.css");
-            if (url2 == null) {
-                System.out.println("Resource not found. Aborting.");
-                System.exit(-1);
-            }
-            String css = url2.toExternalForm();
-            scene.getStylesheets().add(css);
+            Utils.setStyleSheet(scene,"mainStyle.css");
             primaryStage.setScene(scene);
             primaryStage.show();
         } catch(java.io.IOException ex){

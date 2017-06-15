@@ -59,12 +59,20 @@ public class GameUIController implements Initializable  {
     @FXML HBox hBoxHistoryPlays;
     @FXML Label labelRoundNumber;
     @FXML ImageView gameLogo;
+    @FXML Button buttonApplyStyle;
+    @FXML ComboBox<String> styleComboBox;
+
     private NumberTextField textBoxHistoryPlays;
 
     GameModel model = new GameModel();
     BoardButtonController boardButtonController;
     @Override
     public void initialize(URL url, ResourceBundle rb) {
+        styleComboBox.getItems().clear();
+        styleComboBox.getItems().addAll(
+                "mainStyle.css",
+                "mainStyle2.css"
+        );
         initNumberTextField();
         Image image = new Image(getClass().getResourceAsStream("gameLogo.jpg"));
         gameLogo.setImage(image);
@@ -78,7 +86,7 @@ public class GameUIController implements Initializable  {
         typeCol.setCellValueFactory(new PropertyValueFactory<>("type"));
         idCol.setCellValueFactory(new PropertyValueFactory<>("id"));
         scoreCol.setCellValueFactory(new PropertyValueFactory<>("score"));
-
+        buttonApplyStyle.setOnMouseClicked(e->Utils.setStyleSheet(null,styleComboBox.getSelectionModel().getSelectedItem()));
         setConsumers(model);
         FXMLLoader fxmlLoader = new FXMLLoader();
         buttonRevealWord.setDisable(true);

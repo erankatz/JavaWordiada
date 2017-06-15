@@ -193,7 +193,9 @@ public class BoardButtonController implements Initializable {
 
 
     public void removeCard(int row, int col) {
-        gridPaneBoard.getChildren().remove(Utils.getNodeByRowColumnIndex(col-1,row-1,gridPaneBoard));
+        CardUI card =  (CardUI) Utils.getNodeByRowColumnIndex(col-1,row-1,gridPaneBoard);
+        card.setDisable(true);
+        card.setStyleEmpty();
     }
 
     public void selectCard(int row,int col){

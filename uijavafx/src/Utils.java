@@ -1,15 +1,19 @@
 import javafx.collections.ObservableList;
 import javafx.scene.Node;
+import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 import javafx.scene.layout.GridPane;
 
+import java.net.URL;
 import java.util.Optional;
 
 /**
  * Created by eran on 27/05/2017.
  */
 public class Utils {
+    private static Scene scene = null;
+
     public static void showExceptionMessage(Exception ex){
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle("Error Occured");
@@ -59,5 +63,20 @@ public class Utils {
             return true;
         else
             return false;
+    }
+
+    public static void setStyleSheet(Scene scene,String cssFile){
+        if (scene == null){
+            scene = Utils.scene;
+        }
+        scene.getStylesheets().clear();
+        URL url2 = Main.class.getResource(cssFile);
+        if (url2 == null) {
+            System.out.println("Resource not found. Aborting.");
+            System.exit(-1);
+        }
+        String css = url2.toExternalForm();
+        scene.getStylesheets().add(css);
+        Utils.scene = scene;
     }
 }

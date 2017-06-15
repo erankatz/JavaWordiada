@@ -6,10 +6,6 @@
 }
 
 
-.background {
-    -fx-background-color: #1d1d1d;
-}
-
 .card-Selected{
     -fx-background-color: yellow;
 }
@@ -19,9 +15,9 @@
 }
 
 .card-Hidden{
-    -fx-background-color: green"
+    -fx-background-color: green;
 }
 
 .card-UnHidden{
-    -fx-background-color: white"
+    -fx-background-color: white;
 }

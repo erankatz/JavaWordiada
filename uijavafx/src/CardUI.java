@@ -26,7 +26,7 @@ public class CardUI extends javafx.scene.control.Button{
         });
     }
 
-    void setStyleSelected(){
+    public void setStyleSelected(){
         //setStyle("-fx-background-color: yellow");
         getStyleClass().clear();
         getStyleClass().add("card-Selected");
@@ -34,12 +34,12 @@ public class CardUI extends javafx.scene.control.Button{
         setDisable(true);
     }
 
-    void setStyleEmpty(){
+    public void setStyleEmpty(){
         getStyleClass().add("card-Empty");
         setText("");
     }
 
-    void setStyleUndefined(Card c){
+    public void setStyleUndefined(Card c){
         setDisable(false);
         getStyleClass().clear();
         getStyleClass().add("button");
