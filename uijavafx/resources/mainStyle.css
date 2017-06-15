@@ -1,8 +1,8 @@
 .root{
-    -fx-font-size: 8pt;
+    -fx-font-size: 10pt;
     -fx-font-family: "Courier New";
-    -fx-base: rgb(132, 145, 47);
-    -fx-background-color: dodgerblue;
+    -fx-base: rgb(255, 255, 255);
+    -fx-background-color: plum;
 }
 
 
@@ -20,4 +20,8 @@
 
 .card-UnHidden{
     -fx-background-color: white;
+}
+
+.label{
+    -fx-font-size: 15;
 }

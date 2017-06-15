@@ -259,4 +259,12 @@ public class GameModel {
             return false;
         return manager.isGameOver();
     }
+
+    public String getScoreMode(){
+        if (manager.getScoreMode() == EnumScoreMode.WORDCOUNT){
+            return  "Word Count";
+        } else {
+            return "Word Score";
+        }
+    }
 }

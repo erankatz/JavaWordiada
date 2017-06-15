@@ -68,6 +68,7 @@ public class GameUIController implements Initializable  {
     BoardButtonController boardButtonController;
     @Override
     public void initialize(URL url, ResourceBundle rb) {
+        Utils.autoFitTable(playersTable);
         styleComboBox.getItems().clear();
         styleComboBox.getItems().addAll(
                 "mainStyle.css",
@@ -100,8 +101,13 @@ public class GameUIController implements Initializable  {
                     clearGameUI();
                     model.startGame();
                     initNewGameUI();
+                    if (model != null && model.isGameOver() == true)
+                    {
+                        model.getPlayersData().forEach(pl -> playersTable.getItems().add(pl));
+                        playersTable.refresh();
+                    }
                     buttonGetCurrentPlayerStatus.disableProperty().bind(((buttonRevealCard.disabledProperty().not()).or(buttonRevealWord.disabledProperty().not()).or(buttonRollDice.disabledProperty().not())).not());
-            }
+                }
         );
         buttonClearCardSelection.setOnMouseClicked((Event e)->model.clearCardSelection());
         buttonClearCardSelection.disableProperty().bind(((buttonRevealCard.disabledProperty().not()).or(buttonRevealWord.disabledProperty().not())).not());
@@ -135,6 +141,8 @@ public class GameUIController implements Initializable  {
                     model.newGame();
                     boardButtonController.setModel(model);
                     initNewGameUI();
+                    model.getPlayersData().forEach(pl -> playersTable.getItems().add(pl));
+                    playersTable.refresh();
                 } catch (IOException ex){
                     Utils.showExceptionMessage(ex);
                 } catch (EngineException ex)
@@ -168,20 +176,25 @@ public class GameUIController implements Initializable  {
     }
 
     private void initNewGameUI() {
-        if (model.getIsGoldFish())
-            labelIsGoldfishMode.setText("Gold Fish Mode: True");
-        else
-            labelIsGoldfishMode.setText("Gold Fish Mode: False");
-        model.getPlayersData().forEach(pl->playersTable.getItems().add(pl));
-        textBoxLowestFrequencyDictionaryWords.setText(model.getLowestFrequencyDictionaryWords());
+        Platform.runLater(()-> {
+            if (model.getIsGoldFish())
+                labelIsGoldfishMode.setText("Gold Fish Mode: True");
+            else
+                labelIsGoldfishMode.setText("Gold Fish Mode: False");
+            labelScoreMode.setText("Score Mode: " + model.getScoreMode());
+            textBoxLowestFrequencyDictionaryWords.setText(model.getLowestFrequencyDictionaryWords());
+        });
     }
 
     private void clearGameUI(){
-        playersTable.getItems().clear();
-        buttonStart.setDisable(false);
-        labelPlayerTurn.setText("PlayerTurn:");
-        labelRoundNumber.setText("Round Number:");
-        labelIsGoldfishMode.setText("Gold Fish Mode:");
+        Platform.runLater(()->{
+            if (model != null && model.isGameOver() == true)
+                playersTable.getItems().clear();
+            buttonStart.setDisable(false);
+            labelPlayerTurn.setText("PlayerTurn:");
+            labelRoundNumber.setText("Round Number:");
+            labelIsGoldfishMode.setText("Gold Fish Mode:");
+        });
     }
 
     private void initNumberTextField(){
@@ -230,6 +243,11 @@ public class GameUIController implements Initializable  {
         model.setPlayerTurnConsumer((playerIndex)->
             Platform.runLater(()-> {
                 playersTable.getSelectionModel().select(playerIndex);
+                if (!model.isComputerPlayerPlays())
+                    labelStatus.setText("Player " + playersTable.getItems().get(playerIndex).getId() + " your turn started");
+                else{
+                    labelStatus.setText("Computer Player " + playersTable.getItems().get(playerIndex).getId() + " playing");
+                }
                 labelPlayerTurn.setText("Player Turn: " + playersTable.getItems().get(playerIndex).getId());
                 labelRoundNumber.setText("Round Number: " + model.getCurrentNumofTurnsElapsed());
             })
@@ -310,4 +328,5 @@ public class GameUIController implements Initializable  {
     private String printCharFrequencyToTextBox(Map.Entry<Character,Long> ch2Freq,int NumOfCardInDeck){
         return String.format("%c - %d/%d\n",ch2Freq.getKey(),ch2Freq.getValue(), NumOfCardInDeck);
     }
+
 }

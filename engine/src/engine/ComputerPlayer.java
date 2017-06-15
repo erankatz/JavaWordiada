@@ -18,6 +18,7 @@ public class ComputerPlayer extends Player implements java.io.Serializable {
     }
 
     public void playTurn(){
+        Utils.sleepForAWhile(sleepTime);
         List<Map.Entry<Integer,Integer>> pairs;
         Random rand = new Random();
         if (manager.getBoard().getNumOfUnrevealedCard() != 0) {

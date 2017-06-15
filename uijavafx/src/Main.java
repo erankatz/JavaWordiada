@@ -27,7 +27,7 @@ public class Main extends Application  {
             Parent root = fxmlLoader.load(url.openStream());
             Initializable welcomeController = fxmlLoader.getController();
             //welcomeController.setModel(model);
-            Scene scene = new Scene(root, 890, 606);
+            Scene scene = new Scene(root, 1400  , 700);
             Utils.setStyleSheet(scene,"mainStyle.css");
             primaryStage.setScene(scene);
             primaryStage.show();

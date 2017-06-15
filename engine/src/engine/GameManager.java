@@ -644,4 +644,8 @@ public class GameManager implements Serializable,Cloneable{
         public boolean getIsReplayMode(){
         return replayMode;
     }
+
+    public EnumScoreMode getScoreMode() {
+        return scoreMode;
+    }
 }

@@ -1,10 +1,16 @@
+import com.sun.javafx.scene.control.skin.TableViewSkin;
+import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
 import javafx.scene.layout.GridPane;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.net.URL;
 import java.util.Optional;
 
@@ -13,7 +19,30 @@ import java.util.Optional;
  */
 public class Utils {
     private static Scene scene = null;
+    private static Method columnToFitMethod;
+    static {
+        try {
+            columnToFitMethod = TableViewSkin.class.getDeclaredMethod("resizeColumnToFitContent", TableColumn.class, int.class);
+            columnToFitMethod.setAccessible(true);
+        } catch (NoSuchMethodException e) {
+            e.printStackTrace();
+        }
+    }
 
+    public static void autoFitTable(TableView tableView) {
+        tableView.getItems().addListener(new ListChangeListener<Object>() {
+            @Override
+            public void onChanged(Change<?> c) {
+                for (Object column : tableView.getColumns()) {
+                    try {
+                        columnToFitMethod.invoke(tableView.getSkin(), column, -1);
+                    } catch (IllegalAccessException | InvocationTargetException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        });
+    }
     public static void showExceptionMessage(Exception ex){
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle("Error Occured");
