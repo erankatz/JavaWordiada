@@ -328,10 +328,17 @@ public class GameManager implements Serializable,Cloneable{
     }
 
     public void playerQuit(){
-        isGameStarted = false;
-        gameOver = true;
-        endPlayerTurn();
-        notifyGameOverListeners(getCurrentPlayerTurn());
+        players[getCurrentPlayerTurn()].QuitFromGame();
+        long i = Arrays.stream(players).filter(player ->player.getisQuiteFromGame() ==true ).count();
+        if (i == players.length){
+            isGameStarted = false;
+            gameOver = true;
+            endPlayerTurn();
+            notifyGameOverListeners(getCurrentPlayerTurn());
+        } else {
+            endPlayerTurn();
+        }
+
     }
 
     public boolean isGameOver(){
@@ -347,6 +354,10 @@ public class GameManager implements Serializable,Cloneable{
 
     protected synchronized void endPlayerTurn(){
         notifyDisableAllCardsListeners();
+        this.roundCounter++;
+        while (players[getCurrentPlayerTurn()].getisQuiteFromGame() == true){
+            this.roundCounter++;
+        }
         if ((deck.getDeckSize() == 0 && board.getNumOfUnrevealedCard() ==0) ||
                 (this.isGoldFishMode && board.getNumberOfLegalWords(card->true) ==0 || gameOver)){
             gameOver =true;
@@ -360,7 +371,6 @@ public class GameManager implements Serializable,Cloneable{
             }
             notifyGameOverListeners(getCurrentPlayerTurn());
         } else {
-            this.roundCounter++;
             notifyStartPlayerTurn();
             createNewMove();
             if (isGoldFishMode){

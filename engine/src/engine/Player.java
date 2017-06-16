@@ -32,6 +32,7 @@ public class Player implements java.io.Serializable,Cloneable{
     protected int retriesNumber;
     private List<RolledDicesListener> rolledDicesListenerListeners = new ArrayList<>();
     private int numberOfWordsRevealed =0;
+    private boolean isQuitFromGame = false;
 
     public Player (GameManager manager,String id,String name)
     {
@@ -39,6 +40,14 @@ public class Player implements java.io.Serializable,Cloneable{
         this.leftCardNumToReveal = 0;
         this.id = id;
         this.name = name;
+    }
+
+    public void QuitFromGame(){
+        isQuitFromGame = true;
+    }
+
+    public boolean getisQuiteFromGame(){
+        return isQuitFromGame;
     }
     public int rollDice()
     {
