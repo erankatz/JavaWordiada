@@ -14,6 +14,7 @@ public class Card implements java.io.Serializable,Cloneable{
     private int row;
     private int col;
     private boolean isSelected;
+    private int index;
 
     protected Card(char letter,byte score)
     {
@@ -23,6 +24,15 @@ public class Card implements java.io.Serializable,Cloneable{
         this.isEverRevealed = false;
         this.isEnabled = false;
     }
+
+    public int getIndex(){
+        return index;
+    }
+
+    public void setIndex(int i){
+        index =i;
+    }
+
     @Override
     public Card clone(){
         Card c = new Card(letter,score);
@@ -86,5 +96,12 @@ public class Card implements java.io.Serializable,Cloneable{
 
     public synchronized void setSelected(boolean selected) {
         isSelected = selected;
+    }
+
+    @Override
+    public boolean equals(Object o){
+        if(o == null)   return false;
+        if(!(o instanceof Card) ) return false;
+        return ((Card)o).getHiddenChar() == this.getHiddenChar();
     }
 }

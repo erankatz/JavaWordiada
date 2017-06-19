@@ -146,7 +146,7 @@ public class Player implements java.io.Serializable,Cloneable{
         {
             throw new NoCardsLeftToRevealException();
         }
-        if (manager.getBoard().getSelectedCardsList().size() != cube.getResult()){
+        if (manager.getBoard().getSelectedCardsList().size() != cube.getResult() && manager.getBoard().getNumOfUnrevealedCard() != manager.getBoard().getSelectedCardsList().size()){
             throw new ChosenWrongNumberOfCardsException(cube.getResult(),manager.getBoard().getSelectedCardsList().size());
         }
         manager.getBoard().revealCards();

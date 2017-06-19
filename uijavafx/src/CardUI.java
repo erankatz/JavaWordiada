@@ -35,6 +35,8 @@ public class CardUI extends javafx.scene.control.Button{
     }
 
     public void setStyleEmpty(){
+        getStyleClass().clear();
+        getStyleClass().add("button");
         getStyleClass().add("card-Empty");
         setText("");
     }

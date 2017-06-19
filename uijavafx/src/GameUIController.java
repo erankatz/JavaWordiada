@@ -72,8 +72,9 @@ public class GameUIController implements Initializable  {
         styleComboBox.getItems().clear();
         styleComboBox.getItems().addAll(
                 "mainStyle.css",
-                "mainStyle2.css"
+                "mainStyle2.css","mainStyle3.css"
         );
+        buttonExit.setOnMouseClicked((e) -> System.exit(0));
         initNumberTextField();
         Image image = new Image(getClass().getResourceAsStream("gameLogo.jpg"));
         gameLogo.setImage(image);
@@ -194,6 +195,10 @@ public class GameUIController implements Initializable  {
             labelPlayerTurn.setText("PlayerTurn:");
             labelRoundNumber.setText("Round Number:");
             labelIsGoldfishMode.setText("Gold Fish Mode:");
+            buttonPrev.setVisible(false);
+            buttonNext.setVisible(false);
+            buttonPlayTurn.setVisible(false);
+            textBoxHistoryPlays.setVisible(false);
         });
     }
 
@@ -219,7 +224,10 @@ public class GameUIController implements Initializable  {
             ));
         model.setRolledDicesConsumer((result)->
             Platform.runLater(()->{
-                boardButtonController.setDisable(false);
+                if (!model.isComputerPlayerPlays())
+                {
+                    if (!model.isComputerPlayerPlays());
+                }
                 if (!model.isComputerPlayerPlays())
                         labelStatus.setText(String.format("Pick %d Cards in the board\n", result.getKey(),result.getValue()));
                     else
@@ -267,6 +275,11 @@ public class GameUIController implements Initializable  {
                     buttonRevealWord.setDisable(!isPending);
                 } else {
                     buttonRevealWord.setDisable(true);
+                }
+                if (isPending && !model.isComputerPlayerPlays()){
+                    labelStatus.setText("Build a Word");
+                } else if (isPending && model.isComputerPlayerPlays()) {
+                    labelStatus.setText("Computer Player is building a word");
                 }
             }
             )

@@ -37,31 +37,6 @@ public class BoardButtonController implements Initializable {
     public void initialize(URL fxmlFileLocation, ResourceBundle resources){
         gridPaneBoard.getColumnConstraints().clear();
         gridPaneBoard.getRowConstraints().clear();
-        /*GameManager engine = new GameManager();
-        try {
-            engine.readXmlFile("c:\\d\\basic_1.xml");
-            engine.startGame();
-            List<Boolean> f = new ArrayList<>();
-            f.add(false);
-            f.add(false);
-            engine.newGame(f);
-            logicBoard = engine.getBoard();
-            draw();
-        }catch (EngineException ex)
-        {
-            Alert alert = new Alert(Alert.AlertType.INFORMATION);
-            alert.setTitle("Information Dialog");
-            alert.setHeaderText(null);
-            alert.setContentText(ex.getMessage());
-            alert.showAndWait();
-        } catch (Exception ex){
-            Alert alert = new Alert(Alert.AlertType.INFORMATION);
-            alert.setTitle("Information Dialog");
-            alert.setHeaderText(null);
-            alert.setContentText(ex.getMessage());
-            alert.showAndWait();
-        }*/
-
     }
 
 
@@ -98,82 +73,10 @@ public class BoardButtonController implements Initializable {
         this.gridPaneBoard.setAlignment(Pos.CENTER);
         this.gridPaneBoard.setHgap(0);
         this.gridPaneBoard.setVgap(0);
-        //this.gridPaneBoard.setPadding(new Insets(0, 25.0D, 0, 25.0D));
-        //this.gridPaneBoard.setPadding(new Insets(0, 25.0D, 0, 25.0D));
         this.rows = model.getBoardSize();
         this.columns = model.getBoardSize();
         createRowsAndCols();
         createButtons();
-        /*
-        int indexRowButton = 0;
-        int indexColumnButton = 0;
-        int index = 2;
-        int minWidth = 0;
-        int minHeight = 0;
-        HBox blockUp = new HBox(5.0D);
-        VBox blockLeft = new VBox(5.0D);
-        HBox table = new HBox(5.0D);
-
-        for(int row = 0; row < this.rows; ++row) {
-            HBox cellInRow = this.createHboxCell();
-
-            int column;
-            for(column = 0; column < columns; ++column) {
-                Label label = new Label();
-                try {
-                    label.textProperty().bind(Bindings.format("%c",logicBoard.getBoardCard(row,column)));
-                    cellInRow.getChildren().add(label);
-                } catch (EngineException ex){
-                    ex.getMessage();
-                }
-            }
-            minWidth = logicBoard.getBoardSize() * (logicBoard.getBoardSize()  + 15);
-            cellInRow.setMinWidth((double)minWidth);
-            blockLeft.getChildren().add(cellInRow);
-            table.getChildren().add(cellInRow);
-
-            for(column = 0; column < this.columns; ++column) {
-                if(row == 0) {
-                    VBox cellInColumn = this.createVboxCell();
-
-
-                    for(int blockInColumn = 0; blockInColumn < logicBoard.getBoardSize(); ++blockInColumn) {
-                        Label label = new Label();
-                        try {
-                            label.textProperty().bind(Bindings.format("%c",logicBoard.getBoardCard(row,column)));
-                            cellInRow.getChildren().add(label);
-                        } catch (EngineException ex){
-                            ex.getMessage();
-                        }
-                        cellInColumn.getChildren().add(label);
-                    }
-
-                    minHeight = logicBoard.getBoardSize() * (logicBoard.getBoardSize() + 15);
-                    cellInColumn.setMinHeight((double)minHeight);
-                    cellInColumn.setAlignment(Pos.BOTTOM_CENTER);
-                    if(row == 0 && column == 0) {
-                        blockUp.getChildren().add(this.createCell());
-                    }
-
-                    blockUp.getChildren().add(cellInColumn);
-                }
-
-                buttonInBoard = this.createTableCell(row, column);
-                table.getChildren().add(buttonInBoard);
-                this.boardButtonsMap.put(new Key(row, column), buttonInBoard);
-            }
-
-            this.gridPaneBoardAndBlocks.addRow(index++, new Node[]{table});
-            table = new HBox(5.0D);
-        }
-
-        Insets insets = new Insets(0.0D, 0.0D, 0.0D, (double)(minWidth - 30));
-        blockUp.setPadding(insets);
-        this.gridPaneBoardAndBlocks.addRow(1, new Node[]{blockUp});
-        this.gridPaneBoardAndBlocks.setAlignment(Pos.TOP_CENTER);
-        blockLeft.setAlignment(Pos.CENTER_LEFT);
-        return this.gridPaneBoardAndBlocks;
-        */
     }
 
 
@@ -194,8 +97,11 @@ public class BoardButtonController implements Initializable {
 
     public void removeCard(int row, int col) {
         CardUI card =  (CardUI) Utils.getNodeByRowColumnIndex(col-1,row-1,gridPaneBoard);
-        card.setDisable(true);
-        card.setStyleEmpty();
+        if (card != null){
+            card.setDisable(true);
+            card.setStyleEmpty();
+            gridPaneBoard.getChildren().remove(card);
+        }
     }
 
     public void selectCard(int row,int col){
@@ -204,12 +110,16 @@ public class BoardButtonController implements Initializable {
     }
 
     public void updateCharCard(Card c) {
-        CardUI cardUI = (CardUI)Utils.getNodeByRowColumnIndex(c.getCol()-1,c.getRow()-1,gridPaneBoard);
-        cardUI.setText(Character.toString(c.getLetter()));
-        if (c.getSelected()){
-            cardUI.setStyleSelected();
-        } else{
-            cardUI.setStyleUndefined(c);
+        if (c !=null){
+            CardUI cardUI = (CardUI)Utils.getNodeByRowColumnIndex(c.getCol()-1,c.getRow()-1,gridPaneBoard);
+            if (cardUI != null){
+                cardUI.setText(Character.toString(c.getLetter()));
+                if (c.getSelected()){
+                    cardUI.setStyleSelected();
+                } else{
+                    cardUI.setStyleUndefined(c);
+                }
+            }
         }
     }
 

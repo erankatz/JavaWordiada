@@ -1,0 +1,27 @@
+.root{
+    -fx-font-size: 10pt;
+    -fx-font-family : sans-serif;
+    -fx-base: rgb(120, 255, 47);
+    -fx-background-color: darkseagreen;
+}
+
+
+.background {
+    -fx-background-color: #1d1d1d;
+}
+
+.card-Selected{
+    -fx-background-color : burlywood;
+}
+
+.card-Empty {
+    -fx-background-color : darkcyan;
+}
+
+.card-Hidden{
+    -fx-background-color : lightskyblue;
+}
+
+.card-UnHidden{
+    -fx-background-color : tomato;
+}

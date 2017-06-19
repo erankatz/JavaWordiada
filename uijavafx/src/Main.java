@@ -34,8 +34,5 @@ public class Main extends Application  {
         } catch(java.io.IOException ex){
             Utils.showExceptionMessage(ex);
         }
-
-
-        //board.getColumnConstraints().add(new ColumnConstraints());
     }
 }

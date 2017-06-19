@@ -1,0 +1,9 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="uijavafx">
+    <output-path>$PROJECT_DIR$/out/artifacts/uijavafx</output-path>
+    <root id="archive" name="uijavafx.jar">
+      <element id="module-output" name="uijavafx" />
+      <element id="module-output" name="engine" />
+    </root>
+  </artifact>
+</component>

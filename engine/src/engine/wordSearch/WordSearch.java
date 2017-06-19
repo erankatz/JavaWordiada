@@ -4,6 +4,7 @@ import engine.Card;
 
 import java.io.Serializable;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -13,7 +14,7 @@ import java.util.stream.Collectors;
 public class WordSearch implements Serializable{
     List<String> result;
     Trie trie;
-    Predicate<Card> filter;
+    Set<String> currentRunWordCheck;
 
     public WordSearch(Set<String> words){
         trie = new Trie();
@@ -24,11 +25,11 @@ public class WordSearch implements Serializable{
 
     public List<String > findWords(List<Card> board) {
         result = new LinkedList<>();
-        this.filter = filter;
         int m = board.size();
-
+        currentRunWordCheck = new HashSet<>();
         boolean[] visited = new boolean[m];
-
+        AtomicInteger j = new AtomicInteger(0);
+        board.stream().forEach(c->c.setIndex(j.getAndAdd(1)));
         for (int i = 0; i < m; i++) {
                 dfs(board, visited, "", i, trie);
         }
@@ -48,20 +49,26 @@ public class WordSearch implements Serializable{
 
         str = str + board.get(i).getHiddenChar();
 
-        if (!trie.startsWith(str))
+        if (!currentRunWordCheck.contains(str) && !trie.startsWith(str))
             return;
 
+        currentRunWordCheck.add(str);
         if (trie.search(str)) {
                 result.add(str);
         }
 
         visited[i] = true;
 
-        for (int j=0;j<i;j++)
-            dfs(board, visited, str, j, trie);
+        List<Card> listOfCard = board.stream().distinct().collect(Collectors.toList());
 
-        for (int j=i+1;j<m;j++)
-            dfs(board, visited, str, j, trie);
+        for (Card c : listOfCard){
+            dfs(board,visited,str,c.getIndex(),trie);
+        }
+        //for (int j=0;j<i;j++)
+         //   dfs(board, visited, str, j, trie);
+
+        //for (int j=i+1;j<m;j++)
+        //    dfs(board, visited, str, j, trie);
 
         visited[i] = false;
     }

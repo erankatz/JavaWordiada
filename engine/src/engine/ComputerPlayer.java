@@ -24,23 +24,24 @@ public class ComputerPlayer extends Player implements java.io.Serializable {
         if (manager.getBoard().getNumOfUnrevealedCard() != 0) {
         rollDice();
         Utils.sleepForAWhile(sleepTime);
-        pairs = manager.getBoard().AllCardsPositionsFilter(card->card != null && !card.isRevealed());
+            pairs = manager.getBoard().AllCardsPositionsFilter(card->card != null && !card.isRevealed());
             while (isLeftCardsToReveal() && pairs.size() !=0) {
                 Map.Entry<Integer, Integer> pair = pairs.get(rand.nextInt(pairs.size()));
-                pairs.remove(pair);
                 try {
                     manager.getBoard().selectBoardCard(pair.getKey(), pair.getValue(),true);
                     Utils.sleepForAWhile(sleepTime);
                     leftCardNumToReveal--;
+                    pairs.remove(pair);
                 } catch (Exception ex) {
                     System.out.println("Error occurred");
                     System.exit(1);
                 }
             }
             Utils.sleepForAWhile(sleepTime);
+            leftCardNumToReveal = cube.getResult();
             try{
-                leftCardNumToReveal =cube.getResult();
-                revealCards();
+                if (isLeftCardsToReveal())
+                    revealCards();
             } catch (Exception ex)
             {
                 ex.printStackTrace();
@@ -87,8 +88,7 @@ public class ComputerPlayer extends Player implements java.io.Serializable {
             }
         }
 
-        if (!manager.isComputerMode())
-            endTurn();
+        endTurn();
     }
 
     @Override

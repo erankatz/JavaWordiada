@@ -135,23 +135,17 @@ public class GameManager implements Serializable,Cloneable{
         createNewMove();
         notifyPlayerTurnListeners(getCurrentPlayerTurn());
         notifyLetterFrequencyInDeckListeners(getCharFrequency());
-        if (isComputerMode()){
-            while (!gameOver){
-                notifyPlayerTurnListeners(getCurrentPlayerTurn());
-                notifyLetterFrequencyInDeckListeners(getCharFrequency());
-                ComputerPlayerPlayTurnTask task = new ComputerPlayerPlayTurnTask((ComputerPlayer)players[getCurrentPlayerTurn()]);
-                new Thread(task).start();
-                endPlayerTurn();
-            }
-        } else if (players[getCurrentPlayerTurn()] instanceof ComputerPlayer){
+        if (players[getCurrentPlayerTurn()] instanceof ComputerPlayer){
             ComputerPlayerPlayTurnTask task = new ComputerPlayerPlayTurnTask((ComputerPlayer)players[getCurrentPlayerTurn()]);
             new Thread(task).start();
         }
+        Arrays.stream(players).forEach(pl->pl.setScore(0));
         notifyStartPlayerTurn();
     }
 
     public boolean isComputerMode(){
-        return players[0] instanceof ComputerPlayer && players[1] instanceof ComputerPlayer;
+        long computerPlayers = Arrays.stream(players).filter(pl -> pl instanceof  ComputerPlayer).count();
+        return computerPlayers == players.length;
     }
 
     protected void wordRevealed(String word, long frequency){
@@ -169,6 +163,7 @@ public class GameManager implements Serializable,Cloneable{
             else
                 notifyPlayerDataChangedListener(new PlayerData("Human",pl.getId(),pl.getName(),pl.getScore(),getCurrentPlayerTurn()));
     }
+
 
     public Player[] getPlayers()
     {
@@ -330,7 +325,7 @@ public class GameManager implements Serializable,Cloneable{
     public void playerQuit(){
         players[getCurrentPlayerTurn()].QuitFromGame();
         long i = Arrays.stream(players).filter(player ->player.getisQuiteFromGame() ==true ).count();
-        if (i == players.length){
+        if (i == (players.length -1)){
             isGameStarted = false;
             gameOver = true;
             endPlayerTurn();
@@ -377,7 +372,7 @@ public class GameManager implements Serializable,Cloneable{
                 board.ChangeAllCardsToUnrevealed();
             }
             players[getCurrentPlayerTurn()].setRetriesNumber(retriesNumber);
-            if (!isComputerMode() && players[getCurrentPlayerTurn()] instanceof ComputerPlayer){
+            if (players[getCurrentPlayerTurn()] instanceof ComputerPlayer){
                 ComputerPlayerPlayTurnTask task = new ComputerPlayerPlayTurnTask((ComputerPlayer)players[getCurrentPlayerTurn()]);
                 new Thread(task).start();
             }
