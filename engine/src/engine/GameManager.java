@@ -140,6 +140,7 @@ public class GameManager implements Serializable,Cloneable{
             new Thread(task).start();
         }
         Arrays.stream(players).forEach(pl->pl.setScore(0));
+        getPlayersData().stream().forEach(pl ->notifyPlayerDataChangedListener(pl));
         notifyStartPlayerTurn();
     }
 
@@ -149,19 +150,28 @@ public class GameManager implements Serializable,Cloneable{
     }
 
     protected void wordRevealed(String word, long frequency){
-            if (scoreMode == EnumScoreMode.WORDCOUNT)
+            Long score = null;
+            if (scoreMode == EnumScoreMode.WORDCOUNT){
                 players[getCurrentPlayerTurn()].addComposedWord(word,1);
+            }
             else {
                 AtomicLong sumOfCharsScore = new AtomicLong(0);
                 word.chars().forEach(ch->sumOfCharsScore.addAndGet(board.getDeck().getScoreLetter((char)ch)));
-                long score = sumOfCharsScore.get() * board.getWord2Segment(word);
+                score = sumOfCharsScore.get() * board.getWord2Segment(word);
                 players[getCurrentPlayerTurn()].addComposedWord(word,score);
             }
+        if (score != null){
+            notifyWordRevealedListeners(word,score.intValue());
+        } else {
+            notifyWordRevealedListeners(word,1);
+        }
+        Utils.sleepForAWhile(Utils.sleepTime);
             Player pl = players[getCurrentPlayerTurn()];
             if (players[getCurrentPlayerTurn()] instanceof ComputerPlayer)
                 notifyPlayerDataChangedListener(new PlayerData("Computer",pl.getId(),pl.getName(),pl.getScore(),getCurrentPlayerTurn()));
             else
                 notifyPlayerDataChangedListener(new PlayerData("Human",pl.getId(),pl.getName(),pl.getScore(),getCurrentPlayerTurn()));
+
     }
 
 

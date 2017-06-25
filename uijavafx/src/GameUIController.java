@@ -130,6 +130,7 @@ public class GameUIController implements Initializable  {
         });
         buttonStart.setDisable(true);
         buttonLoadXml.setOnMouseClicked((Event e)->{
+            playersTable.getItems().clear();
             Stage newStage = new Stage();
             FileChooser fileChooser = new FileChooser();
             fileChooser.setTitle("Open Resource File");
@@ -144,6 +145,7 @@ public class GameUIController implements Initializable  {
                     initNewGameUI();
                     model.getPlayersData().forEach(pl -> playersTable.getItems().add(pl));
                     playersTable.refresh();
+                    labelStatus.setText("The file loaded successfully :)");
                 } catch (IOException ex){
                     Utils.showExceptionMessage(ex);
                 } catch (EngineException ex)
@@ -262,9 +264,13 @@ public class GameUIController implements Initializable  {
         );
         model.setWordRevealedWord2Score((e)->
             Platform.runLater(()->{
-                    if (!model.isComputerPlayerPlays())
-                        labelStatus.setText("You got " + e.getValue() + " for trying to composing word " + e.getKey() +
-                               " you have "+ model.getCurrentPlayerRetriesLeft() + " more chances " );
+                    if (!model.isComputerPlayerPlays()){
+                        if (e.getValue() > 0){
+                            labelStatus.setText("You are right !! \nYou got " + e.getValue() + " for composing the word " + e.getKey());
+                        } else {
+                            labelStatus.setText("You are wrong. The word " + e.getKey() + " is not valid.\n You have " + model.getCurrentPlayerRetriesLeft() + " more chances ");
+                        }
+                    }
                     else
                         labelStatus.setText("Computer Player got " + e.getValue() + " for trying to composing word " + e.getKey());
             })
@@ -273,6 +279,7 @@ public class GameUIController implements Initializable  {
             Platform.runLater(()->{
                 if (!model.isComputerPlayerPlays() && !model.getIsReplayMode()){
                     buttonRevealWord.setDisable(!isPending);
+                    boardButtonController.setDisable(!isPending);
                 } else {
                     buttonRevealWord.setDisable(true);
                 }
@@ -288,6 +295,7 @@ public class GameUIController implements Initializable  {
                 Platform.runLater(()->{
                         if (!model.isComputerPlayerPlays() && !model.getIsReplayMode()){
                             buttonRevealCard.setDisable(!isPending);
+                            boardButtonController.setDisable(!isPending);
                         } else {
                             buttonRevealCard.setDisable(true);
                         }

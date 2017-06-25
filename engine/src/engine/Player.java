@@ -76,6 +76,7 @@ public class Player implements java.io.Serializable,Cloneable{
 
     public boolean revealWord() throws WrongCardPositionException,CardNotReveledException,BoardException {
         boolean ret = manager.getBoard().revealWord();
+        Utils.sleepForAWhile(Utils.sleepTime);
         if (ret == true){
             retriesNumber=0;
         } else{

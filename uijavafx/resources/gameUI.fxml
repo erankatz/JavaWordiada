@@ -53,11 +53,11 @@
             <AnchorPane fx:id="anchorPane" prefHeight="597.0" prefWidth="400.0">
                <children>
                   <TextArea fx:id="textBoxLetterFrequencyInDeck" editable="false" layoutX="294.0" layoutY="6.0" prefHeight="595.0" prefWidth="118.0" />
-                  <HBox id="hBoxHistory" fx:id="hBoxHistoryPlays" layoutY="41.0" prefHeight="31.0" prefWidth="254.0" spacing="10.0">
+                  <HBox id="hBoxHistory" fx:id="hBoxHistoryPlays" layoutY="41.0" prefHeight="31.0" prefWidth="286.0" spacing="10.0">
                      <children>
-                        <Button fx:id="buttonPrev" mnemonicParsing="false" prefHeight="31.0" prefWidth="44.0" text="Prev" />
-                        <Button fx:id="buttonNext" mnemonicParsing="false" prefHeight="31.0" prefWidth="42.0" text="Next" />
-                        <Button fx:id="buttonPlayTurn" mnemonicParsing="false" prefHeight="32.0" prefWidth="66.0" text="Play Turn" />
+                        <Button fx:id="buttonPrev" mnemonicParsing="false" prefHeight="31.0" prefWidth="59.0" text="Prev" />
+                        <Button fx:id="buttonNext" mnemonicParsing="false" prefHeight="31.0" prefWidth="55.0" text="Next" />
+                        <Button fx:id="buttonPlayTurn" mnemonicParsing="false" prefHeight="31.0" prefWidth="108.0" text="Play Turn" />
                      </children>
                   </HBox>
                   <VBox layoutY="78.0" prefHeight="528.0" prefWidth="288.0" spacing="5.0">
