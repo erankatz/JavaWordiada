@@ -363,7 +363,7 @@ public class GameManager implements Serializable,Cloneable{
         while (players[getCurrentPlayerTurn()].getisQuiteFromGame() == true){
             this.roundCounter++;
         }
-        if ((deck.getDeckSize() == 0 && board.getNumOfUnrevealedCard() ==0)){
+        if ((deck.getDeckSize() == 0 && board.getNumOfUnrevealedCard() ==0) || gameOver){
                 //|| (this.isGoldFishMode && board.getNumberOfLegalWords(card->card!=null) ==0 || gameOver)){
             gameOver =true;
             isGameStarted =false;

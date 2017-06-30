@@ -98,21 +98,15 @@ public class GameUIController implements Initializable,MessageBoxInterface  {
         buttonQuitGame.setOnMouseClicked(e-> {
             if (Utils.YesNoDialog("Are You sure","Quite Game Dialog")){{
                     new Thread(()->model.quitGame()).run();
+                    buttonStart.setDisable(true);
             }}});
         buttonStart.setOnMouseClicked((Event e) ->
                 new Thread(()->{
                     clearGameUI();
                     model.startGame();
                     initNewGameUI();
-                    if (model != null && model.isGameOver() == true)
-                    {
-                        model.getPlayersData().forEach(pl -> playersTable.getItems().add(pl));
-                        playersTable.refresh();
-                    }
                     model.updateCards();
-                    buttonGetCurrentPlayerStatus.disableProperty().bind(((buttonRevealCard.disabledProperty().not()).or(buttonRevealWord.disabledProperty().not()).or(buttonRollDice.disabledProperty().not())).not());
                 }).start()
-
         );
         buttonClearCardSelection.setOnMouseClicked((Event e)->model.clearCardSelection());
         buttonClearCardSelection.disableProperty().bind(((buttonRevealCard.disabledProperty().not()).or(buttonRevealWord.disabledProperty().not())).not());
@@ -175,13 +169,14 @@ public class GameUIController implements Initializable,MessageBoxInterface  {
                 labelIsGoldfishMode.setText("Gold Fish Mode: False");
             labelScoreMode.setText("Score Mode: " + model.getScoreMode());
             textBoxLowestFrequencyDictionaryWords.setText(model.getLowestFrequencyDictionaryWords());
+            playersTable.getItems().clear();
+            model.getPlayersData().forEach(pl -> playersTable.getItems().add(pl));
+            playersTable.refresh();
         });
     }
 
     private void clearGameUI(){
         Platform.runLater(()->{
-            if (model != null && model.isGameOver() == true)
-                playersTable.getItems().clear();
             labelPlayerTurn.setText("PlayerTurn:");
             labelRoundNumber.setText("Round Number:");
             labelIsGoldfishMode.setText("Gold Fish Mode:");
@@ -330,6 +325,7 @@ public class GameUIController implements Initializable,MessageBoxInterface  {
                     buttonRollDice.setDisable(true);
                     buttonRevealCard.setDisable(true);
                     buttonRevealWord.setDisable(true);
+                    buttonStart.setDisable(false);
                 }));
 
         model.setUpdatePlayerScoreConsumer(pl->
