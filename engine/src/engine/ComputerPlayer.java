@@ -49,7 +49,6 @@ public class ComputerPlayer extends Player implements java.io.Serializable {
             }
         }
 
-
         List<String> words =  manager.getBoard().getLegalWords(card->card!=null && card.isRevealed()).stream().distinct().collect(Collectors.toList());
         if (words.size() >0){
             List<Map.Entry<Integer,Integer>> wordPairs = new ArrayList<>();

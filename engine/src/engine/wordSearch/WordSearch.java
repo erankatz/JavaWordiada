@@ -12,9 +12,15 @@ import java.util.stream.Collectors;
  * Created by eran on 17/04/2017.
  */
 public class WordSearch implements Serializable{
+    private final double timeOut = 2;
     List<String> result;
     Trie trie;
+    long tStart;
+    long tEnd;
 
+    private double getTimeElapsed(){ //in Seconds
+        return (tEnd - tStart) /1000000000;
+    }
     public WordSearch(Set<String> words){
         trie = new Trie();
         for (String word : words) {
@@ -23,13 +29,18 @@ public class WordSearch implements Serializable{
     }
 
     public List<String> findWords(List<Card> board) {
+        tStart = System.nanoTime();
+        tEnd = System.nanoTime();
         result = new LinkedList<>();
         int m = board.size();
         boolean[] visited = new boolean[m];
         AtomicInteger j = new AtomicInteger(0);
         board.stream().forEach(c->c.setIndex(j.getAndAdd(1)));
         for (int i = 0; i < m; i++) {
-                dfs(board, visited, "", i, trie);
+            dfs(board, visited, "", i, trie);
+            if (getTimeElapsed() > timeOut){
+                return result.stream().filter(c->c.length()>1).collect(Collectors.toList());
+            }
         }
         return result.stream().filter(c->c.length()>1).collect(Collectors.toList());
     }
