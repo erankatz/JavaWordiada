@@ -78,6 +78,7 @@ public class Board implements java.io.Serializable,Cloneable{
         b.deck = this.deck.clone();
         b.cards = this.cards.clone();
         b.cards = cloneCards();
+        b.word2Segment = this.word2Segment;
         return b;
     }
 
@@ -107,18 +108,15 @@ public class Board implements java.io.Serializable,Cloneable{
         {
             replaceCards(pairs);
             manager.wordRevealed(str,word2FrequencyDic.get(str)); //After word is revealed and validation
-            manager.notifyWordRevealedListeners(str,1);
-            Utils.sleepForAWhile(Utils.sleepTime);
             manager.notifyLetterFrequencyInDeckListeners(deck.CreateMapStructureCharToLong());
             clearSelectedCards();
             selectedCardsList.clear();
-            Utils.sleepForAWhile(Utils.sleepTime);
             return true;
         }
         manager.notifyWordRevealedListeners(str,0);
+        Utils.sleepForAWhile(Utils.sleepTime);
         clearSelectedCards();
         selectedCardsList.clear();
-        Utils.sleepForAWhile(Utils.sleepTime);
         return false;
     }
 
@@ -297,5 +295,9 @@ public class Board implements java.io.Serializable,Cloneable{
     public static <T> Predicate<T> distinctByKey(Function<? super T, ?> keyExtractor) {
         Map<Object,Boolean> seen = new ConcurrentHashMap<>();
         return t -> seen.putIfAbsent(keyExtractor.apply(t), Boolean.TRUE) == null;
+    }
+
+    public void updateCards() {
+        Arrays.stream(cards).flatMap(Arrays::stream).filter(card->card != null).forEach(c->manager.notifyCardChangedListener(c));
     }
 }

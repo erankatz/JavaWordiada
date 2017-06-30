@@ -36,8 +36,10 @@ public class GameModel {
     private Consumer<Boolean> isRolledDicesPending;
     private Consumer<Integer> gameOverConsumer;
     private Consumer<PlayerData> updatePlayerScoreConsumer;
+    private Consumer<Boolean> isFileLoadedSuccefullyConsumer;
+    private Consumer<String> exceptionMessageConsumer;
 
-    public void readXmlFile(File file)throws java.io.IOException,LetterException,XPathExpressionException,BoardSizeOutOfRangeException,NotEnoughCardsToFillBoardException,FileExtensionException,DiceException {
+    public void readXmlFile(File file) {
         manager = new GameManager();
         manager.registerEnableAllCardsListener(()->isDisabledAllCards.accept(false));
         manager.registerDisableAllCardsListener(()->isDisabledAllCards.accept(true));
@@ -55,7 +57,18 @@ public class GameModel {
         manager.registerRollDicesPendingListeners((isPending) ->isRolledDicesPending.accept(isPending));
         manager.registerGameOverListener((id)->gameOverConsumer.accept(id));
         manager.registerPlayerDataChangedListener(pl->updatePlayerScoreConsumer.accept(pl));
-        manager.readXmlFile(file);
+        try {
+            manager.readXmlFile(file);
+            newGame();
+            isFileLoadedSuccefullyConsumer.accept(true);
+        } catch (IOException ex){
+            exceptionMessageConsumer.accept(ex.getMessage());
+        } catch (EngineException ex)
+        {
+            exceptionMessageConsumer.accept(ex.getMessage());
+        } catch (XPathExpressionException ex){
+            exceptionMessageConsumer.accept(ex.getMessage());
+        }
     }
 
     public void selectCard(int row,int col){
@@ -72,6 +85,10 @@ public class GameModel {
 
     public void setCardSelectedConsumer(Consumer<Map.Entry<Integer,Integer>> listenerConsumer){
         cardSelected = listenerConsumer;
+    }
+
+    public void setIsFileLoadedSuccefullyConsumer(Consumer<Boolean> consumer){
+        isFileLoadedSuccefullyConsumer =consumer;
     }
 
     public void playPrevMove(int index){
@@ -127,7 +144,7 @@ public class GameModel {
         try{
             return board.getBoardCard(row,col).getLetter();
         } catch (Exception ex){
-            Utils.showExceptionMessage(ex);
+            exceptionMessageConsumer.accept(ex.getMessage());
         }
         return '*';
     }
@@ -141,7 +158,7 @@ public class GameModel {
         try{
             manager.getPlayers()[manager.getCurrentPlayerTurn()].revealCards();
         } catch (EngineException ex){
-            Utils.showExceptionMessage(ex);
+            exceptionMessageConsumer.accept(ex.getMessage());
         }
     }
 
@@ -149,7 +166,7 @@ public class GameModel {
         try{
             manager.getPlayers()[manager.getCurrentPlayerTurn()].revealWord();
         } catch (EngineException ex){
-            Utils.showExceptionMessage(ex);
+            exceptionMessageConsumer.accept(ex.getMessage());
         }
     }
 
@@ -194,14 +211,14 @@ public class GameModel {
                     a.add(false);
                     manager.newGame(a);
                 } catch (EngineException ex){
-                    Utils.printMessage(ex.getMessage());
+                    exceptionMessageConsumer.accept(ex.getMessage());
                 } catch (IOException ex){
                     System.out.println(ex.getMessage());
                 }
             }
             manager.startGame();
         } else {
-            Utils.printMessage("The Game Not Loaded or already started");
+            exceptionMessageConsumer.accept("The Game Not Loaded or already started");
         }
     }
 
@@ -266,5 +283,14 @@ public class GameModel {
         } else {
             return "Word Score";
         }
+    }
+
+
+    public void setExceptionMessageConsumer(Consumer<String> exceptionMessageConsumer) {
+        this.exceptionMessageConsumer = exceptionMessageConsumer;
+    }
+
+    public void updateCards() {
+        manager.updateCards();
     }
 }

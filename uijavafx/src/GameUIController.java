@@ -29,7 +29,7 @@ import javafx.stage.Stage;
 
 import javax.xml.xpath.XPathExpressionException;
 
-public class GameUIController implements Initializable  {
+public class GameUIController implements Initializable,MessageBoxInterface  {
 
     @FXML BorderPane boarderPane;
     @FXML Button buttonStart;
@@ -68,6 +68,7 @@ public class GameUIController implements Initializable  {
     BoardButtonController boardButtonController;
     @Override
     public void initialize(URL url, ResourceBundle rb) {
+        Utils.setMessageBoxConsumer(this);
         Utils.autoFitTable(playersTable);
         styleComboBox.getItems().clear();
         styleComboBox.getItems().addAll(
@@ -88,7 +89,7 @@ public class GameUIController implements Initializable  {
         typeCol.setCellValueFactory(new PropertyValueFactory<>("type"));
         idCol.setCellValueFactory(new PropertyValueFactory<>("id"));
         scoreCol.setCellValueFactory(new PropertyValueFactory<>("score"));
-        buttonApplyStyle.setOnMouseClicked(e->Utils.setStyleSheet(null,styleComboBox.getSelectionModel().getSelectedItem()));
+        buttonApplyStyle.setOnMouseClicked(e->setButtonApplyStyle());
         setConsumers(model);
         FXMLLoader fxmlLoader = new FXMLLoader();
         buttonRevealWord.setDisable(true);
@@ -96,9 +97,10 @@ public class GameUIController implements Initializable  {
         buttonRollDice.setDisable(true);
         buttonQuitGame.setOnMouseClicked(e-> {
             if (Utils.YesNoDialog("Are You sure","Quite Game Dialog")){{
-                    model.quitGame();
+                    new Thread(()->model.quitGame()).run();
             }}});
-        buttonStart.setOnMouseClicked((Event e) ->{
+        buttonStart.setOnMouseClicked((Event e) ->
+                new Thread(()->{
                     clearGameUI();
                     model.startGame();
                     initNewGameUI();
@@ -107,19 +109,21 @@ public class GameUIController implements Initializable  {
                         model.getPlayersData().forEach(pl -> playersTable.getItems().add(pl));
                         playersTable.refresh();
                     }
+                    model.updateCards();
                     buttonGetCurrentPlayerStatus.disableProperty().bind(((buttonRevealCard.disabledProperty().not()).or(buttonRevealWord.disabledProperty().not()).or(buttonRollDice.disabledProperty().not())).not());
-                }
+                }).start()
+
         );
         buttonClearCardSelection.setOnMouseClicked((Event e)->model.clearCardSelection());
         buttonClearCardSelection.disableProperty().bind(((buttonRevealCard.disabledProperty().not()).or(buttonRevealWord.disabledProperty().not())).not());
         buttonQuitGame.disableProperty().bind(((buttonRevealCard.disabledProperty().not()).or(buttonRevealWord.disabledProperty().not()).or(buttonRollDice.disabledProperty().not())).not());
         buttonGetCurrentPlayerStatus.disableProperty().bind(((buttonRevealCard.disabledProperty().not()).or(buttonRevealWord.disabledProperty().not()).or(buttonRollDice.disabledProperty().not())).not());
-        buttonRevealCard.setOnMouseClicked((Event e) ->{
-            model.revealCards();
-        }) ;
-        buttonRevealWord.setOnMouseClicked((Event e) ->{
-            model.revealWord();
-        });
+        buttonRevealCard.setOnMouseClicked((Event e) ->
+            new Thread(()->model.revealCards()).start()
+        );
+        buttonRevealWord.setOnMouseClicked((Event e) ->
+            new Thread(()->model.revealWord()).start()
+        );
         buttonNext.setOnMouseClicked((Event e)->{
             if (!textBoxHistoryPlays.getNumber().equals(new BigDecimal(model.getTotalNumOfTurnsElapsed())))
                 textBoxHistoryPlays.setNumber(textBoxHistoryPlays.getNumber().add(new BigDecimal(1)));
@@ -136,25 +140,10 @@ public class GameUIController implements Initializable  {
             fileChooser.setTitle("Open Resource File");
             File file = fileChooser.showOpenDialog(newStage);
             if (file != null){
-                try{
-                    boardButtonController.clearAll();
-                    clearGameUI();
-                    model.readXmlFile(file);
-                    model.newGame();
-                    boardButtonController.setModel(model);
-                    initNewGameUI();
-                    model.getPlayersData().forEach(pl -> playersTable.getItems().add(pl));
-                    playersTable.refresh();
-                    labelStatus.setText("The file loaded successfully :)");
-                } catch (IOException ex){
-                    Utils.showExceptionMessage(ex);
-                } catch (EngineException ex)
-                {
-                    Utils.showExceptionMessage(ex);
-                } catch (XPathExpressionException ex){
-                    Utils.showExceptionMessage(ex);
-                }
-            }
+                boardButtonController.clearAll();
+                clearGameUI();
+                new Thread(()->model.readXmlFile(file)).start();
+            };
         });
         this.buttonGetCurrentPlayerStatus.setOnMouseClicked((Event e) ->
                 Platform.runLater(
@@ -193,7 +182,6 @@ public class GameUIController implements Initializable  {
         Platform.runLater(()->{
             if (model != null && model.isGameOver() == true)
                 playersTable.getItems().clear();
-            buttonStart.setDisable(false);
             labelPlayerTurn.setText("PlayerTurn:");
             labelRoundNumber.setText("Round Number:");
             labelIsGoldfishMode.setText("Gold Fish Mode:");
@@ -220,6 +208,22 @@ public class GameUIController implements Initializable  {
                         labelIsGoldfishMode.setText(labelIsGoldfishMode.getText())
                 )
         );
+        model.setIsFileLoadedSuccefullyConsumer((isLoaded)->{
+            if (isLoaded){
+                Platform.runLater(()->{
+                    boardButtonController.setModel(model);
+                    initNewGameUI();
+
+                    model.getPlayersData().forEach(pl -> playersTable.getItems().add(pl));
+                    playersTable.refresh();
+                    labelStatus.setText("The file loaded successfully :)");
+                    buttonStart.setDisable(false);
+                });
+            } else{
+                labelStatus.setText("File Error");
+            }
+        });
+        model.setExceptionMessageConsumer((message)->Utils.showExceptionMessage(message));
         model.setCardConsumer((Card c)->
             Platform.runLater(
                     ()->boardButtonController.updateCharCard(c)
@@ -350,4 +354,24 @@ public class GameUIController implements Initializable  {
         return String.format("%c - %d/%d\n",ch2Freq.getKey(),ch2Freq.getValue(), NumOfCardInDeck);
     }
 
+    private void setButtonApplyStyle(){
+        String cssFile;
+        if (styleComboBox.getSelectionModel().getSelectedIndex() == -1){
+            cssFile = styleComboBox.getItems().get(0);
+        } else{
+            cssFile = styleComboBox.getSelectionModel().getSelectedItem();
+        }
+        Utils.setStyleSheet(null,cssFile);
+    }
+
+    public void showExceptionMessage(String message){
+        Platform.runLater(()-> {
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setTitle("Error Occured");
+            alert.setHeaderText(null);
+            alert.setContentText(message);
+            alert.showAndWait();
+        });
+
+    }
 }

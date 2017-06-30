@@ -14,7 +14,6 @@ import java.util.stream.Collectors;
 public class WordSearch implements Serializable{
     List<String> result;
     Trie trie;
-    Set<String> currentRunWordCheck;
 
     public WordSearch(Set<String> words){
         trie = new Trie();
@@ -26,7 +25,6 @@ public class WordSearch implements Serializable{
     public List<String > findWords(List<Card> board) {
         result = new LinkedList<>();
         int m = board.size();
-        currentRunWordCheck = new HashSet<>();
         boolean[] visited = new boolean[m];
         AtomicInteger j = new AtomicInteger(0);
         board.stream().forEach(c->c.setIndex(j.getAndAdd(1)));
@@ -49,10 +47,9 @@ public class WordSearch implements Serializable{
 
         str = str + board.get(i).getHiddenChar();
 
-        if (!currentRunWordCheck.contains(str) && !trie.startsWith(str))
+        if (!trie.startsWith(str))
             return;
 
-        currentRunWordCheck.add(str);
         if (trie.search(str)) {
                 result.add(str);
         }

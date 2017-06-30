@@ -4,6 +4,7 @@ import engine.Card;
 import engine.GameManager;
 import engine.exception.EngineException;
 import engine.exception.file.FileException;
+import javafx.application.Platform;
 import javafx.beans.binding.Binding;
 import javafx.beans.binding.Bindings;
 import javafx.fxml.FXML;
@@ -77,6 +78,7 @@ public class BoardButtonController implements Initializable {
         this.columns = model.getBoardSize();
         createRowsAndCols();
         createButtons();
+        model.updateCards();
     }
 
 
@@ -125,5 +127,6 @@ public class BoardButtonController implements Initializable {
 
     public void clearAll() {
         gridPaneBoard.getChildren().clear();
+
     }
 }

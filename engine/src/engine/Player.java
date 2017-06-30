@@ -21,7 +21,6 @@ import java.util.*;
  * Created by eran on 30/03/2017.
  */
 public class Player implements java.io.Serializable,Cloneable{
-    private Deck deck;
     protected Dice cube;
     protected GameManager manager;
     protected int leftCardNumToReveal;
@@ -76,7 +75,6 @@ public class Player implements java.io.Serializable,Cloneable{
 
     public boolean revealWord() throws WrongCardPositionException,CardNotReveledException,BoardException {
         boolean ret = manager.getBoard().revealWord();
-        Utils.sleepForAWhile(Utils.sleepTime);
         if (ret == true){
             retriesNumber=0;
         } else{
@@ -168,7 +166,6 @@ public class Player implements java.io.Serializable,Cloneable{
         pl.retriesNumber = this.retriesNumber;
         pl.rolledDicesListenerListeners = this.rolledDicesListenerListeners;
         pl.numberOfWordsRevealed = this.numberOfWordsRevealed;
-        pl.deck = this.deck.clone();
         pl.cube = this.cube;
         return pl;
     }
@@ -177,9 +174,6 @@ public class Player implements java.io.Serializable,Cloneable{
         return numberOfWordsRevealed;
     }
 
-    public void setDeck(Deck deck) {
-        this.deck = deck;
-    }
 
 
     public void setDice(Dice dice) {

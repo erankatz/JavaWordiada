@@ -166,7 +166,7 @@ public class GameManager implements Serializable,Cloneable{
             notifyWordRevealedListeners(word,1);
         }
         Utils.sleepForAWhile(Utils.sleepTime);
-            Player pl = players[getCurrentPlayerTurn()];
+        Player pl = players[getCurrentPlayerTurn()];
             if (players[getCurrentPlayerTurn()] instanceof ComputerPlayer)
                 notifyPlayerDataChangedListener(new PlayerData("Computer",pl.getId(),pl.getName(),pl.getScore(),getCurrentPlayerTurn()));
             else
@@ -363,8 +363,8 @@ public class GameManager implements Serializable,Cloneable{
         while (players[getCurrentPlayerTurn()].getisQuiteFromGame() == true){
             this.roundCounter++;
         }
-        if ((deck.getDeckSize() == 0 && board.getNumOfUnrevealedCard() ==0) ||
-                (this.isGoldFishMode && board.getNumberOfLegalWords(card->true) ==0 || gameOver)){
+        if ((deck.getDeckSize() == 0 && board.getNumOfUnrevealedCard() ==0)){
+                //|| (this.isGoldFishMode && board.getNumberOfLegalWords(card->card!=null) ==0 || gameOver)){
             gameOver =true;
             isGameStarted =false;
             if (players[0].getScore() > players[1].getScore()){
@@ -439,7 +439,6 @@ public class GameManager implements Serializable,Cloneable{
         notifyLetterFrequencyInDeckListeners(getCharFrequency());
         for (int i =0;i<players.length; i++)
         {
-            players[i].setDeck(deck);
             players[i].setDice(new Dice(cubeFacets));
             players[i].setRetriesNumber(retriesNumber);
             players[i].registerRolledDicesListener((result) -> notifyEnableAllCardsListeners());
@@ -662,5 +661,9 @@ public class GameManager implements Serializable,Cloneable{
 
     public EnumScoreMode getScoreMode() {
         return scoreMode;
+    }
+
+    public void updateCards() {
+        board.updateCards();
     }
 }

@@ -1,4 +1,5 @@
 import com.sun.javafx.scene.control.skin.TableViewSkin;
+import javafx.application.Platform;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.scene.Node;
@@ -20,6 +21,7 @@ import java.util.Optional;
 public class Utils {
     private static Scene scene = null;
     private static Method columnToFitMethod;
+    private static MessageBoxInterface controller;
     static {
         try {
             columnToFitMethod = TableViewSkin.class.getDeclaredMethod("resizeColumnToFitContent", TableColumn.class, int.class);
@@ -27,6 +29,10 @@ public class Utils {
         } catch (NoSuchMethodException e) {
             e.printStackTrace();
         }
+    }
+
+    public static void setMessageBoxConsumer(MessageBoxInterface i){
+        Utils.controller = i;
     }
 
     public static void autoFitTable(TableView tableView) {
@@ -43,12 +49,9 @@ public class Utils {
             }
         });
     }
-    public static void showExceptionMessage(Exception ex){
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("Error Occured");
-        alert.setHeaderText(null);
-        alert.setContentText(ex.getMessage());
-        alert.showAndWait();
+
+    public static void showExceptionMessage(String ex){
+        controller.showExceptionMessage(ex);
     }
 
     public static Node getNodeByRowColumnIndex (final int row, final int column, GridPane gridPane) {
@@ -66,11 +69,13 @@ public class Utils {
     }
 
     public static void printMessage(String message){
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("Game Message");
-        alert.setHeaderText(null);
-        alert.setContentText(message);
-        alert.showAndWait();
+        Platform.runLater(()->{
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setTitle("Game Message");
+            alert.setHeaderText(null);
+            alert.setContentText(message);
+            alert.showAndWait();
+        });
     }
 
     public static void sleepForAWhile(long sleepTime) {

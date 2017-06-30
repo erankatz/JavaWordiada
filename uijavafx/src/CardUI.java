@@ -17,7 +17,6 @@ public class CardUI extends javafx.scene.control.Button{
         this.model = model;
         this.row = row;
         this.col = col;
-
         //this.autosize();
         //this.disableProperty().bind(Bindings.createBooleanBinding(()->!model.getIsEnabledCard(row,col)));
         //this.textProperty().bind(Bindings.format("%c",model.getCardLetter(row,col)));

@@ -77,6 +77,7 @@ public class Deck implements java.io.Serializable,Cloneable{
 
     public void NewGame()
     {
+        Random rand = new Random();
         ArrayList<Letter> currLetterArr = new ArrayList<Letter>(); //ArrayList of Letters with data from XML
         for (Letter letter : letterArr)
         {
@@ -85,7 +86,6 @@ public class Deck implements java.io.Serializable,Cloneable{
         cards = new LinkedList<>();
         while (currLetterArr.size() !=0)
         {
-            Random rand = new Random();
             Letter letter;
             int n = rand.nextInt(currLetterArr.size());
 
