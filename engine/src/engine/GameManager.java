@@ -21,6 +21,7 @@ import engine.exception.file.FileExtensionException;
 import engine.exception.letter.AlphabetExeption;
 import engine.exception.letter.DuplicateLetterException;
 import engine.exception.letter.LetterException;
+import engine.exception.player.DuplicatePlayerIDException;
 import engine.listener.*;
 import engine.tasks.ComputerPlayerPlayTurnTask;
 import org.w3c.dom.Document;
@@ -39,6 +40,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -197,7 +199,7 @@ public class GameManager implements Serializable,Cloneable{
             throw new FileException(filePath, ex);
         }
     }
-    public void readXmlFile(File file) throws java.io.IOException,LetterException,XPathExpressionException,BoardSizeOutOfRangeException,NotEnoughCardsToFillBoardException,FileExtensionException
+    public void readXmlFile(File file) throws java.io.IOException,LetterException,XPathExpressionException,BoardSizeOutOfRangeException,NotEnoughCardsToFillBoardException,FileExtensionException,DuplicatePlayerIDException
     {
         if (!file.getName().toLowerCase().endsWith(".xml")){
             throw new FileExtensionException (file.getAbsolutePath());
@@ -244,7 +246,17 @@ public class GameManager implements Serializable,Cloneable{
 
             //Create Players
             players = readPlayersFromXml(doc,xpath);
-
+                for (Player pl1 : players) {
+                    int i = 0;
+                    for (Player pl2 : players) {
+                        if (pl2.getId().contentEquals(pl1.getId())) {
+                            i++;
+                        }
+                        if (i == 2) {
+                            throw new DuplicatePlayerIDException(pl1.getId());
+                        }
+                    }
+                }
             //GetDictionaryFileNameFromFile
             expr =  xpath.compile("/GameDescriptor/Structure/DictionaryFileName/text()");
             dictionaryFilePath =  fXmlFile.getParent() + "\\dictionary\\"+  (String)expr.evaluate(doc, XPathConstants.STRING);
@@ -343,7 +355,6 @@ public class GameManager implements Serializable,Cloneable{
         } else {
             endPlayerTurn();
         }
-
     }
 
     public boolean isGameOver(){

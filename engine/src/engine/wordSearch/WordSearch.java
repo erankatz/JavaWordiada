@@ -22,7 +22,7 @@ public class WordSearch implements Serializable{
         }
     }
 
-    public List<String > findWords(List<Card> board) {
+    public List<String> findWords(List<Card> board) {
         result = new LinkedList<>();
         int m = board.size();
         boolean[] visited = new boolean[m];

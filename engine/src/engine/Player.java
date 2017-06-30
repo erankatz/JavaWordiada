@@ -174,7 +174,12 @@ public class Player implements java.io.Serializable,Cloneable{
         return numberOfWordsRevealed;
     }
 
-
+    @Override
+    public boolean equals(Object o){
+        if(o == null)   return false;
+        if(!(o instanceof Player) ) return false;
+        return ((Player)o).id.contentEquals(this.getId());
+    }
 
     public void setDice(Dice dice) {
         this.cube = dice;
