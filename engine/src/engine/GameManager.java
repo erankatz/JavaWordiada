@@ -387,6 +387,7 @@ public class GameManager implements Serializable,Cloneable{
             }
             notifyGameOverListeners(getCurrentPlayerTurn());
         } else {
+            board.clearSelectedCards();
             notifyStartPlayerTurn();
             createNewMove();
             if (isGoldFishMode){
