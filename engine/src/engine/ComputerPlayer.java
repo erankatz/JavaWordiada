@@ -50,30 +50,43 @@ public class ComputerPlayer extends Player implements java.io.Serializable {
         }
 
         List<String> words =  manager.getBoard().getLegalWords(card->card!=null && card.isRevealed()).stream().distinct().collect(Collectors.toList());
-        if (words.size() >0){
+        String word =null;
             List<Map.Entry<Integer,Integer>> wordPairs = new ArrayList<>();
-            String word = words.get(rand.nextInt(words.size()));
+        if (words.size() != 0){
+            word = words.get(rand.nextInt(words.size()));
+        }
             pairs = manager.getBoard().AllCardsPositionsFilter(card->card!=null && card.isRevealed());
-            for (int k=0;k<word.length();k++) {
+            int numOfCardToSelect;
+            if (word == null){
+                numOfCardToSelect = rand.nextInt(pairs.size()-2)+2;
+            } else {
+                numOfCardToSelect = word.length();
+            }
+            for (int k=0;k<numOfCardToSelect;k++) {
                 boolean found =false;
-                for (int i = 0; i < pairs.size() && !found; i++){
-                    try {
-                        int row = pairs.get(i).getKey();
-                        int col = pairs.get(i).getValue();
-                        if (manager.getBoard().getBoardCard(row, col).getLetter() == word.charAt(k)) {
-                            manager.getBoard().selectBoardCard(row,col,true);
-                            Utils.sleepForAWhile(sleepTime);
-                            Map.Entry<Integer, Integer> pair = pairs.get(i);
-                            pairs.remove(pair);
-                            wordPairs.add(pair);
-                            found = true;
+                int j=0;
+                if (word == null){
+                    j = rand.nextInt(pairs.size());
+                } else {
+                    for (int i = 0; i < pairs.size() && !found; i++) {
+                        int row1 = pairs.get(i).getKey();
+                        int col1 = pairs.get(i).getValue();
+                        try {
+                            if (manager.getBoard().getBoardCard(row1, col1).getLetter() == word.charAt(k)) {
+                                found = true;
+                                j = i;
+                            }
+                        } catch (Exception ex) {
+                            ex.printStackTrace();
+                            System.exit(1);
                         }
-                    } catch (Exception ex) {
-                        System.out.println("Error occurred");
-                        ex.printStackTrace();
-                        System.exit(1);
                     }
                 }
+                Map.Entry<Integer, Integer> pair = pairs.get(j);
+                manager.getBoard().selectBoardCard(pair.getKey(),pair.getValue(),true);
+                Utils.sleepForAWhile(sleepTime);
+                pairs.remove(pair);
+                wordPairs.add(pair);
             }
             try{
                 manager.getBoard().revealWord();
@@ -85,7 +98,7 @@ public class ComputerPlayer extends Player implements java.io.Serializable {
                 ex.printStackTrace();
                 System.exit(1);
             }
-        }
+
 
         endTurn();
     }
