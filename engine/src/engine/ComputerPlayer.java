@@ -51,21 +51,27 @@ public class ComputerPlayer extends Player implements java.io.Serializable {
 
         List<String> words =  manager.getBoard().getLegalWords(card->card!=null && card.isRevealed()).stream().distinct().collect(Collectors.toList());
         String word =null;
-            List<Map.Entry<Integer,Integer>> wordPairs = new ArrayList<>();
+        List<Map.Entry<Integer,Integer>> wordPairs = new ArrayList<>();
         if (words.size() != 0){
             word = words.get(rand.nextInt(words.size()));
         }
-            pairs = manager.getBoard().AllCardsPositionsFilter(card->card!=null && card.isRevealed());
+
+        while (revealWordPending()) {
+            pairs = manager.getBoard().AllCardsPositionsFilter(card -> card != null && card.isRevealed());
             int numOfCardToSelect;
-            if (word == null){
-                numOfCardToSelect = rand.nextInt(pairs.size()-2)+2;
+            if (word == null) {
+                if (wordPairs.size() > 2){
+                    numOfCardToSelect = rand.nextInt(pairs.size() - 2) + 2;
+                } else{
+                    numOfCardToSelect =2;
+                }
             } else {
                 numOfCardToSelect = word.length();
             }
-            for (int k=0;k<numOfCardToSelect;k++) {
-                boolean found =false;
-                int j=0;
-                if (word == null){
+            for (int k = 0; k < numOfCardToSelect; k++) {
+                boolean found = false;
+                int j = 0;
+                if (word == null) {
                     j = rand.nextInt(pairs.size());
                 } else {
                     for (int i = 0; i < pairs.size() && !found; i++) {
@@ -83,22 +89,25 @@ public class ComputerPlayer extends Player implements java.io.Serializable {
                     }
                 }
                 Map.Entry<Integer, Integer> pair = pairs.get(j);
-                manager.getBoard().selectBoardCard(pair.getKey(),pair.getValue(),true);
+                manager.getBoard().selectBoardCard(pair.getKey(), pair.getValue(), true);
                 Utils.sleepForAWhile(sleepTime);
                 pairs.remove(pair);
                 wordPairs.add(pair);
             }
-            try{
-                manager.getBoard().revealWord();
+            try {
+                if (manager.getBoard().revealWord()){
+                    retriesNumber =0;
+                } else{
+                    retriesNumber--;
+                }
                 Utils.sleepForAWhile(sleepTime);
                 manager.getBoard().clearSelectedCards();
-            }catch (Exception ex)
-            {
+            } catch (Exception ex) {
                 System.out.println("Error occurred");
                 ex.printStackTrace();
                 System.exit(1);
             }
-
+        }
 
         endTurn();
     }
