@@ -127,6 +127,7 @@ public class Board implements java.io.Serializable,Cloneable{
                 .forEach(entry-> {
                     Card c = deck.removeTopCard();
                     if (c == null){
+                        cards[entry.getKey()-1][entry.getValue()-1] = null;
                         manager.notifyCardRemovedListeners(entry.getKey(),entry.getValue());
                     } else{
                         setBoardCard(entry.getKey(),entry.getValue(),c);
@@ -248,7 +249,6 @@ public class Board implements java.io.Serializable,Cloneable{
         for (Map.Entry<Integer,Integer> e : selectedCardsList )
         {
             try{
-
                 Card card = cards[e.getKey()-1][e.getValue()-1];
                 if (!card.isRevealed()){
                     card.reveal(); // changing flag to 'reveal'
