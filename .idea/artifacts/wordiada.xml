@@ -1,0 +1,26 @@
+<component name="ArtifactManager">
+  <artifact type="war" name="wordiada">
+    <output-path>$PROJECT_DIR$/out/artifacts/wordiada</output-path>
+    <root id="archive" name="wordiada.war">
+      <element id="directory" name="lib">
+        <element id="module-output" name="engine" />
+      </element>
+      <element id="directory" name="classes">
+        <element id="directory" name="WEB-INF">
+          <element id="directory" name="classes" />
+        </element>
+        <element id="module-output" name="wordiadaWebApp" />
+      </element>
+      <element id="directory" name="WEB-INF">
+        <element id="directory" name="lib">
+          <element id="library" level="project" name="gson-2.3.1" />
+          <element id="file-copy" path="$PROJECT_DIR$/3rd/gson-2.3.1.jar" />
+          <element id="file-copy" path="$PROJECT_DIR$/3rd/javax.servlet.jar" />
+          <element id="file-copy" path="$PROJECT_DIR$/3rd/javax.servlet.jsp.jar" />
+          <element id="file-copy" path="$PROJECT_DIR$/3rd/javax.servlet.jsp.jstl.jar" />
+        </element>
+      </element>
+      <element id="javaee-facet-resources" facet="wordiadaWebApp/web/Web" />
+    </root>
+  </artifact>
+</component>

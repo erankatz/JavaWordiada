@@ -5,7 +5,7 @@ package engine;
  */
 public class Utils
 {
-    public static final int sleepTime = 100;
+    public static final int sleepTime = 100 ;
     public static void sleepForAWhile(long sleepTime) {
         if (sleepTime != 0) {
             try {

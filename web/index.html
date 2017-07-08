@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Login page</title>
+    <link rel="stylesheet" type="text/css" href="LoginStyle.css">
+</head>
+<body class="mainBody">
+<div class="mainDiv">
+    <span class="welcomeSpan">Welcome to the Nonogram Game!</span>
+    <br/>
+    <form name="formLogin" onsubmit="loginClick()">
+        <div>
+            <span>Please insert your name:</span>
+            <input name="UserNameInput" type="text" class="UserNameInput"/>
+        </div>
+        <br/>
+        <div>
+            <span>Computer</span>
+            <input name="ComputerCheckBox" type="checkbox" class="ComputerCheckBox"/>
+        </div>
+        <input type="submit" class="buttonLogin" value="Login"/>
+    </form>
+    <br/>
+    <img src="panda.JPG">
+</div>
+<script type="text/javascript" src="https://code.jquery.com/jquery-3.1.1.js"></script>
+<script type="text/javascript" src="LoginControl.js"></script>
+</body>
+</html>

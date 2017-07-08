@@ -4,6 +4,7 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/engine/engine.iml" filepath="$PROJECT_DIR$/engine/engine.iml" />
       <module fileurl="file://$PROJECT_DIR$/uijavafx/uijavafx.iml" filepath="$PROJECT_DIR$/uijavafx/uijavafx.iml" />
+      <module fileurl="file://$PROJECT_DIR$//wordiadaWebApp.iml" filepath="$PROJECT_DIR$//wordiadaWebApp.iml" />
     </modules>
   </component>
 </project>
