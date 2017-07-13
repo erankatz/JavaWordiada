@@ -7,6 +7,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.DocumentBuilder;
 import java.io.*;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.LocalTime;
 import java.util.*;
@@ -27,6 +28,7 @@ import engine.tasks.ComputerPlayerPlayTurnTask;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
+import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 import sun.plugin.javascript.navig.Array;
@@ -84,7 +86,7 @@ public class GameManager implements Serializable,Cloneable{
     private boolean replayMode = false;
     private EnumScoreMode scoreMode;
     private int NumOfRequiredPlayers =2;
-
+    private String dictName;
 
     public boolean getIsGoldFishMode(){
         return isGoldFishMode;
@@ -120,6 +122,9 @@ public class GameManager implements Serializable,Cloneable{
         return deck.getDeckSize();
     }
 
+    public int getNumOfChars(){
+        return deck.getNumOfChars();
+    }
     private void createNewMove(){
         if (!gameOver){
             Move move = new Move();
@@ -197,42 +202,40 @@ public class GameManager implements Serializable,Cloneable{
         return roundCounter % players.length ;
     }
 
-    public void readXmlFile (String filePath) throws java.io.IOException,LetterException,XPathExpressionException,BoardSizeOutOfRangeException,NotEnoughCardsToFillBoardException,FileExtensionException
+    //public void readXmlFile (String filePath) throws java.io.IOException,LetterException,XPathExpressionException,BoardSizeOutOfRangeException,NotEnoughCardsToFillBoardException,FileExtensionException
+    //{
+    //    try{
+    //        File file = new File(filePath);
+    //        readXmlFile(file);
+    //    }catch (Exception ex){
+    //        throw new FileException(filePath, ex);
+    //    }
+    //}
+    public void readXmlFile(String file) throws java.io.IOException,LetterException,XPathExpressionException,BoardSizeOutOfRangeException,NotEnoughCardsToFillBoardException,FileExtensionException,DuplicatePlayerIDException
     {
-        try{
-            File file = new File(filePath);
-            readXmlFile(file);
-        }catch (Exception ex){
-            throw new FileException(filePath, ex);
-        }
-    }
-    public void readXmlFile(File file) throws java.io.IOException,LetterException,XPathExpressionException,BoardSizeOutOfRangeException,NotEnoughCardsToFillBoardException,FileExtensionException,DuplicatePlayerIDException
-    {
-        if (!file.getName().toLowerCase().endsWith(".xml")){
-            throw new FileExtensionException (file.getAbsolutePath());
-        }
+        //if (!file.getName().toLowerCase().endsWith(".xml")){
+        //    throw new FileExtensionException (file.getAbsolutePath());
+        //}
         Document doc;
-        File fXmlFile;
         try {
-            fXmlFile = file;
             DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
-            DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
-            doc = dBuilder.parse(fXmlFile);
+            final InputStream stream = new ByteArrayInputStream(file.getBytes(StandardCharsets.UTF_8));
+            DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+            doc = builder.parse(stream);
         }catch (Exception ex){
-            throw new FileException(file.getAbsolutePath(), ex);
+            throw new FileException(file, ex);
         }
 
             doc.getDocumentElement().normalize();
 
             //-----------------------------------------
-            Source xmlFile = new StreamSource(fXmlFile);
-            URL schemaFile = GameManager.class.getResource("/resources/Wordiada.xsd");
+            /*URL schemaFile = GameManager.class.getResource("/resources/Wordiada.xsd");
 
             try {
                 SchemaFactory schemaFactory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
                 Schema schema = schemaFactory.newSchema(schemaFile);
                 Validator validator = schema.newValidator();
-                validator.validate(xmlFile);
+                validator.validate(file);
             } catch (SAXParseException e) {
             System.out.println(xmlFile.getSystemId() + " is NOT valid reason:" + e);
             } catch (SAXException e)
@@ -242,7 +245,7 @@ public class GameManager implements Serializable,Cloneable{
                 throw new FileException(file.getAbsolutePath(),ex);
             }
             //-------------------------------------------
-
+            */
 
             XPathFactory xpathFactory = XPathFactory.newInstance();
             XPath xpath = xpathFactory.newXPath();
@@ -266,8 +269,9 @@ public class GameManager implements Serializable,Cloneable{
                 }
             //GetDictionaryFileNameFromFile
             expr =  xpath.compile("/GameDescriptor/Structure/DictionaryFileName/text()");
-            dictionaryFilePath =  fXmlFile.getParent() + "\\dictionary\\"+  (String)expr.evaluate(doc, XPathConstants.STRING);
-
+            dictionaryFilePath =  "C:\\d" + "\\dictionary\\"+  (String)expr.evaluate(doc, XPathConstants.STRING);
+            dictName = (String)expr.evaluate(doc, XPathConstants.STRING);
+            //TODO:Change Directory Path
             //GetNumberOfCubeFacetsFromFile
             expr =  xpath.compile("/GameDescriptor/Structure/CubeFacets/text()");
             cubeFacets = ((Number) expr.evaluate(doc, XPathConstants.NUMBER)).intValue();
@@ -320,6 +324,9 @@ public class GameManager implements Serializable,Cloneable{
         return players;
     }
 
+    public String getDictName(){
+        return dictName;
+    }
 
     public Map<String,Long> createDictionary() throws  java.io.IOException{
         String bookStr;
@@ -439,7 +446,7 @@ public class GameManager implements Serializable,Cloneable{
         notifyPlayerTurnListeners(getCurrentPlayerTurn());
     }
 
-    public void newGame(List<Boolean> booleanList) throws java.io.IOException,DiceException
+    public void newGame() throws java.io.IOException,DiceException
     {
         notifyDisableAllCardsListeners();
         deck.NewGame();

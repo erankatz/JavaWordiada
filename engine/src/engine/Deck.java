@@ -138,6 +138,10 @@ public class Deck implements java.io.Serializable,Cloneable{
         }
     }
 
+    public int getNumOfChars() {
+        return letterArr.size();
+    }
+
 
     class Letter implements Cloneable, java.io.Serializable {
         private final char sign;

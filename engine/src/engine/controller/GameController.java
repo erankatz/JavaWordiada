@@ -6,6 +6,7 @@ import javafx.util.Pair;
 
 import javax.xml.bind.JAXBException;
 import javax.xml.xpath.XPathExpressionException;
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -25,6 +26,8 @@ public class GameController
     private int cols;
     private int requiredPlayers;
     private String gameTitle;
+    private String dictName;
+    private int numOfChars;
   //  private int[][] rowBlocks;
   //  private int[][] colBlocks;
     int idToGive;
@@ -45,6 +48,7 @@ public class GameController
     {
         creatorName = creator;
         gameLogic.readXmlFile(xmlDescription);
+        gameLogic.newGame();
         players = new ArrayList<>();
         status = GameStatus.WaitingForPlayers;
         initControllerData();
@@ -60,8 +64,8 @@ public class GameController
         gameTitle = gameLogic.getGameTitle();
         rows = gameLogic.getBoard().getBoardSize();
         cols = gameLogic.getBoard().getBoardSize();
-//        rowBlocks = gameLogic.getM_BlockRowHints();
-//        colBlocks = gameLogic.getM_BlockColumnHints();
+        dictName = gameLogic.getDictName();
+        numOfChars = gameLogic.getNumOfChars();
     }
 
     public int getKey()
@@ -95,9 +99,6 @@ public class GameController
         {
             status = GameStatus.Running;
             gameLogic.setPlayers(players);
-            List<Boolean> f = new ArrayList<>();
-            f.add(true);
-            f.add(false);
             gameLogic.startGame();
         }
     }

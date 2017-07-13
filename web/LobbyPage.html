@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <link rel="stylesheet" type="text/css" href="LobbyPage.css">
+    <title>Game Lobby</title>
+</head>
+<body class="mainBody">
+<div class="toolBar">
+    <div class="toolbarContent">
+        <span class="logoutSpan" onclick="onLogoutClick()">Logout</span>
+        <span class="userNameSpan"></span>
+        <span class="emptySpan"></span>
+        <span class="logoSpan">
+            <img src="nonogramLogo.JPG" class="image"/>
+        </span>
+    </div>
+</div>
+<div class="mainDiv">
+    <div class="dialogDiv">
+        <div class="close" onclick="removeGameDialog()">
+            <img src="close.JPG"/>
+        </div>
+        <div class="dialogContent">
+            <div class="details">
+                <div class="gameName"></div>
+                <div class="key"></div>
+                <div class="creatorName"></div>
+                <div class="boardSize"></div>
+                <div class="moves"></div>
+                <div class="playerNumber"></div>
+                <div>Registered players:</div>
+                <div class="playersNames"></div>
+            </div>
+            <div class="board">
+            </div>
+        </div>
+        <div class="dialogButtons">
+            <div class="dialogButton" onclick="joinGameClicked()">Join game</div>
+        </div>
+    </div>
+    <div class="gamesDiv">
+        <div class="gamesActions">
+            <span>Upload Game:</span>
+            <input id="fileInput" type="file" class="fileInput" accept="text/xml" onchange="loadGameClicked(event)"/>
+        </div>
+        <table class="gamesTable">
+            <thead>
+            <th>Game's number</th>
+            <th>Game's name</th>
+            <th>Creator's name</th>
+            <th>Board size</th>
+            <th>Player's number</th>
+            <th>Number Of Chars</th>
+			<th>Dictionary Name</th>
+            </thead>
+            <tbody class="tableBody">
+            </tbody>
+        </table>
+    </div>
+    <div class="usersDiv">
+        <table class="usersTable">
+            <thead>
+            <th>Users online:</th>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+    </div>
+</div>
+<script type="text/javascript" src="https://code.jquery.com/jquery-3.1.1.js"></script>
+<script type="text/javascript" src="LobbyPageControl.js"></script>
+</body>
+</html>

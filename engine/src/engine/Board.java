@@ -300,4 +300,5 @@ public class Board implements java.io.Serializable,Cloneable{
     public void updateCards() {
         Arrays.stream(cards).flatMap(Arrays::stream).filter(card->card != null).forEach(c->manager.notifyCardChangedListener(c));
     }
+
 }
