@@ -41,6 +41,7 @@ public class Player implements java.io.Serializable,Cloneable{
         this.name = name;
     }
 
+
     public void QuitFromGame(){
         isQuitFromGame = true;
     }

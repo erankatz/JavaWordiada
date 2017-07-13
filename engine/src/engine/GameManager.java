@@ -29,6 +29,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
+import sun.plugin.javascript.navig.Array;
 
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
@@ -65,6 +66,7 @@ public class GameManager implements Serializable,Cloneable{
 
     private Deck deck;
     private Board board;
+    private String title = "NotWrittenTitle";
     Player players[];
     private String dictionaryFilePath;
     private int retriesNumber;
@@ -81,6 +83,8 @@ public class GameManager implements Serializable,Cloneable{
     private int totalNumberofTurnsElapses = 0;
     private boolean replayMode = false;
     private EnumScoreMode scoreMode;
+    private int NumOfRequiredPlayers =2;
+
 
     public boolean getIsGoldFishMode(){
         return isGoldFishMode;
@@ -97,6 +101,9 @@ public class GameManager implements Serializable,Cloneable{
         return roundCounter;
     }*/
 
+    public void setPlayers(ArrayList<Player> players){
+        this.players = players.toArray(new Player[players.size()]);
+    }
 
     public Duration getTimeElapsed()
     {
@@ -663,6 +670,10 @@ public class GameManager implements Serializable,Cloneable{
         }
     }
 
+    public int getNumOfRequiredPlayers(){
+        return NumOfRequiredPlayers;
+    }
+
     public int getTotalNumberofTurnsElapses() {
         return totalNumberofTurnsElapses;
     }
@@ -677,5 +688,9 @@ public class GameManager implements Serializable,Cloneable{
 
     public void updateCards() {
         board.updateCards();
+    }
+
+    public String getGameTitle(){
+            return title;
     }
 }
