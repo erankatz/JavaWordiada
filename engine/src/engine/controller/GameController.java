@@ -10,6 +10,9 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
 
 /**
  * Created by user on 12/10/2016.
@@ -18,17 +21,25 @@ public class GameController
 {
     private transient GameManager gameLogic;
     private GameStatus status;
-    private ArrayList<Player> players;
-    private String creatorName;
+    private transient ArrayList<Player> players;
     private int registeredPlayers;
     private int key;
-    private int rows;
-    private int cols;
+
     private int requiredPlayers;
     private String gameTitle;
+
+    //Gson Uses on game loaded
     private String dictName;
     private int numOfChars;
-  //  private int[][] rowBlocks;
+    private int rows;
+    private int cols;
+    private String creatorName;
+    private boolean isGoldFishMode;
+    private EnumScoreMode scoreMode;
+    private String lettersFrequencyInDeck;
+    private String lowestFrequencyDictionaryWords;
+
+    //  private int[][] rowBlocks;
   //  private int[][] colBlocks;
     int idToGive;
 
@@ -44,19 +55,39 @@ public class GameController
         return gameTitle;
     }
 
-    public String initGame(String xmlDescription, String creator) throws EngineException, XPathExpressionException,java.io.IOException
+    public String initGame(String xmlDescription,String dictionaryContent, String creator) throws EngineException, XPathExpressionException,java.io.IOException
     {
         creatorName = creator;
-        gameLogic.readXmlFile(xmlDescription);
+        gameLogic.readXmlFile(xmlDescription,dictionaryContent);
         gameLogic.newGame();
+        isGoldFishMode = gameLogic.getIsGoldFishMode();
+        scoreMode = gameLogic.getScoreMode();
+        lettersFrequencyInDeck = getCharFrequencyString();
+        lowestFrequencyDictionaryWords = gameLogic.getBoard().getLowestFrequencyDictionaryWords();
+        gameTitle = gameLogic.getGameTitle();
         players = new ArrayList<>();
         status = GameStatus.WaitingForPlayers;
+        registeredPlayers++;
         initControllerData();
         //return gameLogic.getGameTitle();
-        return  "Title";
-        //TODO:Read Title from xml file
+        return  gameLogic.getGameTitle();
     }
 
+    private String getCharFrequencyString(){
+        AtomicReference<String> ret = new AtomicReference<>();
+        ret.set("");
+        gameLogic.getCharFrequency()
+                .entrySet()
+                .stream()
+                .sorted(Map.Entry.comparingByKey())
+                .map(e1 -> ret.getAndSet(ret.get() + printCharFrequencyToTextBox(e1, gameLogic.getNumOfCardInDeck())))
+                .collect(Collectors.joining());
+        return ret.get();
+    }
+
+    private String printCharFrequencyToTextBox(Map.Entry<Character,Long> ch2Freq,int NumOfCardInDeck){
+        return String.format("%c - %d/%d\n",ch2Freq.getKey(),ch2Freq.getValue(), NumOfCardInDeck);
+    }
     private void initControllerData()
     {
         registeredPlayers = 0;

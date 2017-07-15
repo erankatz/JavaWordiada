@@ -50,10 +50,10 @@ public class GamesManager
         return result;
     }
 
-    public void addGame(String xmlDescription, String creator) throws EngineException,IOException,XPathExpressionException
+    public void addGame(String xmlDescription,String dictionaryContent, String creatorName) throws EngineException,IOException,XPathExpressionException
     {
         GameController newGame = new GameController();
-        String gameName = newGame.initGame(xmlDescription, creator);
+        String gameName = newGame.initGame(xmlDescription,dictionaryContent, creatorName);
         if (isGameNameTaken(gameName))
         {
                     throw new DuplicateGameTitle();

@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+	  <meta name="generator" content="Google Web Designer 1.9.0.0619">
+
+    <link rel="stylesheet" type="text/css" href="GameRoom.css">
+    <title>Game Room</title>
+</head>
+<body>
+<div class="toolBar">
+    <div class="toolbarContent">
+        <span class="leaveGame" onclick="onLeaveGameClick()">Leave Game</span>
+        <span class="userNameSpan">Hi, Eran</span>
+        <span class="gameStatus">Game status: Waiting for players...</span>
+        <span class="logoSpan">
+            <img src="nonogramLogo.JPG" class="image"/>
+        </span>
+    </div>
+</div>
+<div class="mainDiv">
+    <div class="winnerDialog">
+        <div class="closeEnd" onclick="removeDialog(event)">
+            <img class="closeEnd" src="close.JPG"/>
+        </div>
+        <div class="dialogContent">
+            <div class="endDetails">
+                <h2> Game Over !!</h2>
+                <div class="statusDiv">
+                    <span>Game finished status: </span>
+                    <span class="finishStatus"></span>
+                </div>
+                <div class="winnerDiv">
+                    <span>Winners : </span>
+                </div>
+                <div class="endScoreDiv">
+                    <span>Highest Score: </span>
+                    <span class="highestScore"></span>
+                </div>
+            </div>
+            <div class="completedBoard">
+                <div class="completedBoardBody">
+
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="scoreListDetailsDialog">
+        <div class="close" onclick="removeDialog(event)">
+            <img class="close" src="close.JPG"/>
+        </div>
+        <h2>Displaying score details:</h2>
+        <div class="ScoreListDetailsBody">
+
+        </div>
+    </div>
+    <div class="replayDialog">
+        <div class="closeReplay" onclick="onReplayClose()">
+            <img class="closeEnd" src="close.JPG"/>
+        </div>
+        <div class="replayDialogContent">
+            <h2>Displaaying replay board: </h2>
+            <div class="replayBoard">
+                <div class="replayBoardBody">
+
+                </div>
+            </div>
+            <div class="replayButtons">
+                <div class="replayButton" onclick="onNextClick()">Next</div>
+                <div class="replayButton" onclick="onPrevClick()">Prev</div>
+                <span>Turn: </span>
+                <span class="currentTurnReplay"></span>
+                <span> / </span>
+                <span class="totalTurnReplay"></span>
+            </div>
+        </div>
+    </div>
+    <div class="mainDivBody">
+        <div>
+            <h2 class="PlayerTurn">Player Turn: </h2>
+            <h2 class="currentPlayerName">Eran</h2>
+        </div>
+		<h2 class="isGoldFishMode">is Gold Fish Mode: True</h2>
+		<h2 class="scoreMode">Score Mode: WORDCOUNT</h2>
+        <div class="leftDiv">
+            <div class="details">
+                <div class="gameName">gameName</div>
+               <div class="key">key</div>
+                <div class="creatorName">creatorName</div>
+                <div class="boardSize">boardSize</div>
+                <div class="moves">Round Number</div>
+                <div class="playerNumber">
+                    <span>Players: </span>
+                    <span class="registeredPlayers"></span>
+                    <span> / </span>
+                    <span class="requiredPlayers"></span>
+                </div>
+            </div>
+            <div class="turnDetails">
+                <div>
+                    <span>Turn: </span>
+                    <span class="turnSpan">0</span>
+                    <span> / 2</span>
+                </div>
+                <div class=>
+                    <span>Score:</span>
+                    <span class="scoreSpan">0</span>
+                </div>
+                <div></div>
+            </div>
+            <div class="actions">
+                <div class="action">Roll Dice</div>
+                <div class="action">Reveal Cards</div>
+				<div class="action">Check Selected Word</div>
+                <div class="action" onclick="onUndoClick()">Clear Card Selection</div>
+                <div class="action ScoreListDetails" onclick="onScoreListDetailsClick()">Score Details</div>
+            </div>
+        </div>
+        <div class="board">
+            <div class="boardBody">
+
+            </div>
+        </div>
+        <div class="gameDetails">
+			<div class="players">
+				<div class="playersNames">
+					<a>Name:</a>
+					<div class="playersNamesBody"></div>
+				</div>
+				<div class="playersTypes">
+					<a>Type:</a>
+					<div class="playersTypesBody"></div>
+				</div>
+				<div class="playersScore">
+					<a>Score:</a>
+					<div class="playersScoreBody"></div>
+				</div>
+			</div>
+			<div class="lettersFrequencyInDeck">Letters Frequency In Deck</div>
+			<div class="lowestFrequencyDictionaryWords">Lowest Frequency Dictionary Words</div>
+		</div>
+    </div>
+</div>
+<div class="bottomDiv">
+    <div class="specialButtons">
+        <div class="specialButton" onclick="onReplayClick()">Replay</div>
+    </div>
+    <div class="descriptionDiv">
+        <div class="descriptionText">Insert turn Description:</div>
+        <input class="textInput" type="text"/>
+    </div>
+</div>
+<!--<script type="text/javascript" src="https://code.jquery.com/jquery-3.1.1.js"></script>-->
+<script
+        src="https://code.jquery.com/jquery-3.1.1.js"
+        integrity="sha256-16cdPddA6VdVInumRGo6IbivbERE8p7CQR3HzTBuELA="
+        crossorigin="anonymous">
+</script>
+<script type="text/javascript" src="GameRoom.js"></script>
+</body>
+</html>

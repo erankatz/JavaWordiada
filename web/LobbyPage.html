@@ -27,23 +27,28 @@
                 <div class="key"></div>
                 <div class="creatorName"></div>
                 <div class="boardSize"></div>
-                <div class="moves"></div>
                 <div class="playerNumber"></div>
                 <div>Registered players:</div>
                 <div class="playersNames"></div>
             </div>
-            <div class="board">
-            </div>
         </div>
-        <div class="dialogButtons">
+		<table class="boardTable" id="board" >
+
+		</table>
+        <div class="JoinButton">
             <div class="dialogButton" onclick="joinGameClicked()">Join game</div>
         </div>
     </div>
     <div class="gamesDiv">
         <div class="gamesActions">
-            <span>Upload Game:</span>
-            <input id="fileInput" type="file" class="fileInput" accept="text/xml" onchange="loadGameClicked(event)"/>
+            <span>Upload Xml File:</span>
+            <input id="XmlFileInput" type="file" class="fileInput" accept="text/xml" onchange="setXmlFileFullName(event)" />
+        </div>	
+		<div class="gamesActions">
+            <span>Upload Dictionary:</span>
+            <input id="DictionaryFileInput" type="file" class="fileInput" accept="text/plain" onchange="setdictFileFullName(event)" />
         </div>
+		<button type="submit" form="form1" value="Submit" onclick="loadGameClicked()">Submit</button>
         <table class="gamesTable">
             <thead>
             <th>Game's number</th>

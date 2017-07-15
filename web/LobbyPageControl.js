@@ -2,7 +2,9 @@
  * Created by user on 11/10/2016.
  */
 
-
+var dictContent = null;
+var xmlContent = null;
+var xmlFile;
 window.onload = function ()
 {
     refreshLoginStatus();
@@ -27,6 +29,34 @@ window.onload = function ()
 //         });
 //     }
 // }
+
+function setdictFileFullName(event) {
+    var dictFileFullName = event.target.files[0];
+    var reader = new FileReader();
+    if (dictFileFullName != undefined && dictFileFullName.name.split('.').pop().toUpperCase() == "TXT")
+    {
+        reader.onload = function(e) {
+            dictContent = reader.result;
+        }
+        reader.readAsText(dictFileFullName);
+    } else {
+        dictContent = null;
+    }
+}
+
+function setXmlFileFullName(event) {
+    var reader = new FileReader();
+    xmlFile = event.target.files[0];
+    if (xmlFile != undefined && xmlFile.name.split('.').pop().toUpperCase() == "XML")
+    {
+        reader.onload = function(e) {
+            xmlContent = reader.result;
+        }
+        reader.readAsText(xmlFile);
+    } else {
+        xmlContent = null;
+    }
+}
 
 function checkIfuserInGame() {
     var result;
@@ -156,39 +186,38 @@ function refreshUserListCallback(json) {
     });
 }
 
-function loadGameClicked(event) {
-    var file = event.target.files[0];
-    var reader = new FileReader();
-    var creatorName = getUserName();
 
-    reader.onload = function () {
-        var content = reader.result;
+function loadGameClicked() {
+    if (xmlContent != null && dictContent != null)
+    {
         $.ajax(
             {
                 url: 'games',
                 data: {
                     action: "loadGame",
-                    file: content,
-                    creator: creatorName
+                    xml: xmlContent,
+                    dictionary: dictContent,
+                    creatorName: getUserName()
                 },
                 type: 'POST',
                 success: loadGameCallback
             }
         );
-    };
 
-    $.ajax // Getting creator's name.
-    ({
-        url: 'login',
-        data: {
-            action: "status"
-        },
-        type: 'GET',
-        success: function (json) {
-            creatorName = json.userName;
-            reader.readAsText(file);
-        }
-    });
+        $.ajax // Getting creator's name.
+        ({
+            url: 'login',
+            data: {
+                action: "status"
+            },
+            type: 'GET',
+            success: function (json) {
+                creatorName = getUserName();
+                reader.readAsText(xmlFile);
+            }
+        });
+    }
+
 }
 
 function loadGameCallback(json) {
@@ -237,7 +266,7 @@ function refreshGamesListCallback(json) {
         tdCreatorName.appendTo(tr);
         tdBoardSize.appendTo(tr);
         tdPlayerNumber.appendTo(tr);
-        tdNumberOfChars.appendTo(tr);
+            tdNumberOfChars.appendTo(tr);
         tdDictionaryName.appendTo(tr);
 
         tr.appendTo(gamesTable);
@@ -283,14 +312,12 @@ function createGameDialogCallback(json) {
     var creatorName = json.creatorName;
     var gameName = json.gameTitle;
     var boardSize = json.rows + " X " + json.cols;
-    var moves = json.moves;
     var playerNumber = json.registeredPlayers + " / " + json.requiredPlayers
 
     $('.key').text("Game id: " + key + ".");
     $('.creatorName').text("Game Creator: " + creatorName + ".");
     $('.gameName').text("Game Title: " + gameName);
     $('.boardSize').text("Board size: " + boardSize);
-    $('.moves').text("Moves number: " + moves);
     $('.playerNumber').text("Players : " + playerNumber);
     for (i = 0; i < json.registeredPlayers; i++) {
         var playerDiv = $(document.createElement('div'));
@@ -303,68 +330,18 @@ function createGameDialogCallback(json) {
         playerDivs[i].innerHTML = (+i + 1) + '. ' + json.players[i].m_Name + '.';
     }
 
-    createBoard(json.rows, json.cols, json.rowBlocks, json.colBlocks);
+    createBoard(json.rows, json.cols);
 }
 
-function createBoard(rows, cols, rowBlocks, colBlocks) {
-    var board = $('.board');
-    board.contents().remove();
-    colBlocksDiv = $(document.createElement('div'));
-    colBlocksDiv.addClass('colBlocks');
-    colBlocksDiv.appendTo(board);
-
-
+function createBoard(rows, cols) {
+    var board = document.getElementById("board");
+    board.innerHTML= "";
     for (i = 0; i < rows; i++) { // creates squares + row blocks.
-        rowDiv = $(document.createElement('div'));
-        rowDiv.addClass('rowDiv');
-        rowSquares = $(document.createElement('div'));
-        rowSquares.addClass('rowSquares');
-        rowBlocksDiv = $(document.createElement('div'));
-        rowBlocksDiv.addClass('rowBlocks');
-        rowSquares.appendTo(rowDiv);
-        rowBlocksDiv.appendTo(rowDiv);
-
-        for (hint = 0; hint < rowBlocks[i].length; hint++) {
-            rowHint = $(document.createElement('div'));
-            rowHint.addClass('rowHint');
-            rowHint.appendTo(rowBlocksDiv);
-        }
+        var row = board.insertRow(i);
 
         for (j = 0; j < cols; j++) { // add the squares.
-            squareDiv = $(document.createElement('div'));
-            squareDiv.addClass('square');
-            squareDiv.appendTo(rowSquares);
-        }
-        rowDiv.appendTo(board);
-    }
-
-    for (col = 0; col < cols; col++) { // creates column blocks.
-        colBlockDiv = $(document.createElement('div'));
-        colBlockDiv.addClass('colBlock');
-        for (hint = 0; hint < colBlocks[col].length; hint++) {
-            hintDiv = $(document.createElement('div'));
-            hintDiv.addClass('colHint');
-            hintDiv.appendTo(colBlockDiv);
-            //hintDiv.innerHTML = colBlocks[col][hint];
-        }
-        colBlockDiv.appendTo(colBlocksDiv);
-    }
-
-    var hints = $('.colHint');
-    var i = 0;
-    for (col = 0; col < cols; col++) { //add columns block numbers (the text inside the divs)
-        for (hint = 0; hint < colBlocks[col].length; hint++) {
-            hints[i].innerHTML = colBlocks[col][hint];
-            i++;
-        }
-    }
-
-    var hints = $('.rowHint');
-    var i = 0;
-    for (row = 0; row < rows; row++) { //add row block numbers (the text inside the divs)
-        for (hint = 0; hint < rowBlocks[row].length; hint++) {
-            hints[i].innerHTML = rowBlocks[row][hint];
-            i++;
+            var cell = row.insertCell(j);
+            cell.innerHTML = "?"
         }
     }
 }

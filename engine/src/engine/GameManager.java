@@ -68,9 +68,9 @@ public class GameManager implements Serializable,Cloneable{
 
     private Deck deck;
     private Board board;
-    private String title = "NotWrittenTitle";
+    private String title;
     Player players[];
-    private String dictionaryFilePath;
+    private String bookStr;
     private int retriesNumber;
     private int cubeFacets;
     private int boardSize;
@@ -85,7 +85,7 @@ public class GameManager implements Serializable,Cloneable{
     private int totalNumberofTurnsElapses = 0;
     private boolean replayMode = false;
     private EnumScoreMode scoreMode;
-    private int NumOfRequiredPlayers =2;
+    private int NumOfRequiredPlayers;
     private String dictName;
 
     public boolean getIsGoldFishMode(){
@@ -142,6 +142,17 @@ public class GameManager implements Serializable,Cloneable{
 
     public  void startGame()
     {
+        for (int i =0;i<players.length; i++)
+        {
+            try{
+                players[i].setDice(new Dice(cubeFacets));
+            } catch (Exception ex){
+                ex.printStackTrace();
+                System.exit(1);
+            }
+            players[i].setRetriesNumber(retriesNumber);
+            players[i].registerRolledDicesListener((result) -> notifyEnableAllCardsListeners());
+        }
         isGameStarted = true;
         roundCounter = 0;
         replayMode = false;
@@ -211,19 +222,20 @@ public class GameManager implements Serializable,Cloneable{
     //        throw new FileException(filePath, ex);
     //    }
     //}
-    public void readXmlFile(String file) throws java.io.IOException,LetterException,XPathExpressionException,BoardSizeOutOfRangeException,NotEnoughCardsToFillBoardException,FileExtensionException,DuplicatePlayerIDException
+    public void readXmlFile(String xmlDescription,String dictionaryContent) throws java.io.IOException,LetterException,XPathExpressionException,BoardSizeOutOfRangeException,NotEnoughCardsToFillBoardException,FileExtensionException,DuplicatePlayerIDException
     {
         //if (!file.getName().toLowerCase().endsWith(".xml")){
         //    throw new FileExtensionException (file.getAbsolutePath());
         //}
+        bookStr = dictionaryContent;
         Document doc;
         try {
             DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
-            final InputStream stream = new ByteArrayInputStream(file.getBytes(StandardCharsets.UTF_8));
+            final InputStream stream = new ByteArrayInputStream(xmlDescription.getBytes(StandardCharsets.UTF_8));
             DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
             doc = builder.parse(stream);
         }catch (Exception ex){
-            throw new FileException(file, ex);
+            throw new FileException(xmlDescription, ex);
         }
 
             doc.getDocumentElement().normalize();
@@ -255,23 +267,30 @@ public class GameManager implements Serializable,Cloneable{
             deck = new Deck(doc,xpath);
 
             //Create Players
-            players = readPlayersFromXml(doc,xpath);
-                for (Player pl1 : players) {
-                    int i = 0;
-                    for (Player pl2 : players) {
-                        if (pl2.getId().contentEquals(pl1.getId())) {
-                            i++;
-                        }
-                        if (i == 2) {
-                            throw new DuplicatePlayerIDException(pl1.getId());
-                        }
-                    }
-                }
+            //players = readPlayersFromXml(doc,xpath);
+            //    for (Player pl1 : players) {
+            //        int i = 0;
+            //        for (Player pl2 : players) {
+            //            if (pl2.getId().contentEquals(pl1.getId())) {
+            //                i++;
+            //            }
+            //            if (i == 2) {
+            //                throw new DuplicatePlayerIDException(pl1.getId());
+            //            }
+            //        }
+            //    }
+
+            //Get Title
+            expr =  xpath.compile("/GameDescriptor/DynamicPlayers/@game-title");
+            title = (String)expr.evaluate(doc, XPathConstants.STRING);
+
+            //Get Required players
+            expr =  xpath.compile("/GameDescriptor/DynamicPlayers/@total-players");
+            NumOfRequiredPlayers = ((Number) expr.evaluate(doc, XPathConstants.NUMBER)).intValue();
+
             //GetDictionaryFileNameFromFile
             expr =  xpath.compile("/GameDescriptor/Structure/DictionaryFileName/text()");
-            dictionaryFilePath =  "C:\\d" + "\\dictionary\\"+  (String)expr.evaluate(doc, XPathConstants.STRING);
             dictName = (String)expr.evaluate(doc, XPathConstants.STRING);
-            //TODO:Change Directory Path
             //GetNumberOfCubeFacetsFromFile
             expr =  xpath.compile("/GameDescriptor/Structure/CubeFacets/text()");
             cubeFacets = ((Number) expr.evaluate(doc, XPathConstants.NUMBER)).intValue();
@@ -328,13 +347,7 @@ public class GameManager implements Serializable,Cloneable{
         return dictName;
     }
 
-    public Map<String,Long> createDictionary() throws  java.io.IOException{
-        String bookStr;
-        try{
-            bookStr = new String(Files.readAllBytes(Paths.get(dictionaryFilePath)));
-        } catch (IOException ex){
-            throw new FileException(Paths.get(dictionaryFilePath).toString(),ex);
-        }
+    public Map<String,Long> createDictionary(){
         String str = "[\\\\!?,.#:;\\-_=\\+\\*\"'\\(\\)\\{\\}\\[\\]%$\\r]";
         Pattern p = Pattern.compile(str);
         bookStr = bookStr.replace("\n", " ").replaceAll(p.pattern(),"");
@@ -463,13 +476,7 @@ public class GameManager implements Serializable,Cloneable{
             board.createWord2Segment();
         board.addMangerCardsListener(this);
         notifyLetterFrequencyInDeckListeners(getCharFrequency());
-        for (int i =0;i<players.length; i++)
-        {
-            players[i].setDice(new Dice(cubeFacets));
-            players[i].setRetriesNumber(retriesNumber);
-            players[i].registerRolledDicesListener((result) -> notifyEnableAllCardsListeners());
-        }
-        gameOver =false;
+            gameOver =false;
         isGameStarted = false;
     }
 

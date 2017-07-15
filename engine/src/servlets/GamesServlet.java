@@ -120,8 +120,9 @@ public class GamesServlet extends HttpServlet
 
     private void loadGameAction(HttpServletRequest request, HttpServletResponse response) throws IOException
     {
-        String gameContent = request.getParameter("file");
-        String gameCreator = request.getParameter("creator");
+        String xmlContent = request.getParameter("xml");
+        String dictionaryContent  = request.getParameter("dictionary");
+        String gameCreator = request.getParameter("creatorName");
 
         Gson gson = new Gson();
         PrintWriter out = response.getWriter();
@@ -129,7 +130,7 @@ public class GamesServlet extends HttpServlet
 
         try
         {
-            gamesManager.addGame(gameContent, gameCreator);
+            gamesManager.addGame(xmlContent,dictionaryContent, gameCreator);
             out.println(gson.toJson(new LoadGameStatus(true, "")));
         }
         catch (Exception e)

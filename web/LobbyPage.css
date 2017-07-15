@@ -9,6 +9,7 @@ body{
     display: flex;
 }
 
+
 .toolBar{
     height: 50px;
     background: gainsboro;
@@ -129,12 +130,15 @@ th {
     max-height: 600px;
 }
 
-.board {
-    display: inline-block;
+
+.boardTable{
     vertical-align: top;
+    position: relative;
     white-space: nowrap;
-    line-height: 0;
-    margin-left: 40px;
+    border: 3px solid black;
+    color: red;
+    border-radius: 6px;
+    width: 100%;
 }
 
 .details {
@@ -161,6 +165,9 @@ th {
     height: 30px;
 }
 
+.JoinButton{
+    position:absolute;
+}
 .dialogButtons {
     font-size: 14px;
     margin-top: 11px;
