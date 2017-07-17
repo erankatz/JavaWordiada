@@ -1,9 +1,12 @@
 package servlets;
 
 import com.google.gson.Gson;
+import engine.GameManager;
 import engine.GameStatus;
 import engine.GamesManager;
 import engine.controller.GameController;
+import engine.message.DiceResultMessage;
+import engine.message.GameStatusMessage;
 import engine.model.Games;
 import engine.model.LoadGameStatus;
 import javafx.util.Pair;
@@ -59,6 +62,39 @@ public class GamesServlet extends HttpServlet
             case "leaveGame":
                 leaveGameAction(req, resp);
                 break;
+            case "gameStatus":
+                gameStatusAction(req, resp);
+                break;
+            case "rollDice":
+                gameRollDiceAction(req,resp);
+        }
+    }
+
+    private void gameRollDiceAction(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        int key = Integer.parseInt(request.getParameter("key"));
+        Gson gson = new Gson();
+        PrintWriter out = response.getWriter();
+        response.setContentType("application/json");
+        String userName = SessionUtils.getUsername(request.getSession());
+        GameController game = null;
+
+        if (key != UNKNOWN && userName.contentEquals(gamesManager.getGame(key).getCurrentPlayerName()))
+        {
+             game = gamesManager.getGame(key);
+            Integer result = game.rollDice();
+            out.println(gson.toJson(result));
+        }
+        else
+        {
+
+             game = gamesManager.getGameByUserName(userName);
+            if (!userName.contentEquals(game.getCurrentPlayerName())){
+                game =null;
+            }
+        }
+
+        if (game != null){
+            out.println(gson.toJson(new DiceResultMessage(game.rollDice())));
         }
     }
 
@@ -175,7 +211,29 @@ public class GamesServlet extends HttpServlet
         {
             game.playerLeave(userName);
         }
-
         LoginManager.getInstance().userLeaveGame(userName);
+        if (game.getNumRegisteredPlayers() == 0 && game.isReplayMode()){
+            gamesManager.removeGame(game);
+        }
+    }
+
+    private void gameStatusAction(HttpServletRequest request, HttpServletResponse response) throws IOException
+    {
+        Gson gson = new Gson();
+        PrintWriter out = response.getWriter();
+        response.setContentType("application/json");
+        String userName = SessionUtils.getUsername(request.getSession());
+        GameController game = gamesManager.getGameByUserName(userName);
+
+        if (game != null)
+        {
+            GameStatus status = game.getStatus();
+            String name = "";
+            if (status == GameStatus.Running)
+            {
+                name = game.getCurrentPlayerName();
+            }
+            out.println(gson.toJson(new GameStatusMessage(status, name)));
+        }
     }
 }

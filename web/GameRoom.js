@@ -14,6 +14,8 @@ var showScoreBoard;
 var myTurnSaver = false;
 var isFirstStatus = true;
 var isReplayOn = false;
+var diceResult = null;
+var gameTitle = null;
 
 window.onload = function()
 {
@@ -363,11 +365,37 @@ function loadGameDetails()
     )
 }
 
+function rollDiceOnClick()
+{
+	$.ajax
+	(
+		{
+			async: false,
+            url: 'games',
+            data:
+            {
+                action: 'rollDice',
+				key: -1
+            },
+            type: 'GET',
+            success: rollDiceResultCallback
+		}
+	
+	)
+}
+
+function rollDiceResultCallback(json)
+{
+	diceResult = json.result;
+	alert(json.msg);
+}
+
 function loadGameDetailsCallback(json)
 {
     var key = json.key;
     var creatorName = json.creatorName;
     var gameName = json.gameTitle;
+	gameTitle = json.gameTitle;
     var boardSize = json.rows + " X " + json.cols;
     var lettersFrequencyInDeckStrings = json.lettersFrequencyInDeck.split("\n");
     var lowestFrequencyDictionaryWordsStrings = json.lowestFrequencyDictionaryWords.split("\n");
@@ -400,6 +428,10 @@ function loadGameDetailsCallback(json)
     createBoard(json.rows, json.cols);
 }
 
+function onClickMainBoardCell(event){
+	    alert("2")
+}
+
 function createBoard(rows, cols) {
     var board = document.getElementById("mainBoardBody");
     board.innerHTML= "";
@@ -408,10 +440,17 @@ function createBoard(rows, cols) {
 
         for (j = 0; j < cols; j++) { // add the squares.
             var cell = row.insertCell(j);
-            cell.innerHTML = "?"
+            cell.innerHTML = "?";
+			cell.rowIndex = i;
+			cell.colIndex = j;
+			cell.classList.add('square');
         }
     }
+	$('.square').click(function(event) {
+	    alert("Row :" + event.rowIndex + " Col: " + event.colIndex);
+	});
 }
+
 
 function onSquareClick(event)
 {

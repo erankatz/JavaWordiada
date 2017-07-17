@@ -87,9 +87,11 @@ body{
     display: table-row;
 }
 
+
 .square{
-    display: inline-block;
-    border: 1px black solid;
+    background:red;
+    text-align:center;
+    border: 2px black solid;
     width: 30px;
     height: 30px;
     transition: background 2s ease;

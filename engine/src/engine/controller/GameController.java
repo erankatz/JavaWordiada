@@ -138,7 +138,7 @@ public class GameController
     {
         for (Player player : players)
         {
-            if (player.getName().equals(name))
+            if (player.getName().contentEquals(name))
             {
                 return true;
             }
@@ -153,13 +153,12 @@ public class GameController
     public void playerLeave(String userName) {
         gameLogic.playerLeave(userName);
         registeredPlayers--;
-        if (registeredPlayers ==1 && gameLogic.getIsReplayMode()){
+        if (registeredPlayers ==0 && gameLogic.getIsReplayMode()){
             try {
                 gameLogic.newGame();
             }catch (Exception ex){
                 ex.printStackTrace();
             }
-            status =  GameStatus.WaitingForPlayers;
         }
     }
 
@@ -167,4 +166,15 @@ public class GameController
         return registeredPlayers;
     }
 
+    public boolean isReplayMode() {
+        return gameLogic.getIsReplayMode();
+    }
+
+    public String getCurrentPlayerName() {
+        return gameLogic.getPlayers()[gameLogic.getCurrentPlayerTurn()].getName();
+    }
+
+    public int rollDice() {
+        return gameLogic.getPlayers()[gameLogic.getCurrentPlayerTurn()].rollDice();
+    }
 }

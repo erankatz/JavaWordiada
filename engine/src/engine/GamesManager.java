@@ -10,6 +10,8 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 /**
@@ -109,4 +111,14 @@ public class GamesManager
         });
         return result[0];
     }
+
+    public void removeGame(GameController game) {
+        Optional<GameController> gm = games.entrySet().stream()
+                .map(entry -> entry.getValue())
+                .filter(game2-> game2.getGameTitle().contentEquals(game.getGameTitle())).findFirst();
+        if (gm.isPresent()){
+            games.remove(gm.get());
+        }
+    }
+
 }

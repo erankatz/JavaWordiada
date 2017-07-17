@@ -393,13 +393,11 @@ public class GameManager implements Serializable,Cloneable{
             quitedPlayer.get().QuitFromGame();
             players = Arrays.stream(players).filter(pl2-> pl2 != quitedPlayer.get()).toArray(Player[]::new);
         }
-        if (players.length ==1){
+        if (players.length == 1){
             isGameStarted = false;
             gameOver = true;
-            endPlayerTurn();
+            replayMode = true;
             notifyGameOverListeners(getCurrentPlayerTurn());
-        } else {
-            endPlayerTurn();
         }
     }
 
