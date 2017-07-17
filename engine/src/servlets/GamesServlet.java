@@ -53,6 +53,12 @@ public class GamesServlet extends HttpServlet
             case "joinGame":
                 joinGameAction(req, resp);
                 break;
+            case "gamePlayers":
+                gamePlayersAction(req, resp);
+                break;
+            case "leaveGame":
+                leaveGameAction(req, resp);
+                break;
         }
     }
 
@@ -139,11 +145,37 @@ public class GamesServlet extends HttpServlet
         }
     }
 
+    private void gamePlayersAction(HttpServletRequest request, HttpServletResponse response) throws IOException
+    {
+        String userName = SessionUtils.getUsername(request.getSession());
+        GameController game = gamesManager.getGameByUserName(userName);
+        Gson gson = new Gson();
+        PrintWriter out = response.getWriter();
+        response.setContentType("application/json");
+
+        if (game != null)
+        {
+            out.println(gson.toJson(game.getPlayersDetails()));
+        }
+    }
+
     private void gameListAction(HttpServletRequest request, HttpServletResponse response) throws IOException
     {
         Gson gson = new Gson();
         PrintWriter out = response.getWriter();
         response.setContentType("application/json");
         out.println(gson.toJson(new Games(gamesManager.getLobbyGameList())));
+    }
+
+    private void leaveGameAction(HttpServletRequest request, HttpServletResponse response)
+    {
+        String userName = SessionUtils.getUsername(request.getSession());
+        GameController game = gamesManager.getGameByUserName(userName);
+        if (game != null)
+        {
+            game.playerLeave(userName);
+        }
+
+        LoginManager.getInstance().userLeaveGame(userName);
     }
 }

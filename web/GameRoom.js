@@ -333,7 +333,7 @@ function updatePlayersDetailsCallback(json)
     var typeDivs = $('.typeDiv');
     for (i=0; i<json.length; i++)
     {
-        playerDivs[i].innerHTML = json[i].name + ' #' + json[i].id;
+        playerDivs[i].innerHTML = json[i].name;
         scoreDivs[i].innerHTML = json[i].score;
         typeDivs[i].innerHTML = json[i].type;
     }
@@ -397,87 +397,18 @@ function loadGameDetailsCallback(json)
         par.appendChild(br[c]);
     }
 
-    createBoard(json.rows, json.cols, json.rowBlocks, json.colBlocks);
+    createBoard(json.rows, json.cols);
 }
 
-function createBoard(rows,cols, rowBlocks, colBlocks)
-{
-    var board = $('.boardBody');
-    board.contents().remove();
-    colBlocksDiv = $(document.createElement('div'));
-    colBlocksDiv.addClass('colBlocks');
-    colBlocksDiv.appendTo(board);
+function createBoard(rows, cols) {
+    var board = document.getElementById("mainBoardBody");
+    board.innerHTML= "";
+    for (i = 0; i < rows; i++) { // creates squares + row blocks.
+        var row = board.insertRow(i);
 
-
-    for (i=0; i<rows; i++)
-    { // creates squares + row blocks.
-        rowDiv = $(document.createElement('div'));
-        rowDiv.addClass('rowDiv');
-        rowSquares = $(document.createElement('div'));
-        rowSquares.addClass('rowSquares');
-        rowBlocksDiv = $(document.createElement('div'));
-        rowBlocksDiv.addClass('rowBlocks');
-        rowSquares.appendTo(rowDiv);
-        rowBlocksDiv.appendTo(rowDiv);
-
-        for (hint=0; hint<rowBlocks[i].length;hint++)
-        {
-            rowHint = $(document.createElement('div'));
-            rowHint.addClass('rowHint');
-            rowHint.attr('row', i);
-            rowHint.attr('col', hint);
-            rowHint.appendTo(rowBlocksDiv);
-        }
-
-        for (j=0; j<cols;j++)
-        { // add the squares.
-            squareDiv = $(document.createElement('div'));
-            squareDiv.addClass('square');
-            squareDiv.attr('row', i);
-            squareDiv.attr('col', j);
-            squareDiv.appendTo(rowSquares);
-        }
-
-        rowDiv.appendTo(board);
-    }
-
-    $('.square').each(function(i,sqr) { sqr.onclick = onSquareClick;});
-
-    for (col=0; col<cols; col++)
-    { // creates column blocks.
-        colBlockDiv = $(document.createElement('div'));
-        colBlockDiv.addClass('colBlock');
-        for (hint=0; hint<colBlocks[col].length; hint++)
-        {
-            hintDiv = $(document.createElement('div'));
-            hintDiv.addClass('colHint');
-            hintDiv.appendTo(colBlockDiv);
-            hintDiv.attr('row', hint);
-            hintDiv.attr('col', col);
-            //hintDiv.innerHTML = colBlocks[col][hint];
-        }
-        colBlockDiv.appendTo(colBlocksDiv);
-    }
-
-    var hints = $('.colHint');
-    var i=0;
-    for (col=0; col<cols; col++)
-    { //add columns block numbers (the text inside the divs)
-        for (hint=0; hint<colBlocks[col].length; hint++)
-        {
-            hints[i].innerHTML = colBlocks[col][hint];
-            i++;
-        }
-    }
-
-    var hints = $('.rowHint');
-    var i=0;
-    for (row=0; row<rows; row++)
-    { //add row block numbers (the text inside the divs)
-        for (hint=0; hint<rowBlocks[row].length; hint++)
-        {
-            hints[i].innerHTML = rowBlocks[row][hint];
-            i++;
+        for (j = 0; j < cols; j++) { // add the squares.
+            var cell = row.insertCell(j);
+            cell.innerHTML = "?"
         }
     }
 }

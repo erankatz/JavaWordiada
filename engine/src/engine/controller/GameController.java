@@ -122,6 +122,7 @@ public class GameController
         } else {
             player = new Player(gameLogic,"0",userName);
         }
+        gameLogic.addPlayer(player);
         players.add(player);
         idToGive++;
         registeredPlayers++;
@@ -129,7 +130,6 @@ public class GameController
         if (registeredPlayers == requiredPlayers)
         {
             status = GameStatus.Running;
-            gameLogic.setPlayers(players);
             gameLogic.startGame();
         }
     }
@@ -145,4 +145,26 @@ public class GameController
         }
         return false;
     }
+
+    public List<PlayerData> getPlayersDetails() {
+        return gameLogic.getPlayersData();
+    }
+
+    public void playerLeave(String userName) {
+        gameLogic.playerLeave(userName);
+        registeredPlayers--;
+        if (registeredPlayers ==1 && gameLogic.getIsReplayMode()){
+            try {
+                gameLogic.newGame();
+            }catch (Exception ex){
+                ex.printStackTrace();
+            }
+            status =  GameStatus.WaitingForPlayers;
+        }
+    }
+
+    public int getNumRegisteredPlayers(){
+        return registeredPlayers;
+    }
+
 }

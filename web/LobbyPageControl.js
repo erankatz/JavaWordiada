@@ -334,7 +334,7 @@ function createGameDialogCallback(json) {
 }
 
 function createBoard(rows, cols) {
-    var board = document.getElementById("board");
+    var board = document.getElementById("mainBoardBody");
     board.innerHTML= "";
     for (i = 0; i < rows; i++) { // creates squares + row blocks.
         var row = board.insertRow(i);

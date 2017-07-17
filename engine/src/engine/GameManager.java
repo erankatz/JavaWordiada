@@ -374,7 +374,26 @@ public class GameManager implements Serializable,Cloneable{
     public void playerQuit(){
         players[getCurrentPlayerTurn()].QuitFromGame();
         long i = Arrays.stream(players).filter(player ->player.getisQuiteFromGame() ==true ).count();
-        if (i == (players.length -1)){
+        if (isGameStarted ==true){
+            if (i == (players.length -1)){
+                isGameStarted = false;
+                gameOver = true;
+                endPlayerTurn();
+                notifyGameOverListeners(getCurrentPlayerTurn());
+            } else {
+                endPlayerTurn();
+            }
+        }
+    }
+
+    public void playerLeave(String playerName){
+        Optional<Player> quitedPlayer = Arrays.stream(players).filter(pl->pl.getName().contentEquals(playerName)).findFirst();
+
+        if (quitedPlayer.isPresent()){
+            quitedPlayer.get().QuitFromGame();
+            players = Arrays.stream(players).filter(pl2-> pl2 != quitedPlayer.get()).toArray(Player[]::new);
+        }
+        if (players.length ==1){
             isGameStarted = false;
             gameOver = true;
             endPlayerTurn();
@@ -706,5 +725,19 @@ public class GameManager implements Serializable,Cloneable{
 
     public String getGameTitle(){
             return title;
+    }
+
+    public void addPlayer(Player player) {
+        if (players == null){
+            players = new Player[1];
+            players[0] = player;
+        } else {
+            Player[] temp = new Player[players.length +1];
+            for (int i = 0; i < players.length;i++){
+                temp[i] = players[i];
+            }
+            temp[players.length] = player;
+            players = temp;
+        }
     }
 }
