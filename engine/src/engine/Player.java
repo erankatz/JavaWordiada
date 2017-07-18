@@ -21,6 +21,7 @@ import java.util.*;
  * Created by eran on 30/03/2017.
  */
 public class Player implements java.io.Serializable,Cloneable{
+    private EnumPlayerTurnPendingAction pendingAction;
     protected Dice cube;
     protected GameManager manager;
     protected int leftCardNumToReveal;
@@ -39,6 +40,21 @@ public class Player implements java.io.Serializable,Cloneable{
         this.leftCardNumToReveal = 0;
         this.id = id;
         this.name = name;
+        manager.registerRollDicesPendingListeners(pl->{
+            if (pl){
+                pendingAction = EnumPlayerTurnPendingAction.ROLLDICE;
+            }
+        });
+        manager.registerRevealCardPendingListener(pl->{
+            if (pl){
+                pendingAction = EnumPlayerTurnPendingAction.REVEALCARDS;
+            }
+        });
+        manager.registerRevealWordPendingListener(pl->{
+            if (pl){
+                pendingAction = EnumPlayerTurnPendingAction.SELECTWORD;
+            }
+        });
     }
 
 
@@ -109,6 +125,13 @@ public class Player implements java.io.Serializable,Cloneable{
         }
     }
 
+    public void setPendingAction(EnumPlayerTurnPendingAction action){
+        this.pendingAction = action;
+    }
+
+    public EnumPlayerTurnPendingAction getPendingAction(){
+        return pendingAction;
+    }
     public long getScore() {
         return score;
     }

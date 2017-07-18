@@ -16,6 +16,8 @@ var isFirstStatus = true;
 var isReplayOn = false;
 var diceResult = null;
 var gameTitle = null;
+var pendingAction = null;
+
 
 window.onload = function()
 {
@@ -23,19 +25,21 @@ window.onload = function()
 };
 
 function onCheckSelectedWord(){
-	$.ajax
-    (
-        {
-            url: 'games',
-            data:
-            {
-                action: 'CheckSelectedWord',
-				key: -1,
-            },
-            type: 'GET',
-            success: CheckSelectedWordCallBack
-        }
-    )
+	if (pendingAction == "SELECTWORD"){
+		$.ajax
+		(
+			{
+				url: 'games',
+				data:
+				{
+					action: 'CheckSelectedWord',
+					key: -1,
+				},
+				type: 'GET',
+				success: CheckSelectedWordCallBack
+			}
+		)
+	}
 }
 
 function CheckSelectedWordCallBack(json){
@@ -43,24 +47,38 @@ function CheckSelectedWordCallBack(json){
 }
 
 function onRevealCards(){
-	$.ajax
-    (
-        {
-            url: 'games',
-            data:
-            {
-                action: 'revealCards',
-				key: -1,
-				row: event.toElement.rowIndex +1,
-				col: event.toElement.colIndex +1
-            },
-            type: 'POST',
-            success: updateGamePage
-        }
-    )
+	if (pendingAction == "REVEALCARDS")
+	{
+		$.ajax
+		(
+			{
+				url: 'games',
+				data:
+				{
+					action: 'revealCards',
+					key: -1,
+					row: event.toElement.rowIndex +1,
+					col: event.toElement.colIndex +1
+				},
+				type: 'GET',
+				success: onRevealCardsCallBack
+			}
+		)
+	} else{
+		alert("key already pressed");
+	}
+}
+function onRevealCardsCallBack(json){
+	if (json.isSuccess){
+		updateGamePage();
+	} else {
+		if (json.currentPlayerMsg != undefined){
+			alert(json.currentPlayerMsg);
+		}
+	}
 }
 
-function onClickMainBoardCell(event){
+	function onClickMainBoardCell(event){
 	$.ajax
     (
         {
@@ -164,7 +182,7 @@ function isButtonAvailable(e)
 
     if (isMyTurn)
     {
-        if (isButtonsEnabled)
+        if (isButtonsEnabled && !isComputer)
         {
             return true;
         }
@@ -211,7 +229,7 @@ function handleStatus(json)
 
     newStatus = json.status;
     playerTurn = json.currentPlayerTurnName;
-
+	pendingAction = json.pendingAction;
     switch(newStatus)
     {
         case 'WaitingForPlayers':
@@ -234,6 +252,9 @@ function handleStatus(json)
                 if (!isComputer)
                 {
                     alert('Hey Buddy! it is now your turn !');
+					diceResult = null;
+					revealCardsPending = false;
+					checkSelectedWordPending = false;
                 }
 
                 isMyTurn = true;
@@ -241,10 +262,7 @@ function handleStatus(json)
                 {
                     isMyTurn = false;
                 }
-                else if (isComputer)
-                {
-                    playComputerTurn();
-                }
+                
             }
 
             if (isMyTurn && playerTurn != userName)
@@ -385,27 +403,32 @@ function loadGameDetails()
 
 function rollDiceOnClick()
 {
-	$.ajax
-	(
-		{
-			async: false,
-            url: 'games',
-            data:
-            {
-                action: 'rollDice',
-				key: -1
-            },
-            type: 'GET',
-            success: rollDiceResultCallback
-		}
-	
-	)
+	if (pendingAction == "ROLLDICE"){
+		$.ajax
+		(
+			{
+				async: false,
+				url: 'games',
+				data:
+				{
+					action: 'rollDice',
+					key: -1
+				},
+				type: 'GET',
+				success: rollDiceResultCallback
+			}
+		)
+	} else{
+		alert("dice already rolled got " + diceResult);
+	}
+
 }
 
 function rollDiceResultCallback(json)
 {
 	diceResult = json.result;
 	alert(json.msg);
+	revealCardsPending  = true;
 }
 
 function loadGameDetailsCallback(json)
@@ -458,19 +481,23 @@ function createBoardForEndDialog(board) {
             cell.innerText = board[i][j].letter;
             cell.rowIndex = i;
             cell.colIndex = j;
-            if (board[i][j].isSelected) {
-                cell.classList.add('squreStyleSelected');
-            } else if (board[i][j].revealed) {
-                cell.classList.add('squreStyleRevealed');
-            } else {
-                cell.classList.add('square');
-            }
-            if (board[i][j].revealed && cell.innerText != board[i][j].letter) {
-                cell.innerText = board[i][j].letter;
-            }
-            if (!board[i][j].revealed) {
-                cell.innerText = "?";
-            }
+			if (board[i][j] == null){
+				cell.classList.add('squreStyleRemoved');
+			} else{
+				if (board[i][j].isSelected) {
+					cell.classList.add('squreStyleSelected');
+				} else if (board[i][j].revealed) {
+					cell.classList.add('squreStyleRevealed');
+				} else {
+					cell.classList.add('square');
+				}
+				if (board[i][j].revealed && cell.innerText != board[i][j].letter) {
+					cell.innerText = board[i][j].letter;
+				}
+				if (!board[i][j].revealed) {
+					cell.innerText = "?";
+				}
+			}
         }
     }
 }
@@ -627,18 +654,23 @@ function turnPlayCallback(json)
         {
             cell = htmlRow.cells.item(j);
             removeClass(cell);
-			if (board[i][j].isSelected){
-				cell.classList.add('squreStyleSelected');
-			}else if (board[i][j].revealed){
-				cell.classList.add('squreStyleRevealed');
-			} else{
-				cell.classList.add('square');
-			}
-			if (board[i][j].revealed && cell.innerText != board[i][j].letter){
-				cell.innerText = board[i][j].letter;
-			}
-			if (!board[i][j].revealed){
-				cell.innerText = "?";
+			if (board[i][j] == null)
+			{
+				cell.classList.add(squreStyleRemoved);
+			} else {
+				if (board[i][j].isSelected){
+					cell.classList.add('squreStyleSelected');
+				}else if (board[i][j].revealed){
+					cell.classList.add('squreStyleRevealed');
+				} else{
+					cell.classList.add('square');
+				}
+				if (board[i][j].revealed && cell.innerText != board[i][j].letter){
+					cell.innerText = board[i][j].letter;
+				}
+				if (!board[i][j].revealed){
+					cell.innerText = "?";
+				}
 			}
         }
     }
@@ -775,23 +807,7 @@ function removeDialog(event)
     }
 }
 
-function playComputerTurn()
-{
-    $.ajax
-    (
-        {
-            async: false,
-            url: 'games',
-            data:
-            {
-                action: 'computerTurn'
-            },
-            type: 'POST',
-            success: updateGamePage
-        }
-    );
-    onEndMoveClick();
-}
+
 
 function onReplayClick()
 {

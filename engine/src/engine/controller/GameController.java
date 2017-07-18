@@ -2,6 +2,7 @@ package engine.controller;
 
 import engine.*;
 import engine.exception.EngineException;
+import engine.message.RevealCardMessage;
 import engine.message.RevealedWordMessage;
 import javafx.util.Pair;
 
@@ -152,20 +153,18 @@ public class GameController
     }
 
     public void playerLeave(String userName) {
-        gameLogic.playerLeave(userName);
-        registeredPlayers--;
-        if (registeredPlayers == 0 && (status.equals(GameStatus.Running) || status.equals(GameStatus.Finished)))
-        {
-            try {
-                gameLogic.newGame();
-            }catch (Exception ex){
-                ex.printStackTrace();
+        if (gameLogic.playerLeave(userName)) {
+            registeredPlayers--;
+            if (registeredPlayers == 0 && (status.equals(GameStatus.Running) || status.equals(GameStatus.Finished))) {
+                try {
+                    gameLogic.newGame();
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+                status = GameStatus.WaitingForPlayers;
+            } else if (registeredPlayers == 1 && requiredPlayers > 1 && status.equals(GameStatus.Running)) {
+                status = GameStatus.Finished;
             }
-            status = GameStatus.WaitingForPlayers;
-        }
-        else if (registeredPlayers == 1 && requiredPlayers > 1 && status.equals(GameStatus.Running))
-        {
-            status = GameStatus.Finished;
         }
     }
 
@@ -209,12 +208,17 @@ public class GameController
         gameLogic.getBoard().clearSelectedCards();
     }
 
-    public void revealCards() {
+    public RevealCardMessage revealCards() {
+        boolean isSuccess = true;
+        String currentPlayerMsg = null;
+        String msg = null;
         try{
-            gameLogic.getBoard().revealCards();
+            gameLogic.getPlayers()[gameLogic.getCurrentPlayerTurn()].revealCards();
         } catch (Exception ex){
-
+            isSuccess = false;
+            currentPlayerMsg = ex.getMessage();
         }
+        return new RevealCardMessage(isSuccess,currentPlayerMsg,msg);
     }
 
     public RevealedWordMessage checkSelectedWord() {
@@ -224,16 +228,12 @@ public class GameController
         boolean isValidWord =false;
         try{
             isValidWord = gameLogic.getPlayers()[gameLogic.getCurrentPlayerTurn()].revealWord();
-            if (isValidWord){
-                currentPlayerMessage = "You are right";
-            } else {
-                currentPlayerMessage = "You are Wrong";
-            }
         } catch (EngineException ex){
             currentPlayerMessage = ex.getMessage();
         }
         numOfRetriesLeft = gameLogic.getPlayers()[gameLogic.getCurrentPlayerTurn()].getRetriesNumber();
-        return new RevealedWordMessage(numOfRetriesLeft,currentPlayerMessage,otherPlayerMessage,isValidWord);
+
+        return new RevealedWordMessage(numOfRetriesLeft,currentPlayerMessage,otherPlayerMessage,isValidWord,gameLogic.getLastReavledWordScore());
     }
 
     public long getHighestScore() {
@@ -244,4 +244,7 @@ public class GameController
         return players;
     }
 
+    public EnumPlayerTurnPendingAction getcurrentPlayerPendingAction() {
+        return gameLogic.getPlayers()[gameLogic.getCurrentPlayerTurn()].getPendingAction();
+    }
 }

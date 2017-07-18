@@ -77,6 +77,9 @@ public class GamesServlet extends HttpServlet
             case "gameEnd":
                 gameEndAction(req,resp);
                 break;
+            case "revealCards":
+                revealCardsAction(req,resp);
+                break;
         }
     }
 
@@ -213,9 +216,7 @@ public class GamesServlet extends HttpServlet
             case "clearCardSelection":
                 clearCardSelectionAction(req,resp);
                 break;
-            case "revealCards":
-                revealCardsAction(req,resp);
-                break;
+
         }
     }
 
@@ -237,21 +238,17 @@ public class GamesServlet extends HttpServlet
         }
     }
 
-    private void revealCardsAction(HttpServletRequest request, HttpServletResponse resp) {
+    private void revealCardsAction(HttpServletRequest request, HttpServletResponse response) throws java.io.IOException {
         int key = Integer.parseInt(request.getParameter("key"));
 
+        PrintWriter out = response.getWriter();
+        Gson gson = new Gson();
+        response.setContentType("application/json");
         String userName = SessionUtils.getUsername(request.getSession());
-        GameController game = null;
+        GameController game = getGameController(key,userName);
 
-        if (key != UNKNOWN && userName.contentEquals(gamesManager.getGame(key).getCurrentPlayerName()))
-        {
-            game = gamesManager.getGame(key);
-            game.revealCards();
-        }
-        else
-        {
-            game = gamesManager.getGameByUserName(userName);
-            game.revealCards();
+        if (game != null){
+            out.print(gson.toJson(game.revealCards()));
         }
     }
 
@@ -353,9 +350,6 @@ public class GamesServlet extends HttpServlet
             game.playerLeave(userName);
         }
         LoginManager.getInstance().userLeaveGame(userName);
-        if (game.getNumRegisteredPlayers() == 0 && game.isReplayMode()){
-            gamesManager.removeGame(game);
-        }
     }
 
     private void gameStatusAction(HttpServletRequest request, HttpServletResponse response) throws IOException
@@ -365,6 +359,7 @@ public class GamesServlet extends HttpServlet
         response.setContentType("application/json");
         String userName = SessionUtils.getUsername(request.getSession());
         GameController game = gamesManager.getGameByUserName(userName);
+        EnumPlayerTurnPendingAction pendingAction = game.getcurrentPlayerPendingAction();
 
         if (game != null)
         {
@@ -373,8 +368,9 @@ public class GamesServlet extends HttpServlet
             if (status == GameStatus.Running)
             {
                 name = game.getCurrentPlayerName();
+
             }
-            out.println(gson.toJson(new GameStatusMessage(status, name)));
+            out.println(gson.toJson(new GameStatusMessage(status, name,pendingAction)));
         }
     }
 }

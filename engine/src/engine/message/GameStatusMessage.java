@@ -1,6 +1,7 @@
 package engine.message;
 
 
+import engine.EnumPlayerTurnPendingAction;
 import engine.GameStatus;
 
 /**
@@ -10,11 +11,13 @@ public class GameStatusMessage
 {
     GameStatus status;
     String currentPlayerTurnName;
+    EnumPlayerTurnPendingAction pendingAction;
 
-    public GameStatusMessage(GameStatus status, String currentPlayerTurnName)
+    public GameStatusMessage(GameStatus status, String currentPlayerTurnName, EnumPlayerTurnPendingAction action)
     {
         this.status = status;
         this.currentPlayerTurnName = currentPlayerTurnName;
+        this.pendingAction =action;
     }
 
     public GameStatus getStatus()

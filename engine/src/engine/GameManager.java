@@ -67,6 +67,8 @@ public class GameManager implements Serializable,Cloneable{
     private List<GameOverListener> gameOverListeners = new ArrayList<>();
     private List<PlayerDataChangedListener> playerDataChangedListeners = new ArrayList<>();
 
+    private int lastReavledWordScore;
+
     private Deck deck;
     private Board board;
     private String title;
@@ -104,6 +106,9 @@ public class GameManager implements Serializable,Cloneable{
         return roundCounter;
     }*/
 
+    public int getLastReavledWordScore(){
+        return lastReavledWordScore;
+    }
     public void setPlayers(ArrayList<Player> players){
         this.players = players.toArray(new Player[players.size()]);
     }
@@ -162,8 +167,10 @@ public class GameManager implements Serializable,Cloneable{
         notifyPlayerTurnListeners(getCurrentPlayerTurn());
         notifyLetterFrequencyInDeckListeners(getCharFrequency());
         if (players[getCurrentPlayerTurn()] instanceof ComputerPlayer){
-            ComputerPlayerPlayTurnTask task = new ComputerPlayerPlayTurnTask((ComputerPlayer)players[getCurrentPlayerTurn()]);
-            new Thread(task).start();
+            //ComputerPlayerPlayTurnTask task = new ComputerPlayerPlayTurnTask((ComputerPlayer)players[getCurrentPlayerTurn()]);
+            //new Thread(task).start();
+            ((ComputerPlayer)players[getCurrentPlayerTurn()]).playTurn();
+
         }
         Arrays.stream(players).forEach(pl->pl.setScore(0));
         getPlayersData().stream().forEach(pl ->notifyPlayerDataChangedListener(pl));
@@ -188,8 +195,10 @@ public class GameManager implements Serializable,Cloneable{
             }
         if (score != null){
             notifyWordRevealedListeners(word,score.intValue());
+            lastReavledWordScore = score.intValue();
         } else {
             notifyWordRevealedListeners(word,1);
+            lastReavledWordScore = 1;
         }
         Utils.sleepForAWhile(Utils.sleepTime);
         Player pl = players[getCurrentPlayerTurn()];
@@ -387,7 +396,7 @@ public class GameManager implements Serializable,Cloneable{
         }
     }
 
-    public void playerLeave(String playerName){
+    public boolean playerLeave(String playerName){
         Optional<Player> quitedPlayer = Arrays.stream(players).filter(pl->pl.getName().contentEquals(playerName)).findFirst();
 
         if (quitedPlayer.isPresent()){
@@ -400,6 +409,7 @@ public class GameManager implements Serializable,Cloneable{
             replayMode = true;
             notifyGameOverListeners(getCurrentPlayerTurn());
         }
+        return quitedPlayer.isPresent();
     }
 
     public boolean isGameOver(){
@@ -440,8 +450,9 @@ public class GameManager implements Serializable,Cloneable{
             }
             players[getCurrentPlayerTurn()].setRetriesNumber(retriesNumber);
             if (players[getCurrentPlayerTurn()] instanceof ComputerPlayer){
-                ComputerPlayerPlayTurnTask task = new ComputerPlayerPlayTurnTask((ComputerPlayer)players[getCurrentPlayerTurn()]);
-                new Thread(task).start();
+                //ComputerPlayerPlayTurnTask task = new ComputerPlayerPlayTurnTask((ComputerPlayer)players[getCurrentPlayerTurn()]);
+                //new Thread(task).start();
+                ((ComputerPlayer)players[getCurrentPlayerTurn()]).playTurn();
             }
         }
     }

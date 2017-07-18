@@ -130,6 +130,15 @@ body{
     cursor: pointer;
 }
 
+.squreStyleRemoved{
+    background:black;
+    text-align:center;
+    border: 2px black solid;
+    width: 30px;
+    height: 30px;
+    transition: background 2s ease;
+}
+
 .selected {
     border-color: red;
 }
