@@ -2,6 +2,7 @@ package engine.controller;
 
 import engine.*;
 import engine.exception.EngineException;
+import engine.message.RevealedWordMessage;
 import javafx.util.Pair;
 
 import javax.xml.bind.JAXBException;
@@ -73,7 +74,7 @@ public class GameController
         return  gameLogic.getGameTitle();
     }
 
-    private String getCharFrequencyString(){
+    public String getCharFrequencyString(){
         AtomicReference<String> ret = new AtomicReference<>();
         ret.set("");
         gameLogic.getCharFrequency()
@@ -176,5 +177,56 @@ public class GameController
 
     public int rollDice() {
         return gameLogic.getPlayers()[gameLogic.getCurrentPlayerTurn()].rollDice();
+    }
+
+    public void selectCard(int row, int col) {
+            gameLogic.getBoard().selectBoardCard(row, col,true);
+    }
+
+    public Player getPlayer(String userName) {
+        return  gameLogic.getPlayer(userName);
+    }
+
+    public int getRoundNumber() {
+        return gameLogic.getCurrentNumOfTurnsElapsed();
+    }
+
+    public int getCurrentTurn() {
+        return gameLogic.getCurrentPlayerTurn();
+    }
+
+    public Board getBoard() {
+        return gameLogic.getBoard();
+    }
+
+    public void clearCardSelection() {
+        gameLogic.getBoard().clearSelectedCards();
+    }
+
+    public void revealCards() {
+        try{
+            gameLogic.getBoard().revealCards();
+        } catch (Exception ex){
+
+        }
+    }
+
+    public RevealedWordMessage checkSelectedWord() {
+        int numOfRetriesLeft;
+        String  currentPlayerMessage =null;
+        String otherPlayerMessage =null;
+        boolean isValidWord =false;
+        try{
+            isValidWord = gameLogic.getPlayers()[gameLogic.getCurrentPlayerTurn()].revealWord();
+            if (isValidWord){
+                currentPlayerMessage = "You are right";
+            } else {
+                currentPlayerMessage = "You are Wrong";
+            }
+        } catch (EngineException ex){
+            currentPlayerMessage = ex.getMessage();
+        }
+        numOfRetriesLeft = gameLogic.getPlayers()[gameLogic.getCurrentPlayerTurn()].getRetriesNumber();
+        return new RevealedWordMessage(numOfRetriesLeft,currentPlayerMessage,otherPlayerMessage,isValidWord);
     }
 }

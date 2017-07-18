@@ -44,6 +44,7 @@ import java.nio.file.Paths;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Predicate;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -737,5 +738,13 @@ public class GameManager implements Serializable,Cloneable{
             temp[players.length] = player;
             players = temp;
         }
+    }
+
+    public Player getPlayer(String userName) {
+        Optional<Player> playerOptional = Arrays.stream(players).filter(pl->pl.getName().contentEquals(userName)).findFirst();
+        if (playerOptional.isPresent()){
+            return playerOptional.get();
+        }
+        return null;
     }
 }

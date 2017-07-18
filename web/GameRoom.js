@@ -22,6 +22,78 @@ window.onload = function()
     checkLoginStatus();
 };
 
+function onCheckSelectedWord(){
+	$.ajax
+    (
+        {
+            url: 'games',
+            data:
+            {
+                action: 'CheckSelectedWord',
+				key: -1,
+            },
+            type: 'GET',
+            success: CheckSelectedWordCallBack
+        }
+    )
+}
+
+function CheckSelectedWordCallBack(json){
+	window.alert(json.currentPlayerMessage)
+}
+
+function onRevealCards(){
+	$.ajax
+    (
+        {
+            url: 'games',
+            data:
+            {
+                action: 'revealCards',
+				key: -1,
+				row: event.toElement.rowIndex +1,
+				col: event.toElement.colIndex +1
+            },
+            type: 'POST',
+            success: updateGamePage
+        }
+    )
+}
+
+function onClickMainBoardCell(event){
+	$.ajax
+    (
+        {
+            url: 'games',
+            data:
+            {
+                action: 'selectCard',
+				key: -1,
+				row: event.toElement.rowIndex +1,
+				col: event.toElement.colIndex +1
+            },
+            type: 'POST',
+            success: updateGamePage
+        }
+    )
+}
+
+function onClearCardSelection(){
+	$.ajax
+    (
+        {
+            url: 'games',
+            data:
+            {
+                action: 'clearCardSelection',
+				key: -1
+            },
+            type: 'POST',
+            success: updateGamePage
+        }
+    )
+}
+
 function checkLoginStatus() {
     $.ajax
     ({
@@ -226,42 +298,6 @@ function showEndGameDiaglogCallback(json) {
     }
     winnerSpan.innerHTML = winnerSpan.innerHTML + '.';
 
-    createBoardForEndDialog(board);
-}
-
-function createBoardForEndDialog(board)
-{
-    var rows = board.m_Rows;
-    var cols = board.m_Cols;
-    var boardBody = $('.completedBoardBody');
-
-    for (i=0; i<rows; i++)
-    { // creates squares.
-        rowDiv = $(document.createElement('div'));
-        rowDiv.addClass('rowDiv');
-        rowSquares = $(document.createElement('div'));
-        rowSquares.addClass('rowSquares');
-        rowSquares.appendTo(rowDiv);
-
-        for (j=0; j<cols;j++)
-        { // add the squares.
-            squareDiv = $(document.createElement('div'));
-            squareDiv.addClass('square');
-            squareDiv.appendTo(rowSquares);
-
-            color = board.m_Board[i][j].m_CellState;
-            if (color === 'BLACK')
-            {
-                squareDiv.addClass('black');
-            }
-            else if (color ==='EMPTY')
-            {
-                squareDiv.addClass('empty');
-            }
-        }
-
-        rowDiv.appendTo(boardBody);
-    }
 }
 
 function setReason(reason)
@@ -426,11 +462,10 @@ function loadGameDetailsCallback(json)
     }
 
     createBoard(json.rows, json.cols);
+	updateGamePage();
 }
 
-function onClickMainBoardCell(event){
-	    alert("2")
-}
+
 
 function createBoard(rows, cols) {
     var board = document.getElementById("mainBoardBody");
@@ -440,17 +475,14 @@ function createBoard(rows, cols) {
 
         for (j = 0; j < cols; j++) { // add the squares.
             var cell = row.insertCell(j);
-            cell.innerHTML = "?";
+            cell.innerText = "?";
 			cell.rowIndex = i;
 			cell.colIndex = j;
 			cell.classList.add('square');
+			cell.addEventListener("click", onClickMainBoardCell);
         }
     }
-	$('.square').click(function(event) {
-	    alert("Row :" + event.rowIndex + " Col: " + event.colIndex);
-	});
 }
-
 
 function onSquareClick(event)
 {
@@ -556,15 +588,13 @@ function updateGamePage()
 function turnPlayCallback(json)
 {
     var currentMove = json.move;
-    var totalMoves = $('.totalMoves')[0].innerHTML;
-    if (totalMoves != undefined && totalMoves < currentMove)
-    {
-        currentMove--;
-    }
+    //var totalMoves = $('.totalMoves')[0].innerHTML;
+    //if (totalMoves != undefined && totalMoves < currentMove)
+    //{
+    //    currentMove--;
+    //}
 
     $('.scoreSpan')[0].innerHTML = json.score;
-    $('.currentMove')[0].innerHTML = currentMove;
-    $('.undoSpan')[0].innerHTML = json.undo;
     $('.turnSpan')[0].innerHTML = json.turn;
 
     if (isMyTurn)
@@ -576,98 +606,53 @@ function turnPlayCallback(json)
         $('.turnSpan')[0].innerHTML = '0';
     }
 
-    var color;
-    var board = json.board.m_Board;
-    var square;
+    var board = json.board.cards;
+    var cell;
     turn = json.turn;
+	var htmlBoard = document.getElementById("mainBoardBody");
+
     for (i=0; i<board.length; i++)
     {
+		var htmlRow = htmlBoard.rows.item(i);
         for (j=0; j<board[0].length; j++)
         {
-            square = $('.square[row="' + i + '"][col="' + j + '"]')[0];
-            removeClass(square);
-            color = board[i][j].m_CellState;
-            if (color === 'BLACK')
-            {
-                square.classList.add('black');
-            }
-            else if (color ==='EMPTY')
-            {
-                square.classList.add('empty');
-            }
-            else
-            {
-                //nothing..
-            }
+            cell = htmlRow.cells.item(j);
+            removeClass(cell);
+			if (board[i][j].isSelected){
+				cell.classList.add('squreStyleSelected');
+			}else if (board[i][j].revealed){
+				cell.classList.add('squreStyleRevealed');
+			} else{
+				cell.classList.add('square');
+			}
+			if (board[i][j].revealed && cell.innerText != board[i][j].letter){
+				cell.innerText = board[i][j].letter;
+			}
+			if (!board[i][j].revealed){
+				cell.innerText = "?";
+			}
         }
     }
     if (isMyTurn)
     {
-        setPerfectRows(json.perfectRows);
-        setPerfectCols(json.perfectCols);
-    }
+
+	}
 }
 
-function setPerfectRows(perfectRows)
-{
-    if (perfectRows === undefined)
-    {
-        return;
-    }
-
-    for (i=0; i<perfectRows.length; i++)
-    {
-        for (j=0; j<perfectRows[0].length; j++)
-        {
-            var hint = $('.rowHint[row="' + i + '"][col="' + j + '"]')[0];
-            if (hint != undefined && hint.classList.contains('perfect'))
-            {
-                hint.classList.remove('perfect');
-            }
-
-            if (perfectRows[i][j])
-            {
-                hint.classList.add('perfect');
-            }
-        }
-    }
-}
-
-function setPerfectCols(perfectCols)
-{
-    if (perfectCols === undefined)
-    {
-        return;
-    }
-
-    for (i=0; i<perfectCols.length; i++)
-    {
-        for (j=0; j<perfectCols[0].length; j++)
-        {
-            var hint = $('.colHint[row="' + j + '"][col="' + i + '"]')[0];
-            if (hint != undefined && hint.classList.contains('perfect'))
-            {
-                hint.classList.remove('perfect');
-            }
-
-            if (perfectCols[i][j])
-            {
-                hint.classList.add('perfect');
-            }
-        }
-    }
-}
 
 function removeClass(square)
 {
-    if (square.classList.contains('black'))
+    if (square.classList.contains('squre'))
     {
-        square.classList.remove('black');
+        square.classList.remove('squre');
     }
-    else if (square.classList.contains('empty'))
+    if (square.classList.contains('squreStyleSelected'))
     {
-        square.classList.remove('empty');
+        square.classList.remove('squreStyleSelected');
     }
+	if (square.classList.contains('squreStyleRevealed')){
+		square.classList.remove('squreStyleRevealed');
+	}
 }
 
 function getChooserColor()

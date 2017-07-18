@@ -13,7 +13,7 @@ public class Card implements java.io.Serializable,Cloneable{
     private boolean isEnabled;
     private int row;
     private int col;
-    private boolean isSelected;
+        private boolean isSelected;
     private int index;
 
     protected Card(char letter,byte score)

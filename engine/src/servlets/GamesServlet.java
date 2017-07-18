@@ -1,12 +1,11 @@
 package servlets;
 
 import com.google.gson.Gson;
-import engine.GameManager;
-import engine.GameStatus;
-import engine.GamesManager;
+import engine.*;
 import engine.controller.GameController;
 import engine.message.DiceResultMessage;
 import engine.message.GameStatusMessage;
+import engine.message.PageDetailsMessage;
 import engine.model.Games;
 import engine.model.LoadGameStatus;
 import javafx.util.Pair;
@@ -67,6 +66,62 @@ public class GamesServlet extends HttpServlet
                 break;
             case "rollDice":
                 gameRollDiceAction(req,resp);
+                break;
+            case "pageDetails":
+                pageDetailsAction(req,resp);
+                break;
+            case "CheckSelectedWord":
+                CheckSelectedWordAction(req,resp);
+                break;
+        }
+    }
+
+    private void CheckSelectedWordAction(HttpServletRequest request, HttpServletResponse response) throws java.io.IOException {
+        int key = Integer.parseInt(request.getParameter("key"));
+        Gson gson = new Gson();
+        PrintWriter out = response.getWriter();
+        response.setContentType("application/json");
+        String userName = SessionUtils.getUsername(request.getSession());
+        GameController game = getGameController(key,userName);
+
+        if (game != null){
+            out.println(gson.toJson(game.checkSelectedWord()));
+        }
+    }
+
+    private GameController getGameController(int key,String userName)
+    {
+        GameController game=null;
+        if (key != UNKNOWN && userName.contentEquals(gamesManager.getGame(key).getCurrentPlayerName()))
+        {
+            game = gamesManager.getGame(key);
+        }
+        else
+        {
+
+            game = gamesManager.getGameByUserName(userName);
+            if (!userName.contentEquals(game.getCurrentPlayerName())){
+                game =null;
+            }
+        }
+        return game;
+    }
+    private void pageDetailsAction(HttpServletRequest request, HttpServletResponse response) throws IOException
+    {
+        String userName = SessionUtils.getUsername(request.getSession());
+        GameController game = gamesManager.getGameByUserName(userName);
+        Gson gson = new Gson();
+        PrintWriter out = response.getWriter();
+        response.setContentType("application/json");
+
+        if (game != null)
+        {
+            Player currentPlayer = game.getPlayer(userName);
+            int move = game.getRoundNumber();
+            int turn = game.getCurrentTurn();
+            int score = (int)currentPlayer.getScore();
+            Board board = game.getBoard();
+            out.println(gson.toJson(new PageDetailsMessage(board,move,turn,score,game.getPlayersDetails(),game.getCharFrequencyString())));
         }
     }
 
@@ -87,7 +142,7 @@ public class GamesServlet extends HttpServlet
         else
         {
 
-             game = gamesManager.getGameByUserName(userName);
+            game = gamesManager.getGameByUserName(userName);
             if (!userName.contentEquals(game.getCurrentPlayerName())){
                 game =null;
             }
@@ -132,8 +187,74 @@ public class GamesServlet extends HttpServlet
             case "joinGame":
                 joinGameAction(req, resp);
                 break;
-
+            case "selectCard":
+                selectCardAction(req,resp);
+                break;
+            case "clearCardSelection":
+                clearCardSelectionAction(req,resp);
+                break;
+            case "revealCards":
+                revealCardsAction(req,resp);
+                break;
         }
+    }
+
+    private void clearCardSelectionAction(HttpServletRequest request, HttpServletResponse resp) {
+        int key = Integer.parseInt(request.getParameter("key"));
+
+        String userName = SessionUtils.getUsername(request.getSession());
+        GameController game = null;
+
+        if (key != UNKNOWN && userName.contentEquals(gamesManager.getGame(key).getCurrentPlayerName()))
+        {
+            game = gamesManager.getGame(key);
+            game.clearCardSelection();
+        }
+        else
+        {
+            game = gamesManager.getGameByUserName(userName);
+            game.clearCardSelection();
+        }
+    }
+
+    private void revealCardsAction(HttpServletRequest request, HttpServletResponse resp) {
+        int key = Integer.parseInt(request.getParameter("key"));
+
+        String userName = SessionUtils.getUsername(request.getSession());
+        GameController game = null;
+
+        if (key != UNKNOWN && userName.contentEquals(gamesManager.getGame(key).getCurrentPlayerName()))
+        {
+            game = gamesManager.getGame(key);
+            game.revealCards();
+        }
+        else
+        {
+            game = gamesManager.getGameByUserName(userName);
+            game.revealCards();
+        }
+    }
+
+    private void selectCardAction(HttpServletRequest request, HttpServletResponse response) throws java.io.IOException{
+        int key = Integer.parseInt(request.getParameter("key"));
+        int row = Integer.parseInt(request.getParameter("row"));
+        int col = Integer.parseInt(request.getParameter("col"));
+
+        response.setContentType("application/json");
+        String userName = SessionUtils.getUsername(request.getSession());
+        GameController game = null;
+
+        if (key != UNKNOWN && userName.contentEquals(gamesManager.getGame(key).getCurrentPlayerName()))
+        {
+            game = gamesManager.getGame(key);
+            game.selectCard(row,col);
+        }
+        else
+        {
+            game = gamesManager.getGameByUserName(userName);
+            game.selectCard(row,col);
+        }
+
     }
 
 

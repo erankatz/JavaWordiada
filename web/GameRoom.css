@@ -102,6 +102,34 @@ body{
     cursor: pointer;
 }
 
+.squreStyleSelected{
+    background:blue;
+    text-align:center;
+    border: 2px black solid;
+    width: 30px;
+    height: 30px;
+    transition: background 2s ease;
+}
+
+.squreStyleSelected:hover {
+    background: antiquewhite;
+    cursor: pointer;
+}
+
+.squreStyleRevealed{
+    background:yellow;
+    text-align:center;
+    border: 2px black solid;
+    width: 30px;
+    height: 30px;
+    transition: background 2s ease;
+}
+
+.squreStyleRevealed:hover {
+    background: antiquewhite;
+    cursor: pointer;
+}
+
 .selected {
     border-color: red;
 }
@@ -138,20 +166,6 @@ body{
 .completedBoardBody{
     display: table;
     margin: 0 auto;
-}
-
-.boardBody td {
-    border: 3px solid black;
-    border-collapse: collapse;
-    background-color: red;
-	height: 30px;
-	width:30px;	
-	text-align:center;
-}
-
-.boardBody td:hover {
-    background: antiquewhite;
-    cursor: pointer;
 }
 
 .replayBoard{

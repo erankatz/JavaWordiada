@@ -25,11 +25,11 @@ public class Board implements java.io.Serializable,Cloneable{
     private Card cards[][] = new Card[0][0];
     private int boardSize;
     private int numOfUnrevealedCard=0;
-    private GameManager manager;
+    private transient GameManager manager;
     private Map<String, Long> word2FrequencyDic;
     private Map<String,Integer> word2Segment;
     private Deck deck;
-    private WordSearch wordSearcher;
+    private transient WordSearch wordSearcher;
     private List<Map.Entry<Integer,Integer>> selectedCardsList = new ArrayList<>();
 
     private Board(int boardSize,int numOfUnrevealedCard,GameManager manager, Map<String,Long> word2FrequencyDic,WordSearch wordSearcher){
