@@ -154,12 +154,18 @@ public class GameController
     public void playerLeave(String userName) {
         gameLogic.playerLeave(userName);
         registeredPlayers--;
-        if (registeredPlayers ==0 && gameLogic.getIsReplayMode()){
+        if (registeredPlayers == 0 && (status.equals(GameStatus.Running) || status.equals(GameStatus.Finished)))
+        {
             try {
                 gameLogic.newGame();
             }catch (Exception ex){
                 ex.printStackTrace();
             }
+            status = GameStatus.WaitingForPlayers;
+        }
+        else if (registeredPlayers == 1 && requiredPlayers > 1 && status.equals(GameStatus.Running))
+        {
+            status = GameStatus.Finished;
         }
     }
 
@@ -192,7 +198,7 @@ public class GameController
     }
 
     public int getCurrentTurn() {
-        return gameLogic.getCurrentPlayerTurn();
+        return gameLogic.getCurrentPlayerTurn() +1;
     }
 
     public Board getBoard() {
@@ -229,4 +235,13 @@ public class GameController
         numOfRetriesLeft = gameLogic.getPlayers()[gameLogic.getCurrentPlayerTurn()].getRetriesNumber();
         return new RevealedWordMessage(numOfRetriesLeft,currentPlayerMessage,otherPlayerMessage,isValidWord);
     }
+
+    public long getHighestScore() {
+        return gameLogic.getPlayers()[gameLogic.getWinnerPlayer()].getScore();
+    }
+
+    public ArrayList<Player> getWinners() {
+        return players;
+    }
+
 }

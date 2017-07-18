@@ -284,7 +284,6 @@ function showEndGameDiaglog()
 }
 
 function showEndGameDiaglogCallback(json) {
-    setReason(json.reason);
     var board = json.board;
     $('.highestScore')[0].innerHTML = json.winnersScore;
     var winnerDiv = $('.winnerDiv')[0];
@@ -294,29 +293,12 @@ function showEndGameDiaglogCallback(json) {
         var winnerSpan = document.createElement('span');
         winnerSpan.classList.add('winnerName');
         winnerDiv.appendChild(winnerSpan);
-        winnerSpan.innerHTML = winnerSpan.innerHTML + json.winners[i].m_Name + " ";
+        winnerSpan.innerHTML = winnerSpan.innerHTML + json.winners[i].name + " ";
     }
     winnerSpan.innerHTML = winnerSpan.innerHTML + '.';
+	
+    createBoardForEndDialog(board.cards);
 
-}
-
-function setReason(reason)
-{
-    switch(reason)
-    {
-        case 'alone':
-            $('.finishStatus')[0].innerHTML = 'You are the last player..';
-            break;
-        case 'moves':
-            $('.finishStatus')[0].innerHTML = 'Moves Expired !!';
-            break;
-        case 'completed':
-            $('.finishStatus')[0].innerHTML = 'Board was completed !';
-            break;
-        default:
-            $('.finishStatus')[0].innerHTML = 'Unknown ..';
-            break;
-    }
 }
 
 function updatePlayersDetails()
@@ -465,6 +447,33 @@ function loadGameDetailsCallback(json)
 	updateGamePage();
 }
 
+function createBoardForEndDialog(board) {
+    var htmlBoard = document.getElementsByClassName("completedBoardBody")[0];
+    htmlBoard.innerHTML = "";
+    for (i = 0; i < board.length; i++) { // creates squares + row blocks.
+        var row = htmlBoard.insertRow(i);
+
+        for (j = 0; j < board.length; j++) { // add the squares.
+            var cell = row.insertCell(j);
+            cell.innerText = board[i][j].letter;
+            cell.rowIndex = i;
+            cell.colIndex = j;
+            if (board[i][j].isSelected) {
+                cell.classList.add('squreStyleSelected');
+            } else if (board[i][j].revealed) {
+                cell.classList.add('squreStyleRevealed');
+            } else {
+                cell.classList.add('square');
+            }
+            if (board[i][j].revealed && cell.innerText != board[i][j].letter) {
+                cell.innerText = board[i][j].letter;
+            }
+            if (!board[i][j].revealed) {
+                cell.innerText = "?";
+            }
+        }
+    }
+}
 
 
 function createBoard(rows, cols) {
@@ -596,7 +605,7 @@ function turnPlayCallback(json)
 
     $('.scoreSpan')[0].innerHTML = json.score;
     $('.turnSpan')[0].innerHTML = json.turn;
-
+	$('.moves')[0].innerText = "Round number: " + json.move
     if (isMyTurn)
     {
         $('.turnSpan')[0].innerHTML = json.turn;

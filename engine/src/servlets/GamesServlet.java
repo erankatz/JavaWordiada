@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import engine.*;
 import engine.controller.GameController;
 import engine.message.DiceResultMessage;
+import engine.message.EndGameMessage;
 import engine.message.GameStatusMessage;
 import engine.message.PageDetailsMessage;
 import engine.model.Games;
@@ -73,6 +74,25 @@ public class GamesServlet extends HttpServlet
             case "CheckSelectedWord":
                 CheckSelectedWordAction(req,resp);
                 break;
+            case "gameEnd":
+                gameEndAction(req,resp);
+                break;
+        }
+    }
+
+    private void gameEndAction(HttpServletRequest request, HttpServletResponse response) throws java.io.IOException {
+        Gson gson = new Gson();
+        PrintWriter out = response.getWriter();
+        response.setContentType("application/json");
+
+        String userName = SessionUtils.getUsername(request.getSession());
+        GameController game = gamesManager.getGameByUserName(userName);
+
+        if (game != null)
+        {
+            List<PlayerData> winners = game.getPlayersDetails();
+            long score = game.getHighestScore();
+            out.println(gson.toJson(new EndGameMessage(winners, score, game.getBoard())));
         }
     }
 
