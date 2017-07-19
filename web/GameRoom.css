@@ -139,6 +139,32 @@ body{
     transition: background 2s ease;
 }
 
+
+.lettersFrequencyInDeck{
+    display: inline-block;
+    font-size: 24px;
+    margin-left: 1%;
+    border-radius: 14px;
+    background: antiquewhite;
+    box-shadow: -1px 0px 3px 1px;
+}
+
+
+.lettersFrequencyInDeck td{
+	background: antiquewhite;
+}
+
+.lowestFrequencyDictionaryWords{
+	    display: inline-block;
+    font-size: 24px;
+    margin-left: 1%;
+    border-radius: 14px;
+    background: antiquewhite;
+    box-shadow: -1px 0px 3px 1px;
+}
+
+
+
 .selected {
     border-color: red;
 }

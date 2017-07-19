@@ -58,7 +58,7 @@ public class GamesManager
         String gameName = newGame.initGame(xmlDescription,dictionaryContent, creatorName);
         if (isGameNameTaken(gameName))
         {
-                    throw new DuplicateGameTitle();
+                    throw new DuplicateGameTitle(gameName);
         }
 
         numberOfGames++;

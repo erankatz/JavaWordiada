@@ -132,9 +132,13 @@ public class GameController
         if (registeredPlayers == requiredPlayers)
         {
             status = GameStatus.Running;
-            gameLogic.startGame();
         }
     }
+
+    public GameStatus getGameStatus(){
+        return status;
+    }
+
 
     public boolean hasPlayerWithName(String name)
     {
@@ -246,5 +250,13 @@ public class GameController
 
     public EnumPlayerTurnPendingAction getcurrentPlayerPendingAction() {
         return gameLogic.getPlayers()[gameLogic.getCurrentPlayerTurn()].getPendingAction();
+    }
+
+    public void startGame() {
+        gameLogic.startGame();
+    }
+
+    public void refreshDeck() {
+        gameLogic.getBoard().getLowestFrequencyDictionaryWords();
     }
 }

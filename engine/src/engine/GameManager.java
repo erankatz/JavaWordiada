@@ -158,6 +158,7 @@ public class GameManager implements Serializable,Cloneable{
             }
             players[i].setRetriesNumber(retriesNumber);
             players[i].registerRolledDicesListener((result) -> notifyEnableAllCardsListeners());
+            players[i].setScore(0);
         }
         isGameStarted = true;
         roundCounter = 0;
@@ -172,7 +173,6 @@ public class GameManager implements Serializable,Cloneable{
             ((ComputerPlayer)players[getCurrentPlayerTurn()]).playTurn();
 
         }
-        Arrays.stream(players).forEach(pl->pl.setScore(0));
         getPlayersData().stream().forEach(pl ->notifyPlayerDataChangedListener(pl));
         notifyStartPlayerTurn();
     }

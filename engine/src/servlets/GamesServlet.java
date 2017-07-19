@@ -112,6 +112,24 @@ public class GamesServlet extends HttpServlet
         }
     }
 
+    private GameController getGameController(int key,String userName,boolean join)
+    {
+        GameController game=null;
+        if (key != UNKNOWN && (join || userName.contentEquals(gamesManager.getGame(key).getCurrentPlayerName())))
+        {
+            game = gamesManager.getGame(key);
+        }
+        else
+        {
+
+            game = gamesManager.getGameByUserName(userName);
+            //if (!userName.contentEquals(game.getCurrentPlayerName())){
+            //    game =null;
+            //}
+        }
+        return game;
+    }
+
     private GameController getGameController(int key,String userName)
     {
         GameController game=null;
@@ -154,22 +172,7 @@ public class GamesServlet extends HttpServlet
         PrintWriter out = response.getWriter();
         response.setContentType("application/json");
         String userName = SessionUtils.getUsername(request.getSession());
-        GameController game = null;
-
-        if (key != UNKNOWN && userName.contentEquals(gamesManager.getGame(key).getCurrentPlayerName()))
-        {
-             game = gamesManager.getGame(key);
-            Integer result = game.rollDice();
-            out.println(gson.toJson(result));
-        }
-        else
-        {
-
-            game = gamesManager.getGameByUserName(userName);
-            if (!userName.contentEquals(game.getCurrentPlayerName())){
-                game =null;
-            }
-        }
+        GameController game = getGameController(key,userName);
 
         if (game != null){
             out.println(gson.toJson(new DiceResultMessage(game.rollDice())));
@@ -183,16 +186,11 @@ public class GamesServlet extends HttpServlet
         Gson gson = new Gson();
         PrintWriter out = response.getWriter();
         response.setContentType("application/json");
+        String userName = SessionUtils.getUsername(request.getSession());
+        GameController game = getGameController(key,userName,true);
 
-        if (key != UNKNOWN)
-        {
-            GameController game = gamesManager.getGame(key);
-            out.println(gson.toJson(game));
-        }
-        else
-        {
-            String userName = SessionUtils.getUsername(request.getSession());
-            GameController game = gamesManager.getGameByUserName(userName);
+        if (game != null){
+            game.refreshDeck();
             out.println(gson.toJson(game));
         }
     }
@@ -224,16 +222,9 @@ public class GamesServlet extends HttpServlet
         int key = Integer.parseInt(request.getParameter("key"));
 
         String userName = SessionUtils.getUsername(request.getSession());
-        GameController game = null;
+        GameController game = getGameController(key,userName);
 
-        if (key != UNKNOWN && userName.contentEquals(gamesManager.getGame(key).getCurrentPlayerName()))
-        {
-            game = gamesManager.getGame(key);
-            game.clearCardSelection();
-        }
-        else
-        {
-            game = gamesManager.getGameByUserName(userName);
+        if (game != null){
             game.clearCardSelection();
         }
     }
@@ -259,19 +250,12 @@ public class GamesServlet extends HttpServlet
 
         response.setContentType("application/json");
         String userName = SessionUtils.getUsername(request.getSession());
-        GameController game = null;
+        GameController game = getGameController(key,userName);
 
-        if (key != UNKNOWN && userName.contentEquals(gamesManager.getGame(key).getCurrentPlayerName()))
-        {
-            game = gamesManager.getGame(key);
+        if (game != null){
             game.selectCard(row,col);
-        }
-        else
-        {
-            game = gamesManager.getGameByUserName(userName);
-            game.selectCard(row,col);
-        }
 
+        }
     }
 
 
@@ -288,8 +272,12 @@ public class GamesServlet extends HttpServlet
 
         if (loginManager.canUserJoinGame(userName) && currentGame.getStatus().equals(GameStatus.WaitingForPlayers))
         {
-            loginManager.userJoinGame(userName, gameId);
             currentGame.addPlayer(userName, isComputer);
+            loginManager.userJoinGame(userName, gameId);
+            if (currentGame.getGameStatus() == GameStatus.Running){
+                currentGame.startGame();
+            }
+
             out.print(gson.toJson(new LoadGameStatus(true,"")));
         }
         else

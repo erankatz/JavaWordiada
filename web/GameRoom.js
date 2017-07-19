@@ -42,7 +42,46 @@ function onCheckSelectedWord(){
 	}
 }
 
+function getLettersFrequencyInDeckCallBack(json)
+{
+	var lettersFrequencyInDeckStrings = json.lettersFrequencyInDeck.split("\n");
+	lettersFrequencyInDeckStrings.unshift("");
+	var par = document.getElementsByClassName("lettersFrequencyInDeck")[0];
+    for(c=0;c<lettersFrequencyInDeckStrings.length;c++){
+		var line = lettersFrequencyInDeckStrings[c].split("-");
+		while (line[0].trim(" ") != par.rows.item(c).cells.item(0).innerText.trim(" "))
+		{
+			par.rows.item(c).parentElement.removeChild(par.rows.item(c))
+		}
+		for (j = 0; j < line.length; j++) { // add the squares.
+            par.rows.item(c).cells[j].innerText = line[j];
+		}
+    }
+}
+
+
+function updateLettersFrequencyInDeck()
+{
+	$.ajax
+		(
+			{
+				url: 'games',
+				data:
+				{
+					action: 'gameDetails',
+					key: -1,
+				},
+				type: 'GET',
+				success: getLettersFrequencyInDeckCallBack
+			}
+		)
+}
+
+
 function CheckSelectedWordCallBack(json){
+	if (json.isValidWord){
+		updateLettersFrequencyInDeck();
+	}
 	window.alert(json.currentPlayerMessage)
 }
 
@@ -450,13 +489,15 @@ function loadGameDetailsCallback(json)
     $('.requiredPlayers').text(json.requiredPlayers);
 	$('.isGoldFishMode').text("is Gold Fish :" + json.isGoldFishMode);
 	$('scoreMode').text("Score Mode: " + json.scoreMode);
-    br=[];
 	lettersFrequencyInDeckStrings.unshift("");
 	var par = document.getElementsByClassName("lettersFrequencyInDeck")[0];
     for(c=0;c<lettersFrequencyInDeckStrings.length;c++){
-        par.appendChild(document.createTextNode(lettersFrequencyInDeckStrings[c]));
-        br[c]=document.createElement('br');
-        par.appendChild(br[c]);
+		var row = par.insertRow(c);
+		var line = lettersFrequencyInDeckStrings[c].split("-");
+		for (j = 0; j < line.length; j++) { // add the squares.
+            var cell = row.insertCell(j);
+			cell.innerText = line[j];
+		}
     }
     br=[];
     par = document.getElementsByClassName('lowestFrequencyDictionaryWords')[0];
@@ -646,7 +687,10 @@ function turnPlayCallback(json)
     var cell;
     turn = json.turn;
 	var htmlBoard = document.getElementById("mainBoardBody");
-
+	if (htmlBoard.rows.length == 0)
+	{
+		loadGameDetails()
+	}
     for (i=0; i<board.length; i++)
     {
 		var htmlRow = htmlBoard.rows.item(i);
@@ -693,6 +737,9 @@ function removeClass(square)
     }
 	if (square.classList.contains('squreStyleRevealed')){
 		square.classList.remove('squreStyleRevealed');
+	}
+	if (square.classList.contains('squreStyleRemoved')){
+		square.classList.remove('squreStyleRemoved');
 	}
 }
 

@@ -5,6 +5,9 @@
 var dictContent = null;
 var xmlContent = null;
 var xmlFile;
+var readerXml = new FileReader();
+var readerDict = new FileReader();
+
 window.onload = function ()
 {
     refreshLoginStatus();
@@ -32,27 +35,27 @@ window.onload = function ()
 
 function setdictFileFullName(event) {
     var dictFileFullName = event.target.files[0];
-    var reader = new FileReader();
+    readerDict = new FileReader();
     if (dictFileFullName != undefined && dictFileFullName.name.split('.').pop().toUpperCase() == "TXT")
     {
-        reader.onload = function(e) {
-            dictContent = reader.result;
+        readerDict.onload = function(e) {
+            dictContent = readerDict.result;
         }
-        reader.readAsText(dictFileFullName);
+        readerDict.readAsText(dictFileFullName);
     } else {
         dictContent = null;
     }
 }
 
 function setXmlFileFullName(event) {
-    var reader = new FileReader();
     xmlFile = event.target.files[0];
+	readerXml = new FileReader();
     if (xmlFile != undefined && xmlFile.name.split('.').pop().toUpperCase() == "XML")
     {
-        reader.onload = function(e) {
-            xmlContent = reader.result;
+        readerXml.onload = function(e) {
+            xmlContent = readerXml.result;
         }
-        reader.readAsText(xmlFile);
+        readerXml.readAsText(xmlFile);
     } else {
         xmlContent = null;
     }
@@ -188,7 +191,7 @@ function refreshUserListCallback(json) {
 
 
 function loadGameClicked() {
-    if (xmlContent != null && dictContent != null)
+    if (xmlContent != null && dictContent != null && document.getElementById("XmlFileInput").value != "" && document.getElementById("DictionaryFileInput").value != "")
     {
         $.ajax(
             {
@@ -213,7 +216,7 @@ function loadGameClicked() {
             type: 'GET',
             success: function (json) {
                 creatorName = getUserName();
-                reader.readAsText(xmlFile);
+                readerXml.readAsText(xmlFile);
             }
         });
     }
@@ -283,7 +286,8 @@ function removeGameDialog() {
 }
 
 function clearFileInput() {
-    document.getElementById("fileInput").value = "";
+	document.getElementById("XmlFileInput").value = ""
+    document.getElementById("DictionaryFileInput").value = "";
 }
 
 function createGameDialog(event) {
