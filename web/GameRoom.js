@@ -17,10 +17,12 @@ var isReplayOn = false;
 var diceResult = null;
 var gameTitle = null;
 var pendingAction = null;
-
+var gameId = null;
 
 window.onload = function()
 {
+	var url = new URL(window.location);
+	gameId = url.searchParams.get("id");
     checkLoginStatus();
 };
 
@@ -255,7 +257,8 @@ function gameStatus()
             url: 'games',
             data:
             {
-                action: 'gameStatus'
+                action: 'gameStatus',
+				key: gameId
             },
             type: 'GET',
             success: handleStatus
@@ -332,7 +335,8 @@ function showEndGameDiaglog()
             url: 'games',
             data:
             {
-                action: 'gameEnd'
+                action: 'gameEnd',
+				key: gameId
             },
             type: 'GET',
             success: showEndGameDiaglogCallback
@@ -366,7 +370,8 @@ function updatePlayersDetails()
             url: 'games',
             data:
             {
-                action: 'gamePlayers'
+                action: 'gamePlayers',
+				key: gameId
             },
             type: 'GET',
             success: updatePlayersDetailsCallback
@@ -376,6 +381,7 @@ function updatePlayersDetails()
 
 function updatePlayersDetailsCallback(json)
 {
+	json = JSON.parse(json)
     $('.registeredPlayers').text(json.length);
 
     var playersNamesDiv = $('.playersNamesBody');
@@ -636,7 +642,8 @@ function onLeaveGameClick()
         async: false,
         url: 'games',
         data: {
-            action: "leaveGame"
+            action: "leaveGame",
+			key: gameId
         },
         type: 'GET',
         success: function() {
@@ -654,7 +661,8 @@ function updateGamePage()
             url: 'games',
             data:
             {
-                action: 'pageDetails'
+                action: 'pageDetails',
+				key: gameId
             },
             type: 'GET',
             success: turnPlayCallback

@@ -87,9 +87,9 @@ public class GamesServlet extends HttpServlet
         Gson gson = new Gson();
         PrintWriter out = response.getWriter();
         response.setContentType("application/json");
-
+        int key = Integer.parseInt(request.getParameter("key"));
         String userName = SessionUtils.getUsername(request.getSession());
-        GameController game = gamesManager.getGameByUserName(userName);
+        GameController game = getGameController(key,userName);
 
         if (game != null)
         {
@@ -115,17 +115,19 @@ public class GamesServlet extends HttpServlet
     private GameController getGameController(int key,String userName,boolean join)
     {
         GameController game=null;
-        if (key != UNKNOWN && (join || userName.contentEquals(gamesManager.getGame(key).getCurrentPlayerName())))
+        if (key != UNKNOWN && !join && gamesManager.getGamesKeysByUserName(userName).contains(key) )
         {
             game = gamesManager.getGame(key);
         }
-        else
+        else if (join && key != UNKNOWN)
         {
-
-            game = gamesManager.getGameByUserName(userName);
+            game = gamesManager.getGame(key);
             //if (!userName.contentEquals(game.getCurrentPlayerName())){
             //    game =null;
             //}
+        }
+        else if (key == UNKNOWN){
+            game = gamesManager.getGameByUserName(userName);
         }
         return game;
     }
@@ -133,13 +135,12 @@ public class GamesServlet extends HttpServlet
     private GameController getGameController(int key,String userName)
     {
         GameController game=null;
-        if (key != UNKNOWN && userName.contentEquals(gamesManager.getGame(key).getCurrentPlayerName()))
+        if (key != UNKNOWN && gamesManager.getGamesKeysByUserName(userName).contains(key) )
         {
             game = gamesManager.getGame(key);
         }
         else
         {
-
             game = gamesManager.getGameByUserName(userName);
             if (!userName.contentEquals(game.getCurrentPlayerName())){
                 game =null;
@@ -150,10 +151,11 @@ public class GamesServlet extends HttpServlet
     private void pageDetailsAction(HttpServletRequest request, HttpServletResponse response) throws IOException
     {
         String userName = SessionUtils.getUsername(request.getSession());
-        GameController game = gamesManager.getGameByUserName(userName);
         Gson gson = new Gson();
         PrintWriter out = response.getWriter();
         response.setContentType("application/json");
+        int key = Integer.parseInt(request.getParameter("key"));
+        GameController game = getGameController(key,userName);
 
         if (game != null)
         {
@@ -270,7 +272,7 @@ public class GamesServlet extends HttpServlet
         Gson gson = new Gson();
         response.setContentType("application/json");
 
-        if (loginManager.canUserJoinGame(userName) && currentGame.getStatus().equals(GameStatus.WaitingForPlayers))
+        if (currentGame.getStatus().equals(GameStatus.WaitingForPlayers))
         {
             currentGame.addPlayer(userName, isComputer);
             loginManager.userJoinGame(userName, gameId);
@@ -310,10 +312,11 @@ public class GamesServlet extends HttpServlet
     private void gamePlayersAction(HttpServletRequest request, HttpServletResponse response) throws IOException
     {
         String userName = SessionUtils.getUsername(request.getSession());
-        GameController game = gamesManager.getGameByUserName(userName);
         Gson gson = new Gson();
         PrintWriter out = response.getWriter();
-        response.setContentType("application/json");
+
+        int key = Integer.parseInt(request.getParameter("key"));
+        GameController game = getGameController(key,userName);
 
         if (game != null)
         {
@@ -332,7 +335,8 @@ public class GamesServlet extends HttpServlet
     private void leaveGameAction(HttpServletRequest request, HttpServletResponse response)
     {
         String userName = SessionUtils.getUsername(request.getSession());
-        GameController game = gamesManager.getGameByUserName(userName);
+        int key = Integer.parseInt(request.getParameter("key"));
+        GameController game = getGameController(key,userName);
         if (game != null)
         {
             game.playerLeave(userName);
@@ -346,7 +350,8 @@ public class GamesServlet extends HttpServlet
         PrintWriter out = response.getWriter();
         response.setContentType("application/json");
         String userName = SessionUtils.getUsername(request.getSession());
-        GameController game = gamesManager.getGameByUserName(userName);
+        int key = Integer.parseInt(request.getParameter("key"));
+        GameController game = getGameController(key,userName);
         EnumPlayerTurnPendingAction pendingAction = game.getcurrentPlayerPendingAction();
 
         if (game != null)

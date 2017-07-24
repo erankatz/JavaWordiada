@@ -7,10 +7,7 @@ import engine.exception.game.DuplicateGameTitle;
 import javax.xml.bind.JAXBException;
 import javax.xml.xpath.XPathExpressionException;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -110,6 +107,19 @@ public class GamesManager
             }
         });
         return result[0];
+    }
+
+    public Set<Integer> getGamesKeysByUserName(String userName)
+    {
+        Set<Integer> result = new HashSet<>();
+        games.forEach( (key,game )->
+        {
+            if (game.hasPlayerWithName(userName))
+            {
+                result.add(key);
+            }
+        });
+        return result;
     }
 
     public void removeGame(GameController game) {

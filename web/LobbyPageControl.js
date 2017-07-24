@@ -130,10 +130,10 @@ function statusCallback(json)
     {
         window.location = "index.html";
     }
-    else if (json.gameNumber != -1)
-    {
-        window.location = "GameRoom.html";
-    }
+    //else if (json.gameNumber != -1)
+    //{
+        //window.location = "GameRoom.html";
+    //}
     else
     {
         $('.userNameSpan').text("Hello " + json.userName + ", logged in as " + (json.isComputer ? "computer" : "human"));
@@ -374,8 +374,9 @@ function joinGameClickedCallback(json) {
 
     if (json.isLoaded)
     {
+		var gameId = getGameId();
         didUserCloseWindow = false;
-        window.location = "GameRoom.html";
+        window.location = "GameRoom.html?id=" + gameId;
     }
     else {
         alert(json.errorMessage);

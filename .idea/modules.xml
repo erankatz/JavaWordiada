@@ -2,6 +2,8 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+      <module fileurl="file://$PROJECT_DIR$/ChatLogicEngine/ChatLogicEngine.iml" filepath="$PROJECT_DIR$/ChatLogicEngine/ChatLogicEngine.iml" />
+      <module fileurl="file://$PROJECT_DIR$/chatWebApp/chatWebApp.iml" filepath="$PROJECT_DIR$/chatWebApp/chatWebApp.iml" />
       <module fileurl="file://$PROJECT_DIR$/engine/engine.iml" filepath="$PROJECT_DIR$/engine/engine.iml" />
       <module fileurl="file://$PROJECT_DIR$/wordiadaWebApp.iml" filepath="$PROJECT_DIR$/wordiadaWebApp.iml" />
     </modules>
