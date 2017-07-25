@@ -11,8 +11,7 @@ import engine.listener.*;
 import javafx.scene.image.WritableImage;
 
 import javax.xml.xpath.XPathExpressionException;
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.lang.reflect.Executable;
 import java.util.*;
 import java.util.function.Consumer;
@@ -58,7 +57,8 @@ public class GameModel {
         manager.registerGameOverListener((id)->gameOverConsumer.accept(id));
         manager.registerPlayerDataChangedListener(pl->updatePlayerScoreConsumer.accept(pl));
         try {
-            manager.readXmlFile(file);
+            FileInputStream inp = new FileInputStream(file);
+            manager.readXmlFile(readStream(inp),readStream(inp));
             newGame();
             isFileLoadedSuccefullyConsumer.accept(true);
         } catch (IOException ex){
@@ -70,6 +70,7 @@ public class GameModel {
             exceptionMessageConsumer.accept(ex.getMessage());
         }
     }
+
 
     public void selectCard(int row,int col){
         manager.getBoard().selectBoardCard(row, col,true);
@@ -129,10 +130,7 @@ public class GameModel {
     }
 
     public void newGame() throws DiceException,IOException{
-        List<Boolean> f = new ArrayList<>();
-        f.add(true);
-        f.add(false);
-        manager.newGame(f);
+        manager.newGame();
         board = manager.getBoard();
     }
 
@@ -206,10 +204,7 @@ public class GameModel {
             {
                 try {
                     manager.createDictionary();
-                    List<Boolean> a = new ArrayList<>();
-                    a.add(true);
-                    a.add(false);
-                    manager.newGame(a);
+                    manager.newGame();
                 } catch (EngineException ex){
                     exceptionMessageConsumer.accept(ex.getMessage());
                 } catch (IOException ex){
@@ -292,5 +287,19 @@ public class GameModel {
 
     public void updateCards() {
         manager.updateCards();
+    }
+
+    private static String readStream(InputStream is) {
+        StringBuilder sb = new StringBuilder(512);
+        try {
+            Reader r = new InputStreamReader(is, "UTF-8");
+            int c = 0;
+            while ((c = r.read()) != -1) {
+                sb.append((char) c);
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        return sb.toString();
     }
 }
