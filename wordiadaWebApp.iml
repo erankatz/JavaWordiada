@@ -20,18 +20,8 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="library" scope="PROVIDED" name="Tomcat 7.0.79" level="application_server_libraries" />
-    <orderEntry type="module" module-name="engine" />
     <orderEntry type="library" name="gson-2.3.1" level="project" />
-    <orderEntry type="module" module-name="ChatLogicEngine" />
-    <orderEntry type="module-library">
-      <library>
-        <CLASSES />
-        <JAVADOC />
-        <SOURCES>
-          <root url="file://$MODULE_DIR$/ChatLogicEngine/src" />
-        </SOURCES>
-      </library>
-    </orderEntry>
+    <orderEntry type="module" module-name="engine" />
     <orderEntry type="sourceFolder" forTests="false" />
   </component>
 </module>

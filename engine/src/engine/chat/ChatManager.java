@@ -16,6 +16,7 @@ public class ChatManager {
     }
 
     public List<SingleChatEntry> getChatEntries(int fromIndex){
+        fromIndex--;
         if (fromIndex < 0 || fromIndex >= chatDataList.size()) {
             fromIndex = 0;
         }
@@ -25,6 +26,4 @@ public class ChatManager {
     public int getVersion() {
         return chatDataList.size();
     }
-
-
 }

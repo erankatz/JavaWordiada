@@ -1,6 +1,8 @@
 package engine.controller;
 
 import engine.*;
+import engine.chat.ChatManager;
+import engine.chat.SingleChatEntry;
 import engine.exception.EngineException;
 import engine.message.RevealCardMessage;
 import engine.message.RevealedWordMessage;
@@ -40,16 +42,18 @@ public class GameController
     private EnumScoreMode scoreMode;
     private String lettersFrequencyInDeck;
     private String lowestFrequencyDictionaryWords;
-
+    private transient engine.chat.ChatManager chatManager;
     //  private int[][] rowBlocks;
   //  private int[][] colBlocks;
     int idToGive;
+    int chatVersion =1;
 
     public GameController()
     {
         idToGive = 1;
         gameLogic = new GameManager();
         status = GameStatus.Building;
+        chatManager = new ChatManager();
     }
 
     public String getGameTitle()
@@ -75,6 +79,10 @@ public class GameController
         return  gameLogic.getGameTitle();
     }
 
+    public void sendMessage(String chatString,String username){
+        chatManager.addChatString(chatString,username);
+        chatVersion++;
+    }
     public String getCharFrequencyString(){
         AtomicReference<String> ret = new AtomicReference<>();
         ret.set("");
@@ -258,5 +266,13 @@ public class GameController
 
     public void refreshDeck() {
         gameLogic.getBoard().getLowestFrequencyDictionaryWords();
+    }
+
+    public int getChatVersion(){
+        return chatVersion;
+    }
+
+    public List<SingleChatEntry> getChatEntries(int fromIndex){
+        return chatManager.getChatEntries(fromIndex);
     }
 }

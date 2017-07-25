@@ -2,6 +2,7 @@ package servlets;
 
 import com.google.gson.Gson;
 import engine.*;
+import engine.chat.SingleChatEntry;
 import engine.controller.GameController;
 import engine.message.DiceResultMessage;
 import engine.message.EndGameMessage;
@@ -80,6 +81,20 @@ public class GamesServlet extends HttpServlet
             case "revealCards":
                 revealCardsAction(req,resp);
                 break;
+            case "chatContent":
+                chatContentAction(req,resp);
+        }
+    }
+
+    private void sendMessageAction(HttpServletRequest request, HttpServletResponse response) throws  java.io.IOException{
+        response.setContentType("application/json");
+        int key = Integer.parseInt(request.getParameter("key"));
+        String chatString = request.getParameter("chatString");
+        String userName = SessionUtils.getUsername(request.getSession());
+        GameController game = getGameController(key,userName);
+
+        if (game !=null){
+                game.sendMessage(chatString,userName);
         }
     }
 
@@ -216,6 +231,8 @@ public class GamesServlet extends HttpServlet
             case "clearCardSelection":
                 clearCardSelectionAction(req,resp);
                 break;
+            case "sendMessage":
+                sendMessageAction(req,resp);
 
         }
     }
@@ -366,4 +383,41 @@ public class GamesServlet extends HttpServlet
             out.println(gson.toJson(new GameStatusMessage(status, name,pendingAction)));
         }
     }
+
+    protected void chatContentAction(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        String userName = SessionUtils.getUsername(request.getSession());
+        Gson gson = new Gson();
+        PrintWriter out = response.getWriter();
+
+        int key = Integer.parseInt(request.getParameter("key"));
+        int chatVersion = 0;
+        try{
+            chatVersion = Integer.parseInt(request.getParameter("chatVersion"));
+        }catch (Exception ex){
+
+        }
+
+        GameController game = getGameController(key,userName);
+
+        if (chatVersion > Integer.MIN_VALUE) {
+            List<SingleChatEntry> chatEntries = game.getChatEntries(chatVersion);
+            ChatAndVersion cav = new ChatAndVersion(chatEntries, game.getChatVersion());
+            String jsonResponse = gson.toJson(cav);
+            out.print(jsonResponse);
+            out.flush();
+        }
+    }
+
+    class ChatAndVersion {
+
+        final private List<SingleChatEntry> entries;
+        final private int version;
+
+        public ChatAndVersion(List<SingleChatEntry> entries, int version) {
+            this.entries = entries;
+            this.version = version;
+        }
+    }
+
 }
