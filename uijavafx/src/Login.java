@@ -26,9 +26,9 @@ import javafx.stage.Stage;
  */
 public class Login extends Application {
 
-    String user = "JavaFX2";
-    String pw = "password";
-    String checkUser, checkPw;
+
+    String checkUser;
+    GameModel model = new GameModel();
 
     public static void main(String[] args) {
         launch(args);
@@ -54,18 +54,22 @@ public class Login extends Application {
         //Implementing Nodes for GridPane
         Label lblUserName = new Label("Username");
         final TextField txtUserName = new TextField();
-        CheckBox isComputer = new CheckBox("Computer");
+        CheckBox CheckBoxisComputer = new CheckBox("Computer");
         Button btnLogin = new Button("Login");
+        Button btnStart = new Button("Start");
+        btnStart.setVisible(false);
         final Label lblMessage = new Label();
-
+        ComboBox<String> comboBoxGames = new ComboBox<>();
+        comboBoxGames.setVisible(false);
         //Adding Nodes to GridPane layout
         gridPane.add(lblUserName, 0, 0);
         gridPane.add(txtUserName, 1, 0);
-        gridPane.add(isComputer, 0, 1);
+        gridPane.add(CheckBoxisComputer, 0, 1);
         gridPane.add(btnLogin, 2, 1);
+        gridPane.add(btnStart, 2, 1);
         gridPane.add(lblMessage, 1, 2);
-
-
+        gridPane.add(comboBoxGames,1,0);
+        comboBoxGames.setMinSize(200,20);
         //Reflection for gridPane
         Reflection r = new Reflection();
         r.setFraction(0.7f);
@@ -88,25 +92,38 @@ public class Login extends Application {
         bp.setId("bp");
         gridPane.setId("root");
         btnLogin.setId("btnLogin");
+        btnStart.setId("btnStart");
         text.setId("text");
 
         //Action for btnLogin
         btnLogin.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent event) {
                 checkUser = txtUserName.getText().toString();
-                if(checkUser.equals(user) && checkPw.equals(pw)){
-                    lblMessage.setText("Congratulations!");
+                if(model.login(checkUser,CheckBoxisComputer.isSelected())){
+                    lblMessage.setText("Login Succeed redirecting to lobby room");
                     lblMessage.setTextFill(Color.GREEN);
+                    comboBoxGames.getItems().clear();
+                    model.getGamesList().forEach(s->comboBoxGames.getItems().add(s));
+                    txtUserName.setVisible(false);
+                    comboBoxGames.setVisible(true);
+                    CheckBoxisComputer.setVisible(false);
+                    lblUserName.setText("Game");
+                    btnLogin.setVisible(false);
                 }
                 else{
                     lblMessage.setText("Incorrect user or pw.");
                     lblMessage.setTextFill(Color.RED);
                 }
-                txtUserName.setText("");
             }
         });
 
-        //Add HBox and GridPane layout to BorderPane Layout
+        btnStart.setOnAction(new EventHandler<ActionEvent>() {
+            public void handle(ActionEvent event) {
+                model.joinGame("");
+            }
+        });
+
+            //Add HBox and GridPane layout to BorderPane Layout
         bp.setTop(hb);
         bp.setCenter(gridPane);
 

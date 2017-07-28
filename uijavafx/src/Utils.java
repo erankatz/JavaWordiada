@@ -9,7 +9,16 @@ import javafx.scene.control.ButtonType;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.layout.GridPane;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.DefaultHttpClient;
 
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URL;
@@ -22,6 +31,7 @@ public class Utils {
     private static Scene scene = null;
     private static Method columnToFitMethod;
     private static MessageBoxInterface controller;
+
     static {
         try {
             columnToFitMethod = TableViewSkin.class.getDeclaredMethod("resizeColumnToFitContent", TableColumn.class, int.class);
@@ -112,5 +122,89 @@ public class Utils {
         String css = url2.toExternalForm();
         scene.getStylesheets().add(css);
         Utils.scene = scene;
+    }
+
+    public static void makePostJsonRequest(String jsonString,String url)
+    {
+        HttpClient httpClient = new DefaultHttpClient();
+        try {
+            HttpPost postRequest = new HttpPost(url);
+            postRequest.setHeader("Content-type", "application/json");
+            StringEntity entity = new StringEntity(jsonString);
+
+            postRequest.setEntity(entity);
+
+            long startTime = System.currentTimeMillis();
+            HttpResponse response = httpClient.execute(postRequest);
+            long elapsedTime = System.currentTimeMillis() - startTime;
+            //System.out.println("Time taken : "+elapsedTime+"ms");
+
+            InputStream is = response.getEntity().getContent();
+            Reader reader = new InputStreamReader(is);
+            BufferedReader bufferedReader = new BufferedReader(reader);
+            StringBuilder builder = new StringBuilder();
+            while (true) {
+                try {
+                    String line = bufferedReader.readLine();
+                    if (line != null) {
+                        builder.append(line);
+                    } else {
+                        break;
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+            //System.out.println(builder.toString());
+            //System.out.println("****************");
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+    }
+
+    static public String makeGetJsonRequest(String url)
+    {
+        if(url == null /*|| url.isEmpty() == true*/)
+            new IllegalArgumentException("url is empty/null");
+        StringBuilder sb = new StringBuilder();
+        InputStream inStream = null;
+        try
+        {
+            url = urlEncode(url);
+            URL link = new URL(url);
+            inStream = link.openStream();
+            int i;
+            int total = 0;
+            byte[] buffer = new byte[8 * 1024];
+            while((i=inStream.read(buffer)) != -1)
+            {
+                if(total >= (1024 * 1024))
+                {
+                    return "";
+                }
+                total += i;
+                sb.append(new String(buffer,0,i));
+            }
+        }
+        catch(Exception e )
+        {
+            e.printStackTrace();
+            return null;
+        }catch(OutOfMemoryError e)
+        {
+            e.printStackTrace();
+            return null;
+        }
+        return sb.toString();
+    }
+
+    private static String urlEncode(String url)
+    {
+        if(url == null /*|| url.isEmpty() == true*/)
+            return null;
+        url = url.replace("[","");
+        url = url.replace("]","");
+        url = url.replaceAll(" ","%20");
+        return url;
     }
 }

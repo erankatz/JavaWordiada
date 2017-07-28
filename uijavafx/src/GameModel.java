@@ -9,6 +9,9 @@ import engine.exception.file.FileExtensionException;
 import engine.exception.letter.LetterException;
 import engine.listener.*;
 import javafx.scene.image.WritableImage;
+import jsonObjectResponse.login.UserLogin;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import javax.xml.xpath.XPathExpressionException;
 import java.io.*;
@@ -22,6 +25,8 @@ import java.util.function.Consumer;
 public class GameModel {
     private GameManager manager;
     private Board board;
+    private String userName;
+    private Boolean isComputer;
     private Consumer<Map.Entry<Integer,Integer>> cardRemoved;
     private Consumer<Map.Entry<Integer,Integer>> cardSelected;
     private Consumer<Boolean> isDisabledAllCards;
@@ -37,6 +42,7 @@ public class GameModel {
     private Consumer<PlayerData> updatePlayerScoreConsumer;
     private Consumer<Boolean> isFileLoadedSuccefullyConsumer;
     private Consumer<String> exceptionMessageConsumer;
+
 
     public void readXmlFile(File file) {
         manager = new GameManager();
@@ -69,6 +75,32 @@ public class GameModel {
         } catch (XPathExpressionException ex){
             exceptionMessageConsumer.accept(ex.getMessage());
         }
+    }
+
+    public List<String> getGamesList(){
+        List<String> ret = new ArrayList<>();
+        String jsonStr = Utils.makeGetJsonRequest("http://localhost:8080/wordiada/games?action=gameList");
+        JSONObject obj = new JSONObject(jsonStr);
+        JSONArray games =  obj.getJSONArray("games");
+        for (int i=0;i<games.length();i++){
+            JSONObject game = (JSONObject)games.get(i);
+            ret.add(game.getString("gameTitle"));
+        }
+        return ret;
+    }
+
+    public boolean login(String username, boolean isComputer){
+        UserLogin jsonObj = new UserLogin(username,isComputer);
+        String jsonStr = Utils.makeGetJsonRequest(jsonObj.getLoginUrl());
+        JSONObject obj = new JSONObject(jsonStr);
+        this.userName = username;
+        this.isComputer = isComputer;
+        return obj.getBoolean("isConnected");
+    }
+
+    public void joinGame(String gameTitle){
+        String jsonStr = Utils.makeGetJsonRequest("http://localhost:8080/wordiada/games?action=joinGame&userName=" + userName + "&iscomputer=" + isComputer + "gameId=1" );
+
     }
 
 
@@ -195,6 +227,8 @@ public class GameModel {
     public void setGameOverConsumer(Consumer<Integer> listener){
         gameOverConsumer = listener;
     }
+
+
 
     public void startGame()
     {
