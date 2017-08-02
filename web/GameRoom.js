@@ -36,7 +36,7 @@ function onCheckSelectedWord(){
 				data:
 				{
 					action: 'CheckSelectedWord',
-					key: -1,
+					key: gameId,
 				},
 				type: 'GET',
 				success: CheckSelectedWordCallBack
@@ -72,7 +72,7 @@ function updateLettersFrequencyInDeck()
 				data:
 				{
 					action: 'gameDetails',
-					key: -1,
+					key: gameId,
 				},
 				type: 'GET',
 				success: getLettersFrequencyInDeckCallBack
@@ -98,7 +98,7 @@ function onRevealCards(){
 				data:
 				{
 					action: 'revealCards',
-					key: -1,
+					key: gameId,
 					row: event.toElement.rowIndex +1,
 					col: event.toElement.colIndex +1
 				},
@@ -128,7 +128,7 @@ function onRevealCardsCallBack(json){
             data:
             {
                 action: 'selectCard',
-				key: -1,
+				key: gameId,
 				row: event.toElement.rowIndex +1,
 				col: event.toElement.colIndex +1
             },
@@ -146,7 +146,7 @@ function onClearCardSelection(){
             data:
             {
                 action: 'clearCardSelection',
-				key: -1
+				key: gameId
             },
             type: 'POST',
             success: updateGamePage
@@ -439,7 +439,7 @@ function loadGameDetails()
             data:
             {
                 action: 'gameDetails',
-                key: -1
+                key: gameId
             },
             type: 'GET',
             success: loadGameDetailsCallback
@@ -458,7 +458,7 @@ function rollDiceOnClick()
 				data:
 				{
 					action: 'rollDice',
-					key: -1
+					key: gameId
 				},
 				type: 'GET',
 				success: rollDiceResultCallback

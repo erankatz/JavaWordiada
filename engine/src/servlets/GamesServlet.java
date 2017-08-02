@@ -419,5 +419,4 @@ public class GamesServlet extends HttpServlet
             this.version = version;
         }
     }
-
 }

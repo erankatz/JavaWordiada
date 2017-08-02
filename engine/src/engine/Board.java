@@ -300,4 +300,13 @@ public class Board implements java.io.Serializable,Cloneable{
     public void updateCards() {
         Arrays.stream(cards).flatMap(Arrays::stream).filter(card->card != null).forEach(c->manager.notifyCardChangedListener(c));
     }
+
+    public String getSelectedWord() {
+        try{
+            return buildWord(selectedCardsList);
+        }catch (Exception ex){
+            return null;
+        }
+    }
+
 }

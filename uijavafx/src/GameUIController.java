@@ -61,13 +61,19 @@ public class GameUIController implements Initializable,MessageBoxInterface  {
     @FXML ImageView gameLogo;
     @FXML Button buttonApplyStyle;
     @FXML ComboBox<String> styleComboBox;
-
+    @FXML Label labelUserMsg;
+    @FXML Label labelGameTitle;
+    @FXML Label labelGameId;
+    @FXML Label labelPlayersStatus;
+    @FXML Label labelScore;
+    @FXML Label labelCreatorName;
     private NumberTextField textBoxHistoryPlays;
 
-    GameModel model = new GameModel();
+    GameModel model;
     BoardButtonController boardButtonController;
     @Override
     public void initialize(URL url, ResourceBundle rb) {
+        labelUserMsg.setText("Hello, "+ model.getUser() + " playing as "+ (model.isComputerUser()  ? "computer" : "human") + ", enjoy playing.");
         Utils.setMessageBoxConsumer(this);
         Utils.autoFitTable(playersTable);
         styleComboBox.getItems().clear();
@@ -103,7 +109,7 @@ public class GameUIController implements Initializable,MessageBoxInterface  {
         buttonStart.setOnMouseClicked((Event e) ->
                 new Thread(()->{
                     clearGameUI();
-                    model.startGame();
+                    //model.startGame();
                     initNewGameUI();
                     model.updateCards();
                 }).start()
@@ -127,6 +133,8 @@ public class GameUIController implements Initializable,MessageBoxInterface  {
                 textBoxHistoryPlays.setNumber(textBoxHistoryPlays.getNumber().subtract(new BigDecimal(1)));
         });
         buttonStart.setDisable(true);
+        buttonLoadXml.setVisible(false);
+        buttonStart.setVisible(false);
         buttonLoadXml.setOnMouseClicked((Event e)->{
             playersTable.getItems().clear();
             Stage newStage = new Stage();
@@ -136,7 +144,7 @@ public class GameUIController implements Initializable,MessageBoxInterface  {
             if (file != null){
                 boardButtonController.clearAll();
                 clearGameUI();
-                new Thread(()->model.readXmlFile(file)).start();
+             //   new Thread(()->model.readXmlFile(file)).start();
             };
         });
         this.buttonGetCurrentPlayerStatus.setOnMouseClicked((Event e) ->
@@ -144,7 +152,7 @@ public class GameUIController implements Initializable,MessageBoxInterface  {
                         ()->Utils.printMessage(model.getCurrentPlayerStatus())
                 )
         );
-        this.buttonPlayTurn.setOnMouseClicked((Event e)-> model.playPrevMove(Integer.parseInt(textBoxHistoryPlays.getText())));
+        //this.buttonPlayTurn.setOnMouseClicked((Event e)-> model.playPrevMove(Integer.parseInt(textBoxHistoryPlays.getText())));
         this.buttonRollDice.setOnMouseClicked((Event e) -> {
             model.rollDice();
         });
@@ -244,9 +252,10 @@ public class GameUIController implements Initializable,MessageBoxInterface  {
                     boardButtonController.selectCard(e.getKey(),e.getValue())
                 )
         );
-        model.setLetterFrequencyInDeckConsumer((frequency) ->
+        model.setLetterFrequencyInDeckConsumer((frequencyStr) ->
             Platform.runLater(()->
-                    updateLetterFrequencyInDeckTextBox(frequency)
+                    textBoxLetterFrequencyInDeck.setText(frequencyStr)
+                    //updateLetterFrequencyInDeckTextBox(frequency)
             )
         );
         model.setPlayerTurnConsumer((playerIndex)->
@@ -334,7 +343,7 @@ public class GameUIController implements Initializable,MessageBoxInterface  {
                         playersTable.refresh();
                     }));
     }
-    private void updateLetterFrequencyInDeckTextBox(Map<Character,Long> frequency) {
+/*    private void updateLetterFrequencyInDeckTextBox(Map<Character,Long> frequency) {
         String charFrequencyToTextBoxText = frequency
                 .entrySet()
                 .stream()
@@ -344,11 +353,11 @@ public class GameUIController implements Initializable,MessageBoxInterface  {
         Platform.runLater(() ->
                 textBoxLetterFrequencyInDeck.setText(charFrequencyToTextBoxText)
         );
-    }
+    }*/
 
-    private String printCharFrequencyToTextBox(Map.Entry<Character,Long> ch2Freq,int NumOfCardInDeck){
+/*    private String printCharFrequencyToTextBox(Map.Entry<Character,Long> ch2Freq,int NumOfCardInDeck){
         return String.format("%c - %d/%d\n",ch2Freq.getKey(),ch2Freq.getValue(), NumOfCardInDeck);
-    }
+    }*/
 
     private void setButtonApplyStyle(){
         String cssFile;
@@ -368,6 +377,16 @@ public class GameUIController implements Initializable,MessageBoxInterface  {
             alert.setContentText(message);
             alert.showAndWait();
         });
+
+    }
+
+    public void setModel(GameModel model) {
+        this.model = model;
+        labelGameId.setText(new Integer(model.getGameKey()).toString());;
+        labelGameTitle.setText(model.getGameName());
+        labelIsGoldfishMode.setText(new Boolean(model.getIsGoldFish()).toString());
+        textBoxLowestFrequencyDictionaryWords.setText(model.getLowestFrequencyDictionaryWords());
+        labelCreatorName.setText(model.getCreatorName());
 
     }
 }

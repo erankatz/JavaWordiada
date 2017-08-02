@@ -23,16 +23,30 @@ import java.util.function.Consumer;
  * Created by eran on 29/05/2017.
  */
 public class GameModel {
-    private GameManager manager;
-    private Board board;
+    private ManagerClient manager = new ManagerClient();
+    private char[][] board;
     private String userName;
     private Boolean isComputer;
+    private int gameKey;
+    private String creatorName;
+    private String gameName;
+    private int boardSize;
+    private int roundNumber;
+    private int score;
+    private int turn;
+    private boolean isGameOver;
+    private String lettersFrequencyInDeckStrings;
+    private String lowestFrequencyDictionaryWordsStrings;
+    private int registeredPlayers;
+    private int requiredPlayers;
+    private boolean isGoldFishMode;
+    private String scoreMode;
     private Consumer<Map.Entry<Integer,Integer>> cardRemoved;
     private Consumer<Map.Entry<Integer,Integer>> cardSelected;
     private Consumer<Boolean> isDisabledAllCards;
     private Consumer<Map.Entry<Integer,Integer>> rolledDicesResult2RetriesLeft;
     private Consumer<Card> updateCard;
-    private Consumer<Map<Character,Long>> letterFrequencyInDeck;
+    private Consumer<String> letterFrequencyInDeck;
     private Consumer<Integer> playerTurn;
     private Consumer<Map.Entry<String,Integer>> wordRevealedWord2Score;
     private Consumer<Boolean> isRealedWordPending;
@@ -42,10 +56,11 @@ public class GameModel {
     private Consumer<PlayerData> updatePlayerScoreConsumer;
     private Consumer<Boolean> isFileLoadedSuccefullyConsumer;
     private Consumer<String> exceptionMessageConsumer;
-
-
-    public void readXmlFile(File file) {
-        manager = new GameManager();
+    private int gameId = 1;
+    private String url= "http://localhost:8080/wordiada/";
+    private int retriesLeft;
+    /*public void readXmlFile(File file) {
+        manager = new ManagerClient();
         manager.registerEnableAllCardsListener(()->isDisabledAllCards.accept(false));
         manager.registerDisableAllCardsListener(()->isDisabledAllCards.accept(true));
         manager.registerCardChangedListener((Card c)->updateCard.accept(c));
@@ -54,7 +69,7 @@ public class GameModel {
         );
         manager.registerCardRemovedListener((row,col)->cardRemoved.accept(new AbstractMap.SimpleEntry(row,col)));
         manager.registerRollDices((result) -> rolledDicesResult2RetriesLeft.accept(new AbstractMap.SimpleEntry(result,0)));
-        manager.registerLetterFrequencyInDeckListener((map) ->letterFrequencyInDeck.accept(map));
+        //manager.registerLetterFrequencyInDeckListener((map) ->letterFrequencyInDeck.accept(map));
         manager.registerPlayerTurn((playerId -> playerTurn.accept(playerId)));
         manager.registerWordRevealedListener((word,score)->wordRevealedWord2Score.accept(new AbstractMap.SimpleEntry(word,score)));
         manager.registerRevealWordPendingListener((isPending) ->isRealedWordPending.accept(isPending));
@@ -75,11 +90,11 @@ public class GameModel {
         } catch (XPathExpressionException ex){
             exceptionMessageConsumer.accept(ex.getMessage());
         }
-    }
+    }*/
 
     public List<String> getGamesList(){
         List<String> ret = new ArrayList<>();
-        String jsonStr = Utils.makeGetJsonRequest("http://localhost:8080/wordiada/games?action=gameList");
+        String jsonStr = Utils.makeGetJsonRequest(url + "games?action=gameList");
         JSONObject obj = new JSONObject(jsonStr);
         JSONArray games =  obj.getJSONArray("games");
         for (int i=0;i<games.length();i++){
@@ -98,14 +113,42 @@ public class GameModel {
         return obj.getBoolean("isConnected");
     }
 
-    public void joinGame(String gameTitle){
-        String jsonStr = Utils.makeGetJsonRequest("http://localhost:8080/wordiada/games?action=joinGame&userName=" + userName + "&iscomputer=" + isComputer + "gameId=1" );
-
+    public boolean joinGame(String gameTitle){
+        String jsonStr = Utils.makeGetJsonRequest(url +"games?action=joinGame&user=" + userName + "&isComputer=" + isComputer + "&gameId=1" );
+        JSONObject jsonObj = new JSONObject(jsonStr);
+        if (jsonObj.getBoolean("isLoaded")){
+            loadGameDetails();
+            return true;
+        } else {
+            exceptionMessageConsumer.accept(jsonObj.getString("errorMessage"));
+            return false;
+        }
     }
 
+    private void loadGameDetails(){
+        String jsonStr = Utils.makeGetJsonRequest(url + "games?action=gameDetails&gameId=" + gameId);
+        JSONObject jsonObj = new JSONObject(jsonStr);
+        gameKey = jsonObj.getInt("key");
+        creatorName = jsonObj.getString("creatorName");
+        gameName = jsonObj.getString("gameTitle");
+        boardSize = jsonObj.getInt("rows");
+        lettersFrequencyInDeckStrings = jsonObj.getString("lettersFrequencyInDeck");
+        lowestFrequencyDictionaryWordsStrings = jsonObj.getString("lowestFrequencyDictionaryWords");
+        registeredPlayers = jsonObj.getInt("registeredPlayers");
+        requiredPlayers = jsonObj.getInt("requiredPlayers");
+        isGoldFishMode = jsonObj.getBoolean("isGoldFishMode");
+        scoreMode = jsonObj.getString("scoreMode");
+    }
 
     public void selectCard(int row,int col){
-        manager.getBoard().selectBoardCard(row, col,true);
+        //manager.getBoard().selectBoardCard(row, col,true);
+        JSONObject obj = new JSONObject();
+        obj.append("action","selectCard");
+        obj.append("key",gameId);
+        obj.append("row",row);
+        obj.append("col",col);
+
+        Utils.makePostJsonRequest(obj.toString(),url +"games");
     }
 
     public void setCardRemovedConsumer(Consumer<Map.Entry<Integer,Integer>> listenerConsumer){
@@ -124,10 +167,10 @@ public class GameModel {
         isFileLoadedSuccefullyConsumer =consumer;
     }
 
-    public void playPrevMove(int index){
-       new Thread(()->manager.playMove(index)).start();
-       //manager.playPrevMove();
-    }
+    //public void playPrevMove(int index){
+    //   new Thread(()->manager.playMove(index)).start();
+    //   //manager.playPrevMove();
+    //}
 
     public void setCardConsumer(Consumer<Card> listenerConsumer){
         updateCard = listenerConsumer;
@@ -142,10 +185,10 @@ public class GameModel {
     }
 
     public int getCurrentPlayerRetriesLeft(){
-        return  manager.getPlayers()[manager.getCurrentPlayerTurn()].getRetriesNumber();
+        return retriesLeft;
     }
 
-    public void setLetterFrequencyInDeckConsumer(Consumer<Map<Character,Long>> listenerConsumer){
+    public void setLetterFrequencyInDeckConsumer(Consumer<String> listenerConsumer){
         letterFrequencyInDeck = listenerConsumer;
     }
 
@@ -153,26 +196,29 @@ public class GameModel {
         playerTurn = listenerConsumer;
     }
 
-    public boolean getIsEnabledCardConsumer(int row, int col) {
-        try{
-            return board.getBoardCard(row,col).getIsEnabled();
-        } catch (Exception ex){
-            return false;
-        }
-    }
+    //public boolean getIsEnabledCardConsumer(int row, int col) {
+    //    try{
+    //        return board.getBoardCard(row,col).getIsEnabled();
+    //    } catch (Exception ex){
+    //        return false;
+    //    }
+    //}
 
-    public void newGame() throws DiceException,IOException{
-        manager.newGame();
-        board = manager.getBoard();
-    }
+    //public void newGame() throws DiceException,IOException{
+    //    manager.newGame();
+    //    board = manager.getBoard();
+    //}
 
     public int rollDice() {
-        return manager.getPlayers()[manager.getCurrentPlayerTurn()].rollDice();
+        String jsonStr =Utils.makeGetJsonRequest(url + "games?/action=rollDice&key=" +gameId );
+        JSONObject jsonObj = new JSONObject(jsonStr);
+        return jsonObj.getInt("result");
+        //return manager.getPlayers()[manager.getCurrentPlayerTurn()].rollDice();
     }
 
     public char getCardLetter(int row, int col) {
         try{
-            return board.getBoardCard(row,col).getLetter();
+            return board[row-1][col-1];
         } catch (Exception ex){
             exceptionMessageConsumer.accept(ex.getMessage());
         }
@@ -180,32 +226,52 @@ public class GameModel {
     }
 
     public int getBoardSize() {
-        return manager.getBoard().getBoardSize();
+        return boardSize;
     }
 
 
     public void revealCards() {
         try{
-            manager.getPlayers()[manager.getCurrentPlayerTurn()].revealCards();
-        } catch (EngineException ex){
+            String str =Utils.makeGetJsonRequest(url+ "games?action=revealCards&key=" +gameId);
+            JSONObject jsonObj = new JSONObject(str);
+            if (jsonObj.getBoolean("isSuccess")){
+                updateGamePage();
+            } else {
+                if (jsonObj.getString("currentPlayerMsg") != null){
+                    exceptionMessageConsumer.accept(jsonObj.getString("currentPlayerMsg"));
+                }
+            }
+        } catch (Exception ex){
             exceptionMessageConsumer.accept(ex.getMessage());
         }
+    }
+
+    private void updateGamePage(){
+        String str =Utils.makeGetJsonRequest(url+ "games?action=pageDetails&key=" +gameId);
+        JSONObject jsonObj = new JSONObject(str);
+
+
     }
 
     public void revealWord(){
         try{
-            manager.getPlayers()[manager.getCurrentPlayerTurn()].revealWord();
-        } catch (EngineException ex){
+            String str= Utils.makeGetJsonRequest(url+ "game?action=CheckSelectedWord&key=" +gameId);
+            JSONObject jObject = new JSONObject(str);
+            if (jObject.getBoolean("isValidWord")){
+                retriesLeft = jObject.getInt("numOfRetriesLeft");
+                wordRevealedWord2Score.accept(new AbstractMap.SimpleEntry<String, Integer>(jObject.getString("word"),jObject.getInt("score")));
+            }
+        } catch (Exception ex){
             exceptionMessageConsumer.accept(ex.getMessage());
         }
     }
 
-    public int getNumOfCardInDeck() {
-        return manager.getNumOfCardInDeck();
-    }
+    //public int getNumOfCardInDeck() {
+    //    return manager.getNumOfCardInDeck();
+    //}
 
     public boolean getIsGoldFish() {
-        return manager.getIsGoldFishMode();
+        return isGoldFishMode;
     }
 
     public void setIsRealedWordPendingConsumer(Consumer<Boolean> isRealedWordPending) {
@@ -230,7 +296,7 @@ public class GameModel {
 
 
 
-    public void startGame()
+/*    public void startGame()
     {
         if (manager != null && !manager.isGameStarted())
         {
@@ -249,69 +315,71 @@ public class GameModel {
         } else {
             exceptionMessageConsumer.accept("The Game Not Loaded or already started");
         }
-    }
+    }*/
 
     public boolean isComputerPlayerPlays(){
-        return manager.getPlayers()[manager.getCurrentPlayerTurn()] instanceof ComputerPlayer;
+        return false;
+        //TODO
+        //return manager.getPlayers()[manager.getCurrentPlayerTurn()] instanceof ComputerPlayer;
     }
 
     public void clearCardSelection() {
-        manager.getBoard().clearSelectedCards();
+        JSONObject jsonRequest = new JSONObject();
+        jsonRequest.append("action","clearCardSelection");
+        jsonRequest.append("key",gameId);
+        Utils.makePostJsonRequest(jsonRequest.toString(),url);
+        updateGamePage();
     }
 
     public String getLowestFrequencyDictionaryWords(){
-        return manager.getBoard().getLowestFrequencyDictionaryWords();
+        return lowestFrequencyDictionaryWordsStrings;
 
     }
 
     public List<PlayerData> getPlayersData(){
-        return manager.getPlayersData();
+        List<PlayerData> playerData = new ArrayList<>();
+        String respondStr = Utils.makeGetJsonRequest(url + "games?action=gamePlayers&key="+gameId);
+        JSONObject jsonObject = new JSONObject(respondStr);
+        for (int i=0;i<jsonObject.getInt("length");i++){
+            //jsonObject.getJSONArray()
+        }
+        //TODO
+        return playerData;
+        //return manager.getPlayersData();
     }
 
     public void quitGame() {
-        if (!isComputerPlayerPlays())
-            manager.playerQuit();
+        //TODO
+        //if (!isComputerPlayerPlays())
+        //    manager.playerQuit();
     }
 
     public String getCurrentPlayerStatus() {
-        StringBuilder ret = new StringBuilder();
-        Player playerPtr = manager.getPlayers()[manager.getCurrentPlayerTurn()];
-        Map<String,WordData> composedWords = playerPtr.getComposedWords();
-        long score = playerPtr.getScore();
-        ret.append(String.format("Player %s composed %d words, scored %d  \n",
-                playerPtr.getId(),playerPtr.getNumberOfWordsRevealed(),score));
-        if (composedWords.entrySet().size() != 0){
-            composedWords.entrySet()
-                    .forEach(e1->ret.append(String.format("%s : Total scored %d (composed %d times)\n",e1.getKey(),e1.getValue().getScore(),e1.getValue().getNumberOfWords())));
-        }
-        return ret.toString();
+
+        //TODO
+
+        return "";
     }
 
     public int getTotalNumOfTurnsElapsed(){
-        return manager.getTotalNumberofTurnsElapses();
+        return roundNumber;
     }
 
-    public int getCurrentNumofTurnsElapsed(){
-        return manager.getCurrentNumOfTurnsElapsed();
-    }
+//    public int getCurrentNumofTurnsElapsed(){
+ //       return manager.getCurrentNumOfTurnsElapsed();
+ //   }
 
     public boolean getIsReplayMode(){
-        return manager.getIsReplayMode();
+        return false;
     }
 
     public boolean isGameOver()
     {
-        if (manager == null)
-            return false;
-        return manager.isGameOver();
+        return isGameOver;
     }
 
     public String getScoreMode(){
-        if (manager.getScoreMode() == EnumScoreMode.WORDCOUNT){
-            return  "Word Count";
-        } else {
-            return "Word Score";
-        }
+        return scoreMode;
     }
 
 
@@ -320,7 +388,7 @@ public class GameModel {
     }
 
     public void updateCards() {
-        manager.updateCards();
+        //manager.updateCards();
     }
 
     private static String readStream(InputStream is) {
@@ -335,5 +403,25 @@ public class GameModel {
             throw new RuntimeException(e);
         }
         return sb.toString();
+    }
+
+    public String getUser() {
+        return userName;
+    }
+
+    public boolean isComputerUser() {
+        return isComputer;
+    }
+
+    public int getGameKey() {
+        return gameKey;
+    }
+
+    public String getCreatorName() {
+        return creatorName;
+    }
+
+    public String getGameName() {
+        return gameName;
     }
 }

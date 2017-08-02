@@ -78,7 +78,6 @@ public class BoardButtonController implements Initializable {
         this.columns = model.getBoardSize();
         createRowsAndCols();
         createButtons();
-        model.updateCards();
     }
 
 

@@ -6,7 +6,10 @@
 import javafx.application.Application;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.fxml.FXMLLoader;
+import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.effect.DropShadow;
@@ -19,6 +22,11 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
+
+import java.io.IOException;
+import java.net.URL;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -37,6 +45,7 @@ public class Login extends Application {
     @Override
     public void start(Stage primaryStage) {
         primaryStage.setTitle("JavaFX 2 Login");
+        model.setExceptionMessageConsumer((message)->Utils.showExceptionMessage(message));
 
         BorderPane bp = new BorderPane();
         bp.setPadding(new Insets(10,50,50,50));
@@ -109,6 +118,7 @@ public class Login extends Application {
                     CheckBoxisComputer.setVisible(false);
                     lblUserName.setText("Game");
                     btnLogin.setVisible(false);
+                    btnStart.setVisible(true);
                 }
                 else{
                     lblMessage.setText("Incorrect user or pw.");
@@ -119,7 +129,9 @@ public class Login extends Application {
 
         btnStart.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent event) {
-                model.joinGame("");
+                if (model.joinGame("")) {
+                    loadGameUI();
+                }
             }
         });
 
@@ -137,5 +149,30 @@ public class Login extends Application {
                         concat(scene.heightProperty().asString()));
         //primaryStage.setResizable(false);
         primaryStage.show();
+    }
+
+    private void loadGameUI(){
+        try {
+            FXMLLoader fxmlLoader = new FXMLLoader();
+            URL url = getClass().getResource("gameUI.fxml");
+            fxmlLoader.setLocation(url);
+            Parent root = fxmlLoader.load(url.openStream());
+            GameUIController gameController = fxmlLoader.getController();
+            gameController.setModel(model);
+
+        /*
+         * if "fx:controller" is not set in fxml
+         * fxmlLoader.setController(NewWindowController);
+         */
+            Scene scene = new Scene(root, 1400  , 700);
+            Utils.setStyleSheet(scene,"mainStyle.css");
+            Stage stage = new Stage();
+            stage.setTitle("Game Room");
+            stage.setScene(scene);
+            stage.show();
+        } catch (IOException e) {
+            Logger logger = Logger.getLogger(getClass().getName());
+            logger.log(Level.SEVERE, "Failed to create new Window.", e);
+        }
     }
 }

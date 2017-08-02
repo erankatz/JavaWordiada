@@ -238,14 +238,16 @@ public class GameController
         String  currentPlayerMessage =null;
         String otherPlayerMessage =null;
         boolean isValidWord =false;
+        String word ="";
         try{
+            word= getBoard().getSelectedWord();
             isValidWord = gameLogic.getPlayers()[gameLogic.getCurrentPlayerTurn()].revealWord();
         } catch (EngineException ex){
             currentPlayerMessage = ex.getMessage();
         }
         numOfRetriesLeft = gameLogic.getPlayers()[gameLogic.getCurrentPlayerTurn()].getRetriesNumber();
 
-        return new RevealedWordMessage(numOfRetriesLeft,currentPlayerMessage,otherPlayerMessage,isValidWord,gameLogic.getLastReavledWordScore());
+        return new RevealedWordMessage(numOfRetriesLeft,currentPlayerMessage,otherPlayerMessage,isValidWord,gameLogic.getLastReavledWordScore(),word);
     }
 
     public long getHighestScore() {
