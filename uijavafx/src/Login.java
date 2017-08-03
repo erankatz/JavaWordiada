@@ -4,6 +4,7 @@
  * Created by eran on 25/07/2017.
  */
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
@@ -32,7 +33,7 @@ import java.util.logging.Logger;
  *
  * @web http://zoranpavlovic.blogspot.com/
  */
-public class Login extends Application {
+public class Login extends Application implements MessageBoxInterface {
 
 
     String checkUser;
@@ -41,9 +42,20 @@ public class Login extends Application {
     public static void main(String[] args) {
         launch(args);
     }
+    public void showExceptionMessage(String message){
 
+        Platform.runLater(()-> {
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setTitle("Login Error Occured");
+            alert.setHeaderText(null);
+            alert.setContentText(message);
+            alert.showAndWait();
+        });
+
+    }
     @Override
     public void start(Stage primaryStage) {
+        Utils.setMessageBoxConsumer(this);
         primaryStage.setTitle("JavaFX 2 Login");
         model.setExceptionMessageConsumer((message)->Utils.showExceptionMessage(message));
 
@@ -129,7 +141,7 @@ public class Login extends Application {
 
         btnStart.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent event) {
-                if (model.joinGame("")) {
+                if (model.joinGame(comboBoxGames.getSelectionModel().getSelectedItem())) {
                     loadGameUI();
                 }
             }

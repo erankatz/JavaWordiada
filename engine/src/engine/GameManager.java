@@ -56,7 +56,6 @@ public class GameManager implements Serializable,Cloneable{
     private List<CardSelectedListener> cardSelectedListeners = new ArrayList<>();
     private List<DisableAllCardsListener> disableAllCardsListeners = new ArrayList<>();
     private List<EnableAllCardsListener> enableAllCardsListeners = new ArrayList<>();
-    private List<CardChangedListener> cardChangedListeners = new ArrayList<>();
     private List<WordRevealedListener> wordRevealedListeners = new ArrayList<>();
     private List<RolledDicesListener> RolledDicesListeners = new ArrayList<>();
     private List<PlayerTurnListener> playerTurnListeners = new ArrayList<>();
@@ -568,9 +567,6 @@ public class GameManager implements Serializable,Cloneable{
         cardSelectedListeners.add(listener);
     }
 
-    public void registerCardChangedListener(CardChangedListener listener){
-        cardChangedListeners.add(listener);
-    }
 
     public void registerCardRemovedListener(CardRemovedListener listener ){
         cardRemovedListeners.add(listener);
@@ -615,7 +611,7 @@ public class GameManager implements Serializable,Cloneable{
     }
 
     public void notifyLetterFrequencyInDeckListeners(Map<Character,Long> frequency){
-        letterFrequencyInDeckListeners.forEach(listener->listener.LetterFrequencyInDeck(frequency));
+        //letterFrequencyInDeckListeners.forEach(listener->listener.LetterFrequencyInDeck(frequency));
     }
 
 
@@ -633,7 +629,7 @@ public class GameManager implements Serializable,Cloneable{
     }
 
     public void notifyPlayerTurnListeners(int playerId){
-        playerTurnListeners.forEach(listener->listener.playerTurn(playerId));
+
     }
 
     public void notifyEnableAllCardsListeners(){
@@ -649,7 +645,7 @@ public class GameManager implements Serializable,Cloneable{
     }
 
     public void notifyCardChangedListener(Card card){
-        cardChangedListeners.forEach(listener->listener.cardChanged(card));
+
     }
 
     public void registerWordRevealedListener(WordRevealedListener listener ){

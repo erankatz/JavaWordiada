@@ -26,6 +26,7 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import jsonObjectResponse.games.CardData;
 
 import javax.xml.xpath.XPathExpressionException;
 
@@ -67,13 +68,14 @@ public class GameUIController implements Initializable,MessageBoxInterface  {
     @FXML Label labelPlayersStatus;
     @FXML Label labelScore;
     @FXML Label labelCreatorName;
+    @FXML Label labelGameStatus;
+    @FXML Label labelCurrentPlayerTurnName;
     private NumberTextField textBoxHistoryPlays;
 
     GameModel model;
     BoardButtonController boardButtonController;
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        labelUserMsg.setText("Hello, "+ model.getUser() + " playing as "+ (model.isComputerUser()  ? "computer" : "human") + ", enjoy playing.");
         Utils.setMessageBoxConsumer(this);
         Utils.autoFitTable(playersTable);
         styleComboBox.getItems().clear();
@@ -96,7 +98,6 @@ public class GameUIController implements Initializable,MessageBoxInterface  {
         idCol.setCellValueFactory(new PropertyValueFactory<>("id"));
         scoreCol.setCellValueFactory(new PropertyValueFactory<>("score"));
         buttonApplyStyle.setOnMouseClicked(e->setButtonApplyStyle());
-        setConsumers(model);
         FXMLLoader fxmlLoader = new FXMLLoader();
         buttonRevealWord.setDisable(true);
         buttonRevealCard.setDisable(true);
@@ -211,23 +212,9 @@ public class GameUIController implements Initializable,MessageBoxInterface  {
                         labelIsGoldfishMode.setText(labelIsGoldfishMode.getText())
                 )
         );
-        model.setIsFileLoadedSuccefullyConsumer((isLoaded)->{
-            if (isLoaded){
-                Platform.runLater(()->{
-                    boardButtonController.setModel(model);
-                    initNewGameUI();
 
-                    model.getPlayersData().forEach(pl -> playersTable.getItems().add(pl));
-                    playersTable.refresh();
-                    labelStatus.setText("The file loaded successfully :)");
-                    buttonStart.setDisable(false);
-                });
-            } else{
-                labelStatus.setText("File Error");
-            }
-        });
         model.setExceptionMessageConsumer((message)->Utils.showExceptionMessage(message));
-        model.setCardConsumer((Card c)->
+        model.setCardConsumer((CardData c)->
             Platform.runLater(
                     ()->boardButtonController.updateCharCard(c)
             ));
@@ -258,8 +245,9 @@ public class GameUIController implements Initializable,MessageBoxInterface  {
                     //updateLetterFrequencyInDeckTextBox(frequency)
             )
         );
-        model.setPlayerTurnConsumer((playerIndex)->
+        model.setPlayerTurnConsumer((playerName)->
             Platform.runLater(()-> {
+                int playerIndex = playersTable.getItems().filtered(pl->pl.getName().equals("playerName")).get(0).getIndex();
                 playersTable.getSelectionModel().select(playerIndex);
                 if (!model.isComputerPlayerPlays())
                     labelStatus.setText("Player " + playersTable.getItems().get(playerIndex).getId() + " your turn started");
@@ -382,11 +370,15 @@ public class GameUIController implements Initializable,MessageBoxInterface  {
 
     public void setModel(GameModel model) {
         this.model = model;
-        labelGameId.setText(new Integer(model.getGameKey()).toString());;
-        labelGameTitle.setText(model.getGameName());
-        labelIsGoldfishMode.setText(new Boolean(model.getIsGoldFish()).toString());
+        labelGameId.setText("Game ID: " + new Integer(model.getGameKey()).toString());;
+        labelGameTitle.setText("Game Title: "+ model.getGameName());
+        labelIsGoldfishMode.setText("Is Goldfish Mode: " + new Boolean(model.getIsGoldFish()).toString());
         textBoxLowestFrequencyDictionaryWords.setText(model.getLowestFrequencyDictionaryWords());
-        labelCreatorName.setText(model.getCreatorName());
-
+        labelCreatorName.setText("Creator Name: " + model.getCreatorName());
+        labelUserMsg.setText("Hello, "+ model.getUser() + " playing as "+ (model.isComputerUser()  ? "computer" : "human") + ", enjoy playing.");
+        labelScoreMode.setText("Score Mode: "+ model.getScoreMode());
+        labelPlayersStatus.setText(model.getPlayersStatus());
+        setConsumers(model);
+        boardButtonController.setModel(model);
     }
 }

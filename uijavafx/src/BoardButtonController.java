@@ -17,6 +17,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.*;
+import jsonObjectResponse.games.CardData;
 
 import java.io.IOException;
 import java.net.URL;
@@ -110,7 +111,7 @@ public class BoardButtonController implements Initializable {
         cardUI.setStyleSelected();
     }
 
-    public void updateCharCard(Card c) {
+    public void updateCharCard(CardData c) {
         if (c !=null){
             CardUI cardUI = (CardUI)Utils.getNodeByRowColumnIndex(c.getCol()-1,c.getRow()-1,gridPaneBoard);
             if (cardUI != null){

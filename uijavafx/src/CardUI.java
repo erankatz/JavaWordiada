@@ -3,6 +3,7 @@ import javafx.beans.binding.Bindings;
 import javafx.beans.property.Property;
 import javafx.event.Event;
 import javafx.scene.control.*;
+import jsonObjectResponse.games.CardData;
 
 
 /**
@@ -40,7 +41,7 @@ public class CardUI extends javafx.scene.control.Button{
         setText("");
     }
 
-    public void setStyleUndefined(Card c){
+    public void setStyleUndefined(CardData c){
         setDisable(false);
         getStyleClass().clear();
         getStyleClass().add("button");
