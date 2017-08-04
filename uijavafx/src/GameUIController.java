@@ -253,14 +253,16 @@ public class GameUIController implements Initializable,MessageBoxInterface  {
         );
         model.setPlayerTurnConsumer((playerName)->
             Platform.runLater(()-> {
-                int playerIndex = playersTable.getItems().filtered(pl->pl.getName().equals(playerName)).get(0).getIndex();
-                playersTable.getSelectionModel().select(playerIndex);
-                if (!model.isComputerPlayerPlays())
-                    labelStatus.setText("Player " + playersTable.getItems().get(playerIndex).getName() + " your turn started");
-                else{
-                    labelStatus.setText("Computer Player " + playersTable.getItems().get(playerIndex).getName() + " playing");
+                if (buttonRevealWord.isDisable() && buttonRevealCard.isDisable()){
+                    int playerIndex = playersTable.getItems().filtered(pl->pl.getName().equals(playerName)).get(0).getIndex();
+                    playersTable.getSelectionModel().select(playerIndex);
+                    if (!model.isComputerPlayerPlays())
+                        labelStatus.setText("Player " + playersTable.getItems().get(playerIndex).getName() + " your turn started");
+                    else{
+                        labelStatus.setText("Computer Player " + playersTable.getItems().get(playerIndex).getName() + " playing");
+                    }
+                    labelPlayerTurn.setText("Player Turn: " + playersTable.getItems().get(playerIndex).getName());
                 }
-                labelPlayerTurn.setText("Player Turn: " + playersTable.getItems().get(playerIndex).getName());
             })
         );
         model.setWordRevealedWord2Score((e)->
@@ -308,8 +310,10 @@ public class GameUIController implements Initializable,MessageBoxInterface  {
         );
         model.setIsRolledDicesPendingConsumer((isPending)->
             Platform.runLater(()->{
-                    boardButtonController.setDisable(true);
-                    if (!model.isComputerPlayerPlays() && !model.getIsReplayMode()){
+                    if (buttonRevealCard.isDisable() && buttonRevealWord.isDisable())
+                        boardButtonController.setDisable(true);
+
+                    if (!model.isComputerPlayerPlays() && !model.getIsReplayMode() && buttonRevealCard.isDisable() && buttonRevealWord.isDisable()){
                         buttonRollDice.setDisable(!isPending);
                     } else {
                         buttonRollDice.setDisable(true);

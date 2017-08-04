@@ -17,7 +17,7 @@ public class ManagerScheduler {
     private int gameId;
     private String userName;
     private String UserNameTurn;
-    private static final long interval  = 2000;
+    private static final long interval  = 10000;
     private List<CardRemovedListener> cardRemovedListeners = new ArrayList<>();
     private List<CardSelectedListener> cardSelectedListeners = new ArrayList<>();
     private List<DisableAllCardsListener> disableAllCardsListeners = new ArrayList<>();
@@ -218,7 +218,7 @@ public class ManagerScheduler {
         }
     }
 
-    private void updateGamePage() {
+    public void updateGamePage() {
         String str = Utils.makeGetJsonRequest(url + "games?action=pageDetails&key=" + gameId+ "&user=" + userName);
         JSONObject jObj = new JSONObject(str);
         notifyLetterFrequencyInDeckListeners(jObj.getString("charFrequencyString"));

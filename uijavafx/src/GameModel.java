@@ -132,13 +132,13 @@ public class GameModel {
 
     public void selectCard(int row,int col){
         //manager.getBoard().selectBoardCard(row, col,true);
-        JSONObject obj = new JSONObject();
-        obj.append("action","selectCard");
-        obj.append("key",gameId);
-        obj.append("row",row);
-        obj.append("col",col);
-
-        Utils.makePostJsonRequest(obj.toString(),url +"games");
+        //JSONObject obj = new JSONObject();
+        //obj.append("action","selectCard");
+        //obj.append("key",gameId);
+        //obj.append("row",row);
+        //obj.append("col",col);
+        //obj.append("user",userName);
+        Utils.makeGetJsonRequest( url+"?action=selectCard&key=" +gameId +"&row="+row +"&col="+col +"&user="+userName);
     }
 
     public void setCardRemovedConsumer(Consumer<Map.Entry<Integer,Integer>> listenerConsumer){
@@ -206,9 +206,18 @@ public class GameModel {
     //}
 
     public int rollDice() {
-        String jsonStr =Utils.makeGetJsonRequest(url + "games?/action=rollDice&key=" +gameId + "&user=" + userName);
+        String jsonStr =Utils.makeGetJsonRequest(url + "games?action=rollDice&key=" +gameId + "&user=" + userName);
         JSONObject jsonObj = new JSONObject(jsonStr);
-        return jsonObj.getInt("result");
+        int result=0;
+        try{
+            result= jsonObj.getInt("result");
+            manager.notifyRollDicesPendingListener(false);
+            manager.notifyRollDices(result);
+            manager.notifyRevealCardPendingListener(true);
+        }catch(Exception ex ) {
+            exceptionMessageConsumer.accept("error in sending the command");
+        }
+        return result;
         //return manager.getPlayers()[manager.getCurrentPlayerTurn()].rollDice();
     }
 
@@ -232,6 +241,8 @@ public class GameModel {
             JSONObject jsonObj = new JSONObject(str);
             if (jsonObj.getBoolean("isSuccess")){
                 updateGamePage();
+                manager.notifyRevealCardPendingListener(false);
+                manager.notifyRevealWordPendingListener(true);
             } else {
                 if (jsonObj.getString("currentPlayerMsg") != null){
                     exceptionMessageConsumer.accept(jsonObj.getString("currentPlayerMsg"));
@@ -243,10 +254,7 @@ public class GameModel {
     }
 
     private void updateGamePage(){
-        String str =Utils.makeGetJsonRequest(url+ "games?action=pageDetails&key=" +gameId+ "&user=" + userName);
-        JSONObject jsonObj = new JSONObject(str);
-        roundNumber = jsonObj.getInt("move");
-
+        manager.updateGamePage();
     }
 
     public void revealWord(){
@@ -256,6 +264,8 @@ public class GameModel {
             if (jObject.getBoolean("isValidWord")){
                 retriesLeft = jObject.getInt("numOfRetriesLeft");
                 wordRevealedWord2Score.accept(new AbstractMap.SimpleEntry<String, Integer>(jObject.getString("word"),jObject.getInt("score")));
+                manager.notifyRevealWordPendingListener(false);
+                updateGamePage();
             }
         } catch (Exception ex){
             exceptionMessageConsumer.accept(ex.getMessage());
@@ -320,10 +330,11 @@ public class GameModel {
     }
 
     public void clearCardSelection() {
-        JSONObject jsonRequest = new JSONObject();
-        jsonRequest.append("action","clearCardSelection");
-        jsonRequest.append("key",gameId);
-        Utils.makePostJsonRequest(jsonRequest.toString(),url);
+        //JSONObject jsonRequest = new JSONObject();
+        //jsonRequest.append("action","clearCardSelection");
+        //jsonRequest.append("key",gameId);
+
+        Utils.makeGetJsonRequest(url + "games?action=clearCardSelection&key=" +gameId +"&user=" +userName);
         updateGamePage();
     }
 

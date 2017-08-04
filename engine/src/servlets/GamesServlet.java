@@ -83,6 +83,12 @@ public class GamesServlet extends HttpServlet
                 break;
             case "chatContent":
                 chatContentAction(req,resp);
+            case "selectCard":
+                selectCardAction(req,resp);
+                break;
+            case "clearCardSelection":
+                clearCardSelectionAction(req,resp);
+                break;
         }
     }
 
