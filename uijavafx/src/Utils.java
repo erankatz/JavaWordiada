@@ -1,4 +1,5 @@
 import com.sun.javafx.scene.control.skin.TableViewSkin;
+import engine.Card;
 import javafx.application.Platform;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
@@ -69,12 +70,14 @@ public class Utils {
         ObservableList<Node> childrens = gridPane.getChildren();
 
         for (Node node : childrens) {
-            if(gridPane.getRowIndex(node) == row && gridPane.getColumnIndex(node) == column) {
-                result = node;
-                break;
+            if (node instanceof CardUI){
+                CardUI card = (CardUI) node;
+                if(card.row == row && card.col == column) {
+                    result = node;
+                    break;
+                }
             }
         }
-
         return result;
     }
 

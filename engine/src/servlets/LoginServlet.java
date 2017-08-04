@@ -62,8 +62,8 @@ public class LoginServlet extends HttpServlet
     {
         if (SessionUtils.hasSession(request))
         {
-            String userName = SessionUtils.getUsername(request.getSession());
-            loginManager.removeUser(SessionUtils.getUsername(request.getSession()));
+            String userName = SessionUtils.getUsername(request.getSession(),request);
+            loginManager.removeUser(SessionUtils.getUsername(request.getSession(),request));
             SessionUtils.logoutUser(request.getSession());
             if (loginManager.isUserInGame(userName))
             {
@@ -82,7 +82,7 @@ public class LoginServlet extends HttpServlet
 
         if (SessionUtils.hasSession(request) && SessionUtils.isLoggedIn(request.getSession()))
         {
-            String userName = SessionUtils.getUsername(request.getSession(false));
+            String userName = SessionUtils.getUsername(request.getSession(false),request);
             boolean isComputer = SessionUtils.isComputer(request.getSession(false));
             User user = loginManager.getUser(userName);
             out.println(gson.toJson(new LoginStatus(true, null, userName, isComputer, user.getInGameNumber())));
@@ -102,7 +102,7 @@ public class LoginServlet extends HttpServlet
 
         if (SessionUtils.hasSession(request) && SessionUtils.isLoggedIn(request.getSession()))
         {
-            loginManager.removeUser(SessionUtils.getUsername(request.getSession(false)));
+            loginManager.removeUser(SessionUtils.getUsername(request.getSession(false),request));
             SessionUtils.logoutUser(request.getSession());
             out.println(gson.toJson(new LoginStatus(false)));
         }

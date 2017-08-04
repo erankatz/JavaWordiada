@@ -10,6 +10,7 @@ import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
+import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
@@ -142,7 +143,9 @@ public class Login extends Application implements MessageBoxInterface {
         btnStart.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent event) {
                 if (model.joinGame(comboBoxGames.getSelectionModel().getSelectedItem())) {
+                    ((Node)event.getSource()).getScene().getWindow().hide();
                     loadGameUI();
+
                 }
             }
         });
@@ -165,13 +168,14 @@ public class Login extends Application implements MessageBoxInterface {
 
     private void loadGameUI(){
         try {
-            FXMLLoader fxmlLoader = new FXMLLoader();
             URL url = getClass().getResource("gameUI.fxml");
+            FXMLLoader fxmlLoader = new FXMLLoader();
             fxmlLoader.setLocation(url);
-            Parent root = fxmlLoader.load(url.openStream());
-            GameUIController gameController = fxmlLoader.getController();
-            gameController.setModel(model);
-
+            Parent root =  fxmlLoader.load();
+            GameUIController gameUIController = fxmlLoader.getController();
+            gameUIController.setModel(model);
+            model.loadGameDetails();
+            gameUIController.setModel(model);
         /*
          * if "fx:controller" is not set in fxml
          * fxmlLoader.setController(NewWindowController);
@@ -179,7 +183,7 @@ public class Login extends Application implements MessageBoxInterface {
             Scene scene = new Scene(root, 1400  , 700);
             Utils.setStyleSheet(scene,"mainStyle.css");
             Stage stage = new Stage();
-            stage.setTitle("Game Room");
+            stage.setTitle("game Room");
             stage.setScene(scene);
             stage.show();
         } catch (IOException e) {

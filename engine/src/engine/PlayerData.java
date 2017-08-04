@@ -37,6 +37,17 @@ public class PlayerData {
         this.score = score;
     }
 
+    public void setName(String name){
+        this.name = name;
+    }
+    public void setType(String type){
+        this.type = type;
+    }
+
+    public void setId(String id){
+        this.id = id;
+    }
+
     public int getIndex(){
         return index;
     }

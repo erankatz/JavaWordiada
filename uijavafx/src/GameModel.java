@@ -47,6 +47,7 @@ public class GameModel {
     private Consumer<String> exceptionMessageConsumer;
     private Consumer<String> gameStatusConsumer;
     private Consumer<String> playerTurnConsumer;
+    private Consumer<Integer> roundNumberConsumer;
 
     private int gameId = 1;
     private Map<String,Integer> gameTitle2Id;
@@ -56,6 +57,7 @@ public class GameModel {
         manager = new ManagerScheduler();
         manager.setGameId(gameId);
         manager.setUrl(url);
+        manager.setUser(userName);
         manager.registerEnableAllCardsListener(()->isDisabledAllCards.accept(false));
         manager.registerDisableAllCardsListener(()->isDisabledAllCards.accept(true));
         manager.registerCardChangedListener((CardData c)->updateCard.accept(c));
@@ -74,6 +76,7 @@ public class GameModel {
         manager.registerPlayerDataChangedListener(pl->updatePlayerScoreConsumer.accept(pl));
         manager.registerRegisteredPlayersListener(pl->registeredPlayersConsumer.accept(pl));
         manager.registerGamestatusConsumer(pl->gameStatusConsumer.accept(pl));
+        manager.registerRoundNumberConsumer(pl->roundNumberConsumer.accept(pl));
         manager.activateTimers();
     }
 
@@ -105,7 +108,6 @@ public class GameModel {
         String jsonStr = Utils.makeGetJsonRequest(url +"games?action=joinGame&user=" + userName + "&isComputer=" + isComputer + "&gameId=" + gameId  );
         JSONObject jsonObj = new JSONObject(jsonStr);
         if (jsonObj.getBoolean("isLoaded")){
-            loadGameDetails();
             return true;
         } else {
             exceptionMessageConsumer.accept(jsonObj.getString("errorMessage"));
@@ -113,8 +115,8 @@ public class GameModel {
         }
     }
 
-    private void loadGameDetails(){
-        String jsonStr = Utils.makeGetJsonRequest(url + "games?action=gameDetails&key=" + gameId);
+    public void loadGameDetails(){
+        String jsonStr = Utils.makeGetJsonRequest(url + "games?action=gameDetails&key=" + gameId + "&user=" + userName);
         JSONObject jsonObj = new JSONObject(jsonStr);
         gameKey = jsonObj.getInt("key");
         creatorName = jsonObj.getString("creatorName");
@@ -204,7 +206,7 @@ public class GameModel {
     //}
 
     public int rollDice() {
-        String jsonStr =Utils.makeGetJsonRequest(url + "games?/action=rollDice&key=" +gameId );
+        String jsonStr =Utils.makeGetJsonRequest(url + "games?/action=rollDice&key=" +gameId + "&user=" + userName);
         JSONObject jsonObj = new JSONObject(jsonStr);
         return jsonObj.getInt("result");
         //return manager.getPlayers()[manager.getCurrentPlayerTurn()].rollDice();
@@ -226,7 +228,7 @@ public class GameModel {
 
     public void revealCards() {
         try{
-            String str =Utils.makeGetJsonRequest(url+ "games?action=revealCards&key=" +gameId);
+            String str =Utils.makeGetJsonRequest(url+ "games?action=revealCards&key=" +gameId + "&user=" + userName);
             JSONObject jsonObj = new JSONObject(str);
             if (jsonObj.getBoolean("isSuccess")){
                 updateGamePage();
@@ -241,15 +243,15 @@ public class GameModel {
     }
 
     private void updateGamePage(){
-        String str =Utils.makeGetJsonRequest(url+ "games?action=pageDetails&key=" +gameId);
+        String str =Utils.makeGetJsonRequest(url+ "games?action=pageDetails&key=" +gameId+ "&user=" + userName);
         JSONObject jsonObj = new JSONObject(str);
-
+        roundNumber = jsonObj.getInt("move");
 
     }
 
     public void revealWord(){
         try{
-            String str= Utils.makeGetJsonRequest(url+ "game?action=CheckSelectedWord&key=" +gameId);
+            String str= Utils.makeGetJsonRequest(url+ "game?action=CheckSelectedWord&key=" +gameId+ "&user=" + userName);
             JSONObject jObject = new JSONObject(str);
             if (jObject.getBoolean("isValidWord")){
                 retriesLeft = jObject.getInt("numOfRetriesLeft");
@@ -332,7 +334,7 @@ public class GameModel {
 
     public List<PlayerData> getPlayersData(){
         List<PlayerData> playerData = new ArrayList<>();
-        String respondStr = Utils.makeGetJsonRequest(url + "games?action=gamePlayers&key="+gameId);
+        String respondStr = Utils.makeGetJsonRequest(url + "games?action=gamePlayers&key="+gameId+ "&user=" + userName);
         JSONArray jsonObject = new JSONArray(respondStr);
         for (int i=0;i<jsonObject.length();i++){
             PlayerData pl = new PlayerData(jsonObject.getJSONObject(i).getString("type"),
@@ -351,7 +353,7 @@ public class GameModel {
     }
 
     public void quitGame() {
-        Utils.makeGetJsonRequest(url+"games/action=leaveGame&key="+gameId);
+        Utils.makeGetJsonRequest(url+"games/action=leaveGame&key="+gameId+ "&user=" + userName);
     }
 
     public String getCurrentPlayerStatus() {
@@ -431,5 +433,13 @@ public class GameModel {
 
     public void setPlayerTurnConsumerName(Consumer<String> consumer){
         this.playerTurnConsumer = consumer;
+    }
+
+    public int getRequiredPlayersNumber(){
+        return requiredPlayers;
+    }
+
+    public void setRoundNumberConsumer(Consumer<Integer> consumer){
+        this.roundNumberConsumer = consumer;
     }
 }

@@ -90,7 +90,7 @@ public class GamesServlet extends HttpServlet
         response.setContentType("application/json");
         int key = Integer.parseInt(request.getParameter("key"));
         String chatString = request.getParameter("chatString");
-        String userName = SessionUtils.getUsername(request.getSession());
+        String userName = SessionUtils.getUsername(request.getSession(),request);
         GameController game = getGameController(key,userName);
 
         if (game !=null){
@@ -103,7 +103,7 @@ public class GamesServlet extends HttpServlet
         PrintWriter out = response.getWriter();
         response.setContentType("application/json");
         int key = Integer.parseInt(request.getParameter("key"));
-        String userName = SessionUtils.getUsername(request.getSession());
+        String userName = SessionUtils.getUsername(request.getSession(),request);
         GameController game = getGameController(key,userName);
 
         if (game != null)
@@ -119,7 +119,7 @@ public class GamesServlet extends HttpServlet
         Gson gson = new Gson();
         PrintWriter out = response.getWriter();
         response.setContentType("application/json");
-        String userName = SessionUtils.getUsername(request.getSession());
+        String userName = SessionUtils.getUsername(request.getSession(),request);
         GameController game = getGameController(key,userName);
 
         if (game != null){
@@ -165,7 +165,7 @@ public class GamesServlet extends HttpServlet
     }
     private void pageDetailsAction(HttpServletRequest request, HttpServletResponse response) throws IOException
     {
-        String userName = SessionUtils.getUsername(request.getSession());
+        String userName = SessionUtils.getUsername(request.getSession(),request);
         Gson gson = new Gson();
         PrintWriter out = response.getWriter();
         response.setContentType("application/json");
@@ -188,7 +188,7 @@ public class GamesServlet extends HttpServlet
         Gson gson = new Gson();
         PrintWriter out = response.getWriter();
         response.setContentType("application/json");
-        String userName = SessionUtils.getUsername(request.getSession());
+        String userName = SessionUtils.getUsername(request.getSession(),request);
         GameController game = getGameController(key,userName);
 
         if (game != null){
@@ -203,7 +203,7 @@ public class GamesServlet extends HttpServlet
         Gson gson = new Gson();
         PrintWriter out = response.getWriter();
         response.setContentType("application/json");
-        String userName = SessionUtils.getUsername(request.getSession());
+        String userName = SessionUtils.getUsername(request.getSession(),request);
         GameController game = getGameController(key,userName,true);
 
         if (game != null){
@@ -240,7 +240,7 @@ public class GamesServlet extends HttpServlet
     private void clearCardSelectionAction(HttpServletRequest request, HttpServletResponse resp) {
         int key = Integer.parseInt(request.getParameter("key"));
 
-        String userName = SessionUtils.getUsername(request.getSession());
+        String userName = SessionUtils.getUsername(request.getSession(),request);
         GameController game = getGameController(key,userName);
 
         if (game != null){
@@ -254,7 +254,7 @@ public class GamesServlet extends HttpServlet
         PrintWriter out = response.getWriter();
         Gson gson = new Gson();
         response.setContentType("application/json");
-        String userName = SessionUtils.getUsername(request.getSession());
+        String userName = SessionUtils.getUsername(request.getSession(),request);
         GameController game = getGameController(key,userName);
 
         if (game != null){
@@ -268,7 +268,7 @@ public class GamesServlet extends HttpServlet
         int col = Integer.parseInt(request.getParameter("col"));
 
         response.setContentType("application/json");
-        String userName = SessionUtils.getUsername(request.getSession());
+        String userName = SessionUtils.getUsername(request.getSession(),request);
         GameController game = getGameController(key,userName);
 
         if (game != null){
@@ -328,7 +328,7 @@ public class GamesServlet extends HttpServlet
 
     private void gamePlayersAction(HttpServletRequest request, HttpServletResponse response) throws IOException
     {
-        String userName = SessionUtils.getUsername(request.getSession());
+        String userName = SessionUtils.getUsername(request.getSession(),request);
         Gson gson = new Gson();
         PrintWriter out = response.getWriter();
 
@@ -351,7 +351,7 @@ public class GamesServlet extends HttpServlet
 
     private void leaveGameAction(HttpServletRequest request, HttpServletResponse response)
     {
-        String userName = SessionUtils.getUsername(request.getSession());
+        String userName = SessionUtils.getUsername(request.getSession(),request);
         int key = Integer.parseInt(request.getParameter("key"));
         GameController game = getGameController(key,userName);
         if (game != null)
@@ -366,7 +366,7 @@ public class GamesServlet extends HttpServlet
         Gson gson = new Gson();
         PrintWriter out = response.getWriter();
         response.setContentType("application/json");
-        String userName = SessionUtils.getUsername(request.getSession());
+        String userName = SessionUtils.getUsername(request.getSession(),request);
         int key = Integer.parseInt(request.getParameter("key"));
         GameController game = getGameController(key,userName);
         EnumPlayerTurnPendingAction pendingAction = game.getcurrentPlayerPendingAction();
@@ -378,7 +378,6 @@ public class GamesServlet extends HttpServlet
             if (status == GameStatus.Running)
             {
                 name = game.getCurrentPlayerName();
-
             }
             out.println(gson.toJson(new GameStatusMessage(status, name,pendingAction)));
         }
@@ -386,7 +385,7 @@ public class GamesServlet extends HttpServlet
 
     protected void chatContentAction(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        String userName = SessionUtils.getUsername(request.getSession());
+        String userName = SessionUtils.getUsername(request.getSession(),request);
         Gson gson = new Gson();
         PrintWriter out = response.getWriter();
 

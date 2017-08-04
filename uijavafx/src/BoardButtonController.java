@@ -107,18 +107,18 @@ public class BoardButtonController implements Initializable {
     }
 
     public void selectCard(int row,int col){
-        CardUI cardUI = (CardUI)Utils.getNodeByRowColumnIndex(col-1,row-1,gridPaneBoard);
+        CardUI cardUI = (CardUI)Utils.getNodeByRowColumnIndex(col,row,gridPaneBoard);
         cardUI.setStyleSelected();
     }
 
     public void updateCharCard(CardData c) {
-        if (c !=null){
-            CardUI cardUI = (CardUI)Utils.getNodeByRowColumnIndex(c.getCol()-1,c.getRow()-1,gridPaneBoard);
-            if (cardUI != null){
+        if (c !=null) {
+            CardUI cardUI = (CardUI)Utils.getNodeByRowColumnIndex(c.getCol(),c.getRow(),gridPaneBoard);
+            if (cardUI != null) {
                 cardUI.setText(Character.toString(c.getLetter()));
-                if (c.getSelected()){
+                if (c.getSelected()) {
                     cardUI.setStyleSelected();
-                } else{
+                } else {
                     cardUI.setStyleUndefined(c);
                 }
             }

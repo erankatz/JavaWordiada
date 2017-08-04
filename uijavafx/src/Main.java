@@ -26,7 +26,8 @@ public class Main extends Application  {
         try {
             Parent root = fxmlLoader.load(url.openStream());
             Initializable welcomeController = fxmlLoader.getController();
-            //welcomeController.setModel(model);
+            Parent root2 =  fxmlLoader.load(url.openStream());
+            GameUIController gameUIController = fxmlLoader.getController();
             Scene scene = new Scene(root, 1400  , 700);
             Utils.setStyleSheet(scene,"mainStyle.css");
             primaryStage.setScene(scene);

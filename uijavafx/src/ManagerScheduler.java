@@ -15,6 +15,8 @@ public class ManagerScheduler {
     Timer timer = new Timer();
     private String url;
     private int gameId;
+    private String userName;
+    private String UserNameTurn;
     private static final long interval  = 2000;
     private List<CardRemovedListener> cardRemovedListeners = new ArrayList<>();
     private List<CardSelectedListener> cardSelectedListeners = new ArrayList<>();
@@ -33,6 +35,7 @@ public class ManagerScheduler {
     private List<Consumer<Integer>> registeredPlayersConsumer = new ArrayList<>();
     private List<Consumer<String>> registerGameStatusConsumer = new ArrayList<>();
     private List<Consumer<String>> registerPlayerTurnConsumerName = new ArrayList<>();
+    private List<Consumer<Integer>> registerRoundNumberConsumers = new ArrayList<>();
 
 
     public void setUrl(String url){
@@ -43,6 +46,9 @@ public class ManagerScheduler {
         this.gameId = gameID;
     }
 
+    public void setUser(String user){
+        this.userName = user;
+    }
     public void registerDisableAllCardsListener(DisableAllCardsListener listener){
         disableAllCardsListeners.add(listener);
     }
@@ -155,6 +161,10 @@ public class ManagerScheduler {
         wordRevealedListeners.forEach(listener->listener.PrintResultOfWordRevealed(word,score));
     }
 
+    public void notifyRoundNumberConsumer(int roundnumber){
+        registerRoundNumberConsumers.forEach(listener->listener.accept(roundnumber));
+    }
+
     public void notifyGameOverListeners(int id){
         gameOverListeners.forEach(listener->listener.gameOver(id));
     }
@@ -163,7 +173,8 @@ public class ManagerScheduler {
         playerDataChangedListeners.forEach(listener->listener.updateScore(score));
     }
     public void notifyRegisteredPlayersListener(int registeredPlayers){
-        registeredPlayersConsumer.forEach(listener->listener.accept(registeredPlayers));
+        if (registeredPlayersConsumer != null)
+            registeredPlayersConsumer.forEach(listener->listener.accept(registeredPlayers));
     }
 
     private void checkLoginStatus(){
@@ -171,18 +182,22 @@ public class ManagerScheduler {
     }
 
     private void    updatePlayersDetails(){
-        String str =Utils.makeGetJsonRequest(url+ "games?action=gamePlayers&key=" + gameId);
-        JSONObject jObj = new JSONObject(str);
-        notifyRegisteredPlayersListener(jObj.getInt("length"));
-        for (int i=0;i<jObj.getInt("length");i++){
+        String str =Utils.makeGetJsonRequest(url+ "games?action=gamePlayers&key=" + gameId + "&user=" +userName);
+        JSONArray jObj = new JSONArray(str);
+        notifyRegisteredPlayersListener(jObj.length());
+        for (int i=0;i<jObj.length();i++){
             String i2String = new Integer(i).toString();
-            PlayerData playerData = new PlayerData(jObj.getString("type"),i2String,jObj.getString("name"),jObj.getLong("score"),i);
+            PlayerData playerData = new PlayerData(jObj.getJSONObject(i).getString("type"),
+                    i2String,
+                    jObj.getJSONObject(i).getString("name"),
+                    jObj.getJSONObject(i).getLong("score"),
+                    i);
             notifyPlayerDataChangedListener(playerData);
         }
     }
 
     private void gameStatus(){
-        String str = Utils.makeGetJsonRequest(url + "games/action=gameStatus&key=" + gameId);
+        String str = Utils.makeGetJsonRequest(url + "games?action=gameStatus&key=" + gameId+ "&user=" +userName);
         JSONObject jObj = new JSONObject(str);
         notifyGameStatusConsumer(jObj.getString("status"));
 
@@ -193,6 +208,10 @@ public class ManagerScheduler {
             case "Running":
                 notifyPlayerTurnConsumerName(jObj.getString("currentPlayerTurnName"));
                 updateGamePage();
+                if (UserNameTurn.equals(userName)){
+                    notifyEnableAllCardsListeners();
+                    notifyRollDicesPendingListener(true);
+                }
                 break;
             case "Finished":
                 disableControls();
@@ -200,7 +219,7 @@ public class ManagerScheduler {
     }
 
     private void updateGamePage() {
-        String str = Utils.makeGetJsonRequest(url + "games?action=pageDetails&key=" + gameId);
+        String str = Utils.makeGetJsonRequest(url + "games?action=pageDetails&key=" + gameId+ "&user=" + userName);
         JSONObject jObj = new JSONObject(str);
         notifyLetterFrequencyInDeckListeners(jObj.getString("charFrequencyString"));
         JSONArray board = jObj.getJSONObject("board").getJSONArray("cards");
@@ -209,11 +228,14 @@ public class ManagerScheduler {
                 CardData card = new CardData(board.getJSONArray(i).getJSONObject(j).getString("letter").charAt(0),
                                 board.getJSONArray(i).getJSONObject(j).getBoolean("isSelected"),
                         board.getJSONArray(i).getJSONObject(j).getInt("row"),
-                                board.getJSONArray(i).getJSONObject(j).getInt("col"));
+                                board.getJSONArray(i).getJSONObject(j).getInt("col"),
+                        board.getJSONArray(i).getJSONObject(j).getBoolean("revealed"));
                 notifyCardChangedListener(card);
             }
         }
-        //notifyPlayerTurnListeners();
+        notifyRoundNumberConsumer(jObj.getInt("move"));
+        UserNameTurn = jObj.getJSONArray("playersDetails").getJSONObject(jObj.getInt("turn")-1).getString("name");
+        notifyPlayerTurnListeners(UserNameTurn);
     }
 
     private void disableControls(){
@@ -231,24 +253,16 @@ public class ManagerScheduler {
             @Override
             public void run() {
                 checkLoginStatus();
-            }
-        };
-        TimerTask task2 = new TimerTask() {
-            @Override
-            public void run() {
                 updatePlayersDetails();
-            }
-        };
-        TimerTask task3 = new TimerTask() {
-            @Override
-            public void run() {
                 gameStatus();
             }
         };
 
-        timer.schedule(task1, interval,interval);
-        timer.schedule(task2,interval,interval);
-        timer.schedule(task3,interval,interval);
+        Utils.sleepForAWhile(2);
+        checkLoginStatus();
+        updatePlayersDetails();
+        gameStatus();
+        timer.scheduleAtFixedRate(task1, interval,interval);
     }
 
     public void registerGamestatusConsumer(Consumer<String> consumer){
@@ -265,5 +279,9 @@ public class ManagerScheduler {
 
     public void registerPlayerTurnConsumerName(Consumer<String> consumer){
         registerPlayerTurnConsumerName.add(consumer);
+    }
+
+    public void registerRoundNumberConsumer(Consumer<Integer> consumer){
+        registerRoundNumberConsumers.add(consumer);
     }
 }

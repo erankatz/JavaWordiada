@@ -3,6 +3,7 @@
  */
 
 import engine.Card;
+import engine.Player;
 import engine.PlayerData;
 import engine.exception.EngineException;
 import javafx.application.Platform;
@@ -69,7 +70,6 @@ public class GameUIController implements Initializable,MessageBoxInterface  {
     @FXML Label labelScore;
     @FXML Label labelCreatorName;
     @FXML Label labelGameStatus;
-    @FXML Label labelCurrentPlayerTurnName;
     private NumberTextField textBoxHistoryPlays;
 
     GameModel model;
@@ -168,6 +168,7 @@ public class GameUIController implements Initializable,MessageBoxInterface  {
         } catch (java.io.IOException ex){
 
         }
+        initNewGameUI();
     }
 
     private void initNewGameUI() {
@@ -179,7 +180,9 @@ public class GameUIController implements Initializable,MessageBoxInterface  {
             labelScoreMode.setText("Score Mode: " + model.getScoreMode());
             textBoxLowestFrequencyDictionaryWords.setText(model.getLowestFrequencyDictionaryWords());
             playersTable.getItems().clear();
-            model.getPlayersData().forEach(pl -> playersTable.getItems().add(pl));
+            List<PlayerData> playersData = model.getPlayersData();
+            if (playersData != null)
+                playersData.forEach(pl -> playersTable.getItems().add(pl));
             playersTable.refresh();
         });
     }
@@ -208,10 +211,12 @@ public class GameUIController implements Initializable,MessageBoxInterface  {
     private void setConsumers(GameModel model) {
         model.setDisableAllCardsConsumer((Boolean flag)->
                 Platform.runLater(()->
-                        //()-> boardButtonController.setDisable(flag)
+                                //boardButtonController.setDisable(flag)
                         labelIsGoldfishMode.setText(labelIsGoldfishMode.getText())
                 )
         );
+        model.setRoundNumberConsumer(pl->
+                Platform.runLater(()->labelRoundNumber.setText("Round Number:" + pl)));
 
         model.setExceptionMessageConsumer((message)->Utils.showExceptionMessage(message));
         model.setCardConsumer((CardData c)->
@@ -241,21 +246,21 @@ public class GameUIController implements Initializable,MessageBoxInterface  {
         );
         model.setLetterFrequencyInDeckConsumer((frequencyStr) ->
             Platform.runLater(()->
-                    textBoxLetterFrequencyInDeck.setText(frequencyStr)
+                        textBoxLetterFrequencyInDeck.setText(frequencyStr)
+
                     //updateLetterFrequencyInDeckTextBox(frequency)
             )
         );
         model.setPlayerTurnConsumer((playerName)->
             Platform.runLater(()-> {
-                int playerIndex = playersTable.getItems().filtered(pl->pl.getName().equals("playerName")).get(0).getIndex();
+                int playerIndex = playersTable.getItems().filtered(pl->pl.getName().equals(playerName)).get(0).getIndex();
                 playersTable.getSelectionModel().select(playerIndex);
                 if (!model.isComputerPlayerPlays())
-                    labelStatus.setText("Player " + playersTable.getItems().get(playerIndex).getId() + " your turn started");
+                    labelStatus.setText("Player " + playersTable.getItems().get(playerIndex).getName() + " your turn started");
                 else{
-                    labelStatus.setText("Computer Player " + playersTable.getItems().get(playerIndex).getId() + " playing");
+                    labelStatus.setText("Computer Player " + playersTable.getItems().get(playerIndex).getName() + " playing");
                 }
-                labelPlayerTurn.setText("Player Turn: " + playersTable.getItems().get(playerIndex).getId());
-                labelRoundNumber.setText("Round Number: " + model.getCurrentNumofTurnsElapsed());
+                labelPlayerTurn.setText("Player Turn: " + playersTable.getItems().get(playerIndex).getName());
             })
         );
         model.setWordRevealedWord2Score((e)->
@@ -287,6 +292,9 @@ public class GameUIController implements Initializable,MessageBoxInterface  {
             }
             )
         );
+        model.setRegisteredPlayersConsumer((num)->
+                Platform.runLater(()->
+                            labelPlayersStatus.setText("Players Status: " + num + "/" + model.getRequiredPlayersNumber())));
         model.setIsRevealedCardPendingConsumer((isPending)->
                 Platform.runLater(()->{
                         if (!model.isComputerPlayerPlays() && !model.getIsReplayMode()){
@@ -309,6 +317,7 @@ public class GameUIController implements Initializable,MessageBoxInterface  {
                 }
             )
         );
+        model.setGameStatusConsumer((gameStatus)->Platform.runLater(()-> labelGameStatus.setText("Game Status: "+ gameStatus)));
         model.setGameOverConsumer((playerIndex)->
         Platform.runLater(
                 ()-> {
@@ -328,6 +337,9 @@ public class GameUIController implements Initializable,MessageBoxInterface  {
         model.setUpdatePlayerScoreConsumer(pl->
             Platform.runLater(() -> {
                         playersTable.getItems().get(pl.getIndex()).setScore(pl.getScore());
+                        playersTable.getItems().get(pl.getIndex()).setName(pl.getName());
+                        playersTable.getItems().get(pl.getIndex()).setId(pl.getId());
+                        playersTable.getItems().get(pl.getIndex()).setType(pl.getType());
                         playersTable.refresh();
                     }));
     }

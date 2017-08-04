@@ -112,7 +112,6 @@
                   <Label fx:id="labelGameId" prefHeight="47.0" prefWidth="538.0" text="Game Id:" />
                   <Label fx:id="labelPlayersStatus" prefHeight="47.0" prefWidth="538.0" text="Players Status:" />
                   <Label fx:id="labelGameStatus" prefHeight="31.0" prefWidth="318.0" text="Game status: WaitingForPlayers" />
-                  <Label fx:id="labelCurrentPlayerTurnName" prefHeight="38.0" prefWidth="325.0" text="Player Turn: " />
                </children>
             </VBox>
          </content>
