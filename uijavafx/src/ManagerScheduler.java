@@ -17,7 +17,7 @@ public class ManagerScheduler {
     private int gameId;
     private String userName;
     private String UserNameTurn;
-    private static final long interval  = 10000;
+    private static final long interval  = 5000;
     private List<CardRemovedListener> cardRemovedListeners = new ArrayList<>();
     private List<CardSelectedListener> cardSelectedListeners = new ArrayList<>();
     private List<DisableAllCardsListener> disableAllCardsListeners = new ArrayList<>();

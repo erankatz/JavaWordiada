@@ -113,7 +113,7 @@ public class BoardButtonController implements Initializable {
 
     public void updateCharCard(CardData c) {
         if (c !=null) {
-            CardUI cardUI = (CardUI)Utils.getNodeByRowColumnIndex(c.getCol(),c.getRow(),gridPaneBoard);
+            CardUI cardUI = (CardUI)Utils.getNodeByRowColumnIndex(c.getRow(),c.getCol(),gridPaneBoard);
             if (cardUI != null) {
                 cardUI.setText(Character.toString(c.getLetter()));
                 if (c.getSelected()) {

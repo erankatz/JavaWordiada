@@ -138,7 +138,7 @@ public class GameModel {
         //obj.append("row",row);
         //obj.append("col",col);
         //obj.append("user",userName);
-        Utils.makeGetJsonRequest( url+"?action=selectCard&key=" +gameId +"&row="+row +"&col="+col +"&user="+userName);
+        Utils.makeGetJsonRequest( url+"games?action=selectCard&key=" +gameId +"&row="+row +"&col="+col +"&user="+userName);
     }
 
     public void setCardRemovedConsumer(Consumer<Map.Entry<Integer,Integer>> listenerConsumer){
@@ -259,7 +259,7 @@ public class GameModel {
 
     public void revealWord(){
         try{
-            String str= Utils.makeGetJsonRequest(url+ "game?action=CheckSelectedWord&key=" +gameId+ "&user=" + userName);
+            String str= Utils.makeGetJsonRequest(url+ "games?action=CheckSelectedWord&key=" +gameId+ "&user=" + userName);
             JSONObject jObject = new JSONObject(str);
             if (jObject.getBoolean("isValidWord")){
                 retriesLeft = jObject.getInt("numOfRetriesLeft");
