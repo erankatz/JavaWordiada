@@ -17,7 +17,7 @@ public class ManagerScheduler {
     private int gameId;
     private String userName;
     private String UserNameTurn;
-    private static final long interval  = 5000;
+    private static final long interval  = 2000;
     private List<CardRemovedListener> cardRemovedListeners = new ArrayList<>();
     private List<CardSelectedListener> cardSelectedListeners = new ArrayList<>();
     private List<DisableAllCardsListener> disableAllCardsListeners = new ArrayList<>();
@@ -222,6 +222,14 @@ public class ManagerScheduler {
                 } else {
                     if (!jObj.isNull("otherPlayerMessage"))
                         notifyOtherPlayerMessageConsumers(jObj.getString("otherPlayerMessage"));
+                    else if (jObj.getString("pendingAction").equals("REVEALCARDS"))
+                        notifyOtherPlayerMessageConsumers("Player" + jObj.getString("currentPlayerTurnName") + " revealing cards according to dice");
+                    else if (jObj.getString("pendingAction").equals("SELECTWORD"))
+                        notifyOtherPlayerMessageConsumers("Player" + jObj.getString("currentPlayerTurnName") + "  Choosing cards to word composing");
+                    else
+                        notifyOtherPlayerMessageConsumers("Player" + jObj.getString("currentPlayerTurnName") + " is playing");
+
+
                 }
                 break;
             case "Finished":

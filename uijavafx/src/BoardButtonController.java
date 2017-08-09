@@ -61,7 +61,7 @@ public class BoardButtonController implements Initializable {
         for (int i = 0; i < rows; i++) {
             for (int j = 0; j < columns; j++) {
                     CardUI card = new CardUI(model,i+1,j+1);
-                    gridPaneBoard.add(card,i,j);
+                    gridPaneBoard.add(card,j,i);
                     card.setPrefSize(50,50);
             }
         }
@@ -107,7 +107,7 @@ public class BoardButtonController implements Initializable {
     }
 
     public void selectCard(int row,int col){
-        CardUI cardUI = (CardUI)Utils.getNodeByRowColumnIndex(col,row,gridPaneBoard);
+        CardUI cardUI = (CardUI)Utils.getNodeByRowColumnIndex(row,col,gridPaneBoard);
         cardUI.setStyleSelected();
     }
 
