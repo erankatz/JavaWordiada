@@ -265,6 +265,11 @@ public class GameUIController implements Initializable,MessageBoxInterface  {
                 }
             })
         );
+        model.setOtherPlayerMessageConsumer((msg)->
+                Platform.runLater(()-> {
+                            labelStatus.setText(msg);
+                }
+                ));
         model.setWordRevealedWord2Score((e)->
             Platform.runLater(()->{
                     if (!model.isComputerPlayerPlays()){

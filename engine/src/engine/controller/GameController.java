@@ -4,6 +4,8 @@ import engine.*;
 import engine.chat.ChatManager;
 import engine.chat.SingleChatEntry;
 import engine.exception.EngineException;
+import engine.message.DiceResultMessage;
+import engine.message.IGameMessage;
 import engine.message.RevealCardMessage;
 import engine.message.RevealedWordMessage;
 import javafx.util.Pair;
@@ -31,7 +33,7 @@ public class GameController
 
     private int requiredPlayers;
     private String gameTitle;
-
+    private IGameMessage userMessage;
     //Gson Uses on game loaded
     private String dictName;
     private int numOfChars;
@@ -180,6 +182,16 @@ public class GameController
         }
     }
 
+    public String getOtherPlayerMessage(){
+        if (userMessage != null)
+            return userMessage.getOtherPlayerMessage();
+        else return null;
+    }
+
+    public void setUserMessage(IGameMessage message){
+        this.userMessage = message;
+    }
+
     public int getNumRegisteredPlayers(){
         return registeredPlayers;
     }
@@ -192,8 +204,10 @@ public class GameController
         return gameLogic.getPlayers()[gameLogic.getCurrentPlayerTurn()].getName();
     }
 
-    public int rollDice() {
-        return gameLogic.getPlayers()[gameLogic.getCurrentPlayerTurn()].rollDice();
+    public DiceResultMessage rollDice() {
+        userMessage = new DiceResultMessage(gameLogic.getPlayers()[gameLogic.getCurrentPlayerTurn()].rollDice(),getCurrentPlayerName());
+        return (DiceResultMessage) userMessage;
+
     }
 
     public void selectCard(int row, int col) {
@@ -223,20 +237,19 @@ public class GameController
     public RevealCardMessage revealCards() {
         boolean isSuccess = true;
         String currentPlayerMsg = null;
-        String msg = null;
         try{
             gameLogic.getPlayers()[gameLogic.getCurrentPlayerTurn()].revealCards();
         } catch (Exception ex){
             isSuccess = false;
             currentPlayerMsg = ex.getMessage();
         }
-        return new RevealCardMessage(isSuccess,currentPlayerMsg,msg);
+        userMessage = new RevealCardMessage(isSuccess,currentPlayerMsg,getCurrentPlayerName());
+        return (RevealCardMessage)userMessage;
     }
 
     public RevealedWordMessage checkSelectedWord() {
         int numOfRetriesLeft;
         String  currentPlayerMessage =null;
-        String otherPlayerMessage =null;
         boolean isValidWord =false;
         String word ="";
         try{
@@ -246,8 +259,8 @@ public class GameController
             currentPlayerMessage = ex.getMessage();
         }
         numOfRetriesLeft = gameLogic.getPlayers()[gameLogic.getCurrentPlayerTurn()].getRetriesNumber();
-
-        return new RevealedWordMessage(numOfRetriesLeft,currentPlayerMessage,otherPlayerMessage,isValidWord,gameLogic.getLastReavledWordScore(),word);
+        userMessage = new RevealedWordMessage(numOfRetriesLeft,currentPlayerMessage,isValidWord,gameLogic.getLastReavledWordScore(),word,getCurrentPlayerName());
+        return (RevealedWordMessage)userMessage;
     }
 
     public long getHighestScore() {

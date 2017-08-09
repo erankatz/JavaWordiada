@@ -36,7 +36,7 @@ public class ManagerScheduler {
     private List<Consumer<String>> registerGameStatusConsumer = new ArrayList<>();
     private List<Consumer<String>> registerPlayerTurnConsumerName = new ArrayList<>();
     private List<Consumer<Integer>> registerRoundNumberConsumers = new ArrayList<>();
-
+    private List<Consumer<String>> otherPlayerMessageConsumers = new ArrayList<>();
 
     public void setUrl(String url){
         this.url = url;
@@ -80,6 +80,14 @@ public class ManagerScheduler {
 
     public void registerRevealWordPendingListener(RevealWordPendingListener listener ){
         revealWordPendingListeners.add(listener);
+    }
+
+    public void registerOtherPlayerMessageConsumers(Consumer<String> listener ){
+        otherPlayerMessageConsumers.add(listener);
+    }
+
+    public void notifyOtherPlayerMessageConsumers(String msg){
+        otherPlayerMessageConsumers.forEach(consumer -> consumer.accept(msg));
     }
 
     public void registerRevealCardPendingListener(RevealCardPendingListener listener ){
@@ -211,11 +219,25 @@ public class ManagerScheduler {
                 if (UserNameTurn.equals(userName)){
                     notifyEnableAllCardsListeners();
                     notifyRollDicesPendingListener(true);
+                } else {
+                    if (!jObj.isNull("otherPlayerMessage"))
+                        notifyOtherPlayerMessageConsumers(jObj.getString("otherPlayerMessage"));
                 }
                 break;
             case "Finished":
+                gameEndAction();
                 disableControls();
         }
+    }
+
+    private void gameEndAction() {
+        String str = Utils.makeGetJsonRequest(url + "games?action=gameEnd&key=" + gameId+ "&user=" +userName);
+        JSONObject jsonObject = new JSONObject(str);
+        int winnerScore =  jsonObject.getJSONArray("winners").getJSONObject(0).getInt("score");
+        String winnerName =  jsonObject.getJSONArray("winners").getJSONObject(0).getString("name");
+        int winnerId = jsonObject.getJSONArray("winners").getJSONObject(0).getInt("id");
+        notifyGameStatusConsumer("The Winner is " + winnerName + " scored " + winnerScore);
+        notifyGameOverListeners(winnerId);
     }
 
     public void updateGamePage() {

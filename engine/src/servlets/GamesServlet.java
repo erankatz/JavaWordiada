@@ -198,7 +198,7 @@ public class GamesServlet extends HttpServlet
         GameController game = getGameController(key,userName);
 
         if (game != null){
-            out.println(gson.toJson(new DiceResultMessage(game.rollDice())));
+            out.println(gson.toJson(game.rollDice()));
         }
     }
 
@@ -385,7 +385,7 @@ public class GamesServlet extends HttpServlet
             {
                 name = game.getCurrentPlayerName();
             }
-            out.println(gson.toJson(new GameStatusMessage(status, name,pendingAction)));
+            out.println(gson.toJson(new GameStatusMessage(status, name,pendingAction,game.getOtherPlayerMessage())));
         }
     }
 

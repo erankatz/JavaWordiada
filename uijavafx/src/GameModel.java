@@ -53,6 +53,8 @@ public class GameModel {
     private Map<String,Integer> gameTitle2Id;
     private String url= "http://localhost:8080/wordiada/";
     private int retriesLeft;
+    private Consumer<String> otherPlayerMessageConsumer;
+
     private void startSched() {
         manager = new ManagerScheduler();
         manager.setGameId(gameId);
@@ -94,6 +96,7 @@ public class GameModel {
         return ret;
     }
 
+
     public boolean login(String username, boolean isComputer){
         UserLogin jsonObj = new UserLogin(username,isComputer);
         String jsonStr = Utils.makeGetJsonRequest(jsonObj.getLoginUrl());
@@ -107,12 +110,14 @@ public class GameModel {
         gameId = gameTitle2Id.get(gameTitle);
         String jsonStr = Utils.makeGetJsonRequest(url +"games?action=joinGame&user=" + userName + "&isComputer=" + isComputer + "&gameId=" + gameId  );
         JSONObject jsonObj = new JSONObject(jsonStr);
+
         if (jsonObj.getBoolean("isLoaded")){
             return true;
         } else {
             exceptionMessageConsumer.accept(jsonObj.getString("errorMessage"));
             return false;
         }
+
     }
 
     public void loadGameDetails(){
@@ -174,6 +179,10 @@ public class GameModel {
 
     public void setGameStatusConsumer(Consumer<String> listenerConsumer){
         this.gameStatusConsumer = listenerConsumer;
+    }
+
+    public void setOtherPlayerMessageConsumer(Consumer<String> otherPlayerMessageConsumer){
+        this.otherPlayerMessageConsumer = otherPlayerMessageConsumer;
     }
 
     public void setRolledDicesConsumer(Consumer<Map.Entry<Integer,Integer>> listenerConsumer){
